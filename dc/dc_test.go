@@ -1,3 +1,5 @@
+// Package dc_test tests structs and functions pertaining to datacenter resources
+// outlined in the dc package.
 package dc_test
 
 import (
@@ -8,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestDatacenter tests the *Datacenter Validate function with a pass and a fail
+// case.
 func TestDatacenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -22,6 +26,7 @@ func TestDatacenter(t *testing.T) {
 	assert.Nil(datacenter.Validate(ctx))
 }
 
+// TestRack tests the *Rack Validate function with a pass and a fail case.
 func TestRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
