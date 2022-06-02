@@ -2,10 +2,14 @@ package dc
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/rchamarthy/zebra"
 )
+
+var ErrAddressEmpty = errors.New("address is empty")
+
+var ErrRowEmpty = errors.New("row is empty")
 
 type Datacenter struct {
 	zebra.NamedResource
@@ -14,7 +18,7 @@ type Datacenter struct {
 
 func (dc *Datacenter) Validate(ctx context.Context) error {
 	if dc.Address == "" {
-		return fmt.Errorf("datacenter must have an address")
+		return ErrAddressEmpty
 	}
 
 	return dc.NamedResource.Validate(ctx)
@@ -31,7 +35,7 @@ type Rack struct {
 
 func (r *Rack) Validate(ctx context.Context) error {
 	if r.Row == "" {
-		return fmt.Errorf("row cannot be empty")
+		return ErrRowEmpty
 	}
 
 	return r.NamedResource.Validate(ctx)

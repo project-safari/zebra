@@ -9,10 +9,11 @@ import (
 )
 
 func TestBaseResource(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	r := &zebra.BaseResource{}
+	r := &zebra.BaseResource{ID: ""}
 	assert.NotNil(r.Validate(ctx))
 
 	r.ID = "abracadabra"
@@ -20,15 +21,19 @@ func TestBaseResource(t *testing.T) {
 }
 
 func TestNamedResource(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	r := &zebra.NamedResource{}
-	assert.NotNil(r.Validate(ctx))
+	res := &zebra.NamedResource{
+		BaseResource: zebra.BaseResource{ID: ""},
+		Name:         "",
+	}
+	assert.NotNil(res.Validate(ctx))
 
-	r.ID = "abracadabra"
-	assert.NotNil(r.Validate(ctx))
+	res.ID = "abracadabra"
+	assert.NotNil(res.Validate(ctx))
 
-	r.Name = "jasmine"
-	assert.Nil(r.Validate(ctx))
+	res.Name = "jasmine"
+	assert.Nil(res.Validate(ctx))
 }
