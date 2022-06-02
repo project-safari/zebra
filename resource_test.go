@@ -1,3 +1,4 @@
+// Package zebra_test tests structs and functions outlined in the zebra package.
 package zebra_test
 
 import (
@@ -8,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestBaseResource tests the *BaseResource Validate function with a pass case
+// and a fail case.
 func TestBaseResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -20,6 +23,8 @@ func TestBaseResource(t *testing.T) {
 	assert.Nil(r.Validate(ctx))
 }
 
+// TestBaseResource tests the *NamedResource Validate function with a pass case
+// and a fail case.
 func TestNamedResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
