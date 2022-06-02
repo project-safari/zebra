@@ -9,27 +9,29 @@ import (
 )
 
 func TestDatacenter(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	d := &dc.Datacenter{}
-	assert.NotNil(d.Validate(ctx))
+	datacenter := new(dc.Datacenter)
+	assert.NotNil(datacenter.Validate(ctx))
 
-	d.ID = "abracadabra"
-	d.Name = "jasmine"
-	d.Address = "1 palace st, agrabah"
-	assert.Nil(d.Validate(ctx))
+	datacenter.ID = "abracadabra"
+	datacenter.Name = "jasmine"
+	datacenter.Address = "1 palace st, agrabah"
+	assert.Nil(datacenter.Validate(ctx))
 }
 
 func TestRack(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	r := &dc.Rack{}
-	assert.NotNil(r.Validate(ctx))
+	rack := new(dc.Rack)
+	assert.NotNil(rack.Validate(ctx))
 
-	r.ID = "abracadabra"
-	r.Name = "sher"
-	r.Row = "bazar"
-	assert.Nil(r.Validate(ctx))
+	rack.ID = "abracadabra"
+	rack.Name = "sher"
+	rack.Row = "bazar"
+	assert.Nil(rack.Validate(ctx))
 }

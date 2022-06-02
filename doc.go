@@ -1,5 +1,5 @@
 package zebra
 
 /*
-TODO: Add package documentation here.
+Add package documentation here.
 */
