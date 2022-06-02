@@ -1,3 +1,3 @@
-# :vertical_traffic_light: zebra
+# :vertical_traffic_light: zebra [![test](https://github.com/rchamarthy/zebra/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/rchamarthy/zebra/actions/workflows/test.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/rchamarthy/zebra)](https://goreportcard.com/report/github.com/rchamarthy/zebra) [![codecov](https://codecov.io/gh/rchamarthy/zebra/branch/main/graph/badge.svg?token=94ZZ46W6VA)](https://codecov.io/gh/rchamarthy/zebra) [![Maintainability](https://api.codeclimate.com/v1/badges/e49a48cf30c0d644fd7b/maintainability)](https://codeclimate.com/github/rchamarthy/zebra/maintainability)
 
 Zebra maintains lab resource inventory and reservations.
