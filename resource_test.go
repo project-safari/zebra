@@ -16,7 +16,7 @@ func TestBaseResource(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	r := &zebra.BaseResource{ID: ""}
+	r := &zebra.BaseResource{ID: "", Labels: zebra.Labels{}}
 	assert.NotNil(r.Validate(ctx))
 
 	r.ID = "abracadabra"
@@ -31,7 +31,7 @@ func TestNamedResource(t *testing.T) {
 
 	ctx := context.Background()
 	res := &zebra.NamedResource{
-		BaseResource: zebra.BaseResource{ID: ""},
+		BaseResource: zebra.BaseResource{ID: "", Labels: zebra.Labels{}},
 		Name:         "",
 	}
 	assert.NotNil(res.Validate(ctx))
