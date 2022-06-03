@@ -18,7 +18,8 @@ var ErrIDEmpty = errors.New("id is empty")
 // BaseResource must be embedded in all resource structs, ensuring each resource is
 // assigned an ID string.
 type BaseResource struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	Labels Labels `json:"labels,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.
