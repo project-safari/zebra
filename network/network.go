@@ -25,7 +25,7 @@ var ErrInvalidRange = errors.New("range bounds are invalid, start is greater tha
 // address, a serial number, model, and ports.
 type Switch struct {
 	zebra.BaseResource
-	ManagementIP net.IP `json:"managementIp"`
+	ManagementIP net.IP `json:"managementIP"` //nolint:tagliatelle
 	SerialNumber string `json:"serialNumber"`
 	Model        string `json:"model"`
 	NumPorts     uint32 `json:"numPorts"`
