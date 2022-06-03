@@ -45,14 +45,25 @@ func TestIPAddressPool(t *testing.T) {
 	pool := new(network.IPAddressPool)
 	assert.NotNil(pool.Validate(ctx))
 
-	pool.ID = "b"
-	assert.NotNil(pool.Validate(ctx))
-
-	pool.IP = net.ParseIP("192.0.2.1")
-	assert.NotNil(pool.Validate(ctx))
-
-	pool.Mask = pool.IP.DefaultMask()
+	pool.ID = "a"
 	assert.Nil(pool.Validate(ctx))
+
+	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
+	ipnet.Mask = ipnet.IP.DefaultMask()
+	pool.Subnets = append(pool.Subnets, ipnet)
+	assert.Nil(pool.Validate(ctx))
+
+	pool = new(network.IPAddressPool)
+	pool.ID = "b"
+	ipnet1 := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
+	pool.Subnets = append(pool.Subnets, ipnet1)
+	assert.NotNil(pool.Validate(ctx))
+
+	pool = new(network.IPAddressPool)
+	pool.ID = "c"
+	ipnet2 := net.IPNet{IP: nil, Mask: nil}
+	pool.Subnets = append(pool.Subnets, ipnet2)
+	assert.NotNil(pool.Validate(ctx))
 }
 
 // TestVLANPool tests the *VLANPool Validate function with a pass and a fail case.
