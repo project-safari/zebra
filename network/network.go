@@ -52,16 +52,18 @@ func (s *Switch) Validate(ctx context.Context) error {
 // to the same network.
 type IPAddressPool struct {
 	zebra.BaseResource
-	net.IPNet
+	Subnets []net.IPNet `json:"subnets"`
 }
 
 // Validate returns an error if the given IPAddressPool object has incorrect values.
 // Else, it returns nil.
 func (p *IPAddressPool) Validate(ctx context.Context) error {
-	if p.IP == nil {
-		return ErrIPEmpty
-	} else if p.Mask == nil {
-		return ErrMaskEmpty
+	for _, ip := range p.Subnets {
+		if ip.IP == nil {
+			return ErrIPEmpty
+		} else if ip.Mask == nil {
+			return ErrMaskEmpty
+		}
 	}
 
 	return p.BaseResource.Validate(ctx)
