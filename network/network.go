@@ -25,10 +25,11 @@ var ErrInvalidRange = errors.New("range bounds are invalid, start is greater tha
 // address, a serial number, model, and ports.
 type Switch struct {
 	zebra.BaseResource
-	ManagementIP net.IP `json:"managementIP"` //nolint:tagliatelle
-	SerialNumber string `json:"serialNumber"`
-	Model        string `json:"model"`
-	NumPorts     uint32 `json:"numPorts"`
+	Credentials  zebra.Credentials `json:"credentials"`
+	ManagementIP net.IP            `json:"managementIP"` //nolint:tagliatelle
+	SerialNumber string            `json:"serialNumber"`
+	Model        string            `json:"model"`
+	NumPorts     uint32            `json:"numPorts"`
 }
 
 // Validate returns an error if the given Switch object has incorrect values.
@@ -43,6 +44,10 @@ func (s *Switch) Validate(ctx context.Context) error {
 		return ErrModelEmpty
 	case s.NumPorts == 0:
 		return ErrNumPortsEmpty
+	}
+
+	if err := s.Credentials.Validate(ctx); err != nil {
+		return err
 	}
 
 	return s.BaseResource.Validate(ctx)
