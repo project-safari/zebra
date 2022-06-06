@@ -7,6 +7,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/rchamarthy/zebra"
 	"github.com/rchamarthy/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,6 +34,21 @@ func TestSwitch(t *testing.T) {
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.NumPorts = 12
+	assert.NotNil(switch1.Validate(ctx))
+
+	switch1.Credentials = zebra.Credentials{
+		NamedResource: zebra.NamedResource{
+			BaseResource: zebra.BaseResource{
+				ID:     "blahblah",
+				Labels: nil,
+			},
+			Name: "blah",
+		},
+		Keys: nil,
+	}
+	assert.NotNil(switch1.Validate(ctx))
+
+	switch1.Credentials.Keys = make(map[string]string)
 	assert.Nil(switch1.Validate(ctx))
 }
 
