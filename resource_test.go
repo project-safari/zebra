@@ -16,11 +16,13 @@ func TestBaseResource(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	r := &zebra.BaseResource{ID: "", Labels: zebra.Labels{}}
-	assert.NotNil(r.Validate(ctx))
+	res := &zebra.BaseResource{ID: "", Labels: zebra.Labels{}}
+	assert.NotNil(res.Validate(ctx))
 
-	r.ID = "abracadabra"
-	assert.Nil(r.Validate(ctx))
+	res.ID = "abracadabra"
+	assert.Nil(res.Validate(ctx))
+
+	assert.True(res.ID == res.GetID())
 }
 
 // TestBaseResource tests the *NamedResource Validate function with a pass case

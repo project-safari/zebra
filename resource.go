@@ -11,6 +11,7 @@ import (
 // validation and label selection methods.
 type Resource interface {
 	Validate(ctx context.Context) error
+	GetID() string
 }
 
 var ErrNameEmpty = errors.New("name is empty")
@@ -42,6 +43,11 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// Return ID of BaseResource r.
+func (r *BaseResource) GetID() string {
+	return r.ID
 }
 
 // NamedResource represents all resources assigned both a string ID and a name.
