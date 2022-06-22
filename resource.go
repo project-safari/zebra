@@ -12,6 +12,8 @@ import (
 type Resource interface {
 	Validate(ctx context.Context) error
 	GetID() string
+	GetName() string
+	GetLabels() Labels
 }
 
 var ErrNameEmpty = errors.New("name is empty")
@@ -50,6 +52,21 @@ func (r *BaseResource) GetID() string {
 	return r.ID
 }
 
+// BaseResource has no name. Return empty string.
+func (r *BaseResource) GetName() string {
+	return ""
+}
+
+// Return labels of BaseResource r.
+func (r *BaseResource) GetLabels() Labels {
+	dest := make(Labels, len(r.Labels))
+	for key, val := range r.Labels {
+		dest[key] = val
+	}
+
+	return dest
+}
+
 // NamedResource represents all resources assigned both a string ID and a name.
 type NamedResource struct {
 	BaseResource
@@ -64,6 +81,11 @@ func (r *NamedResource) Validate(ctx context.Context) error {
 	}
 
 	return r.BaseResource.Validate(ctx)
+}
+
+// Return name of NamedResource r.
+func (r *NamedResource) GetName() string {
+	return r.Name
 }
 
 // Credentials represents a named resource that has a set of keys (where each key is
