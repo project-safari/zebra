@@ -16,13 +16,15 @@ func TestBaseResource(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	res := &zebra.BaseResource{ID: "", Labels: zebra.Labels{}}
+	res := &zebra.BaseResource{ID: "", Labels: zebra.Labels{"key": "value"}}
 	assert.NotNil(res.Validate(ctx))
 
 	res.ID = "abracadabra"
 	assert.Nil(res.Validate(ctx))
 
 	assert.True(res.ID == res.GetID())
+	assert.True(res.GetName() == "")
+	assert.True(res.GetLabels().HasKey("key"))
 }
 
 // TestBaseResource tests the *NamedResource Validate function with a pass case
@@ -33,16 +35,20 @@ func TestNamedResource(t *testing.T) {
 
 	ctx := context.Background()
 	res := &zebra.NamedResource{
-		BaseResource: zebra.BaseResource{ID: "", Labels: zebra.Labels{}},
+		BaseResource: zebra.BaseResource{ID: "", Labels: zebra.Labels{"key": "value"}},
 		Name:         "",
 	}
 	assert.NotNil(res.Validate(ctx))
 
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
+	assert.True(res.GetID() == res.ID)
 
 	res.Name = "jasmine"
 	assert.Nil(res.Validate(ctx))
+	assert.True(res.GetName() == res.Name)
+
+	assert.True(res.GetLabels().HasKey("key"))
 }
 
 func TestCredentials(t *testing.T) {
