@@ -17,9 +17,7 @@ func TestInitialize(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll("teststore") })
 
-	filestore := new(store.FileStore)
-	filestore.SetStorageRoot("teststore")
-	filestore.SetTypes(nil)
+	filestore := store.NewFileStore("teststore", nil)
 
 	assert.Nil(filestore.Initialize())
 	assert.Nil(filestore.Initialize())
@@ -43,9 +41,7 @@ func TestCreate(t *testing.T) {
 
 	types["VLANPool"] = new(network.VLANPool)
 
-	filestore := new(store.FileStore)
-	filestore.SetStorageRoot("teststore1")
-	filestore.SetTypes(types)
+	filestore := store.NewFileStore("teststore1", types)
 
 	// Initialize store
 	assert.Nil(filestore.Initialize())
@@ -75,9 +71,7 @@ func TestLoad(t *testing.T) {
 
 	types["VLANPool"] = new(network.VLANPool)
 
-	filestore := new(store.FileStore)
-	filestore.SetStorageRoot("teststore2")
-	filestore.SetTypes(types)
+	filestore := store.NewFileStore("teststore2", types)
 
 	// Initialize store
 	assert.Nil(filestore.Initialize())
@@ -115,9 +109,7 @@ func TestDelete(t *testing.T) {
 
 	types["VLANPool"] = new(network.VLANPool)
 
-	filestore := new(store.FileStore)
-	filestore.SetStorageRoot("teststore3")
-	filestore.SetTypes(types)
+	filestore := store.NewFileStore("teststore3", types)
 
 	// Initialize store
 	assert.Nil(filestore.Initialize())
@@ -160,9 +152,7 @@ func TestClearStore(t *testing.T) {
 
 	types["VLANPool"] = new(network.VLANPool)
 
-	filestore := new(store.FileStore)
-	filestore.SetStorageRoot("teststore4")
-	filestore.SetTypes(types)
+	filestore := store.NewFileStore("teststore4", types)
 
 	// Initialize store
 	assert.Nil(filestore.Initialize())
@@ -194,9 +184,7 @@ func TestWipeStore(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll("teststore5") })
 
-	filestore := new(store.FileStore)
-	filestore.SetStorageRoot("teststore5")
-	filestore.SetTypes(nil)
+	filestore := store.NewFileStore("teststore5", nil)
 
 	assert.Nil(filestore.Initialize())
 	assert.Nil(filestore.Wipe())
