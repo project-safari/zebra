@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/rchamarthy/zebra"
-	"github.com/rchamarthy/zebra/dc"
 	"github.com/rchamarthy/zebra/network"
 	"github.com/rchamarthy/zebra/query"
 	"github.com/stretchr/testify/assert"
@@ -135,30 +134,6 @@ func TestQueryType(t *testing.T) {
 	ippools := querystore.QueryType("IPAddressPool")
 	assert.True(len(ippools) == 1)
 	assert.True(ippools[0].GetID() == "0200000001")
-}
-
-func TestQueryTypeName(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	// Create Datacenter resource
-	resource1 := new(dc.Datacenter)
-	resource1.ID = "0100000001"
-	resource1.Name = "cisco-building-15"
-	resource1.Address = "blah blah san jose"
-
-	// Add resource to map
-	resources := make(map[string]zebra.Resource)
-	resources["0100000001"] = resource1
-
-	querystore := query.NewQueryStore(resources)
-	assert.NotNil(querystore)
-
-	results := querystore.QueryTypeName("Datacenter", []string{"cisco-building-14"})
-	assert.True(len(results) == 0)
-
-	results = querystore.QueryTypeName("Datacenter", []string{"cisco-building-14", "cisco-building-15"})
-	assert.True(len(results) == 1)
 }
 
 func TestInvalidLabelQuery(t *testing.T) {

@@ -24,6 +24,9 @@ func TestSwitch(t *testing.T) {
 	switch1.ID = "a"
 	assert.NotNil(switch1.Validate(ctx))
 
+	switch1.Type = "Switch"
+	assert.NotNil(switch1.Validate(ctx))
+
 	switch1.ManagementIP = net.ParseIP("10.1.0.0")
 	assert.NotNil(switch1.Validate(ctx))
 
@@ -40,6 +43,7 @@ func TestSwitch(t *testing.T) {
 		NamedResource: zebra.NamedResource{
 			BaseResource: zebra.BaseResource{
 				ID:     "blahblah",
+				Type:   "Credentials",
 				Labels: nil,
 			},
 			Name: "blah",
@@ -62,6 +66,7 @@ func TestIPAddressPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "a"
+	pool.Type = "IPAddressPool"
 	assert.Nil(pool.Validate(ctx))
 
 	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
@@ -92,6 +97,7 @@ func TestVLANPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "c"
+	pool.Type = "VLANPool"
 	pool.RangeStart = 10
 	pool.RangeEnd = 1
 	assert.NotNil(pool.Validate(ctx))

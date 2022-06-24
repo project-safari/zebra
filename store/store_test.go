@@ -2,7 +2,6 @@ package store_test
 
 import (
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/rchamarthy/zebra"
@@ -10,6 +9,8 @@ import (
 	"github.com/rchamarthy/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
+
+const vlan string = "VLANPool"
 
 func TestInitialize(t *testing.T) {
 	t.Parallel()
@@ -32,14 +33,15 @@ func TestCreate(t *testing.T) {
 	// Create VLANPool resource
 	resource := new(network.VLANPool)
 	resource.ID = "0100000001"
+	resource.Type = vlan
 	resource.Labels = make(map[string]string)
 	resource.Labels["key"] = "value"
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]zebra.Resource)
+	types := make(map[string]func() zebra.Resource)
 
-	types["VLANPool"] = new(network.VLANPool)
+	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
 
 	filestore := store.NewFileStore("teststore1", types)
 
@@ -63,13 +65,14 @@ func TestLoad(t *testing.T) {
 	// Create VLANPool resource
 	resource := new(network.VLANPool)
 	resource.ID = "0100000001"
+	resource.Type = vlan
 	resource.Labels = make(map[string]string)
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]zebra.Resource)
+	types := make(map[string]func() zebra.Resource)
 
-	types["VLANPool"] = new(network.VLANPool)
+	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
 
 	filestore := store.NewFileStore("teststore2", types)
 
@@ -88,8 +91,7 @@ func TestLoad(t *testing.T) {
 
 	assert.True(resources != nil)
 	assert.True(resources["0100000001"] != nil)
-	assert.True(reflect.TypeOf(resources["0100000001"]).String() ==
-		"*network.VLANPool")
+	assert.True(resources["0100000001"].GetType() == vlan)
 }
 
 func TestDelete(t *testing.T) {
@@ -101,13 +103,14 @@ func TestDelete(t *testing.T) {
 	// Create VLANPool resource
 	resource := new(network.VLANPool)
 	resource.ID = "0100000001"
+	resource.Type = vlan
 	resource.Labels = make(map[string]string)
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]zebra.Resource)
+	types := make(map[string]func() zebra.Resource)
 
-	types["VLANPool"] = new(network.VLANPool)
+	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
 
 	filestore := store.NewFileStore("teststore3", types)
 
@@ -137,6 +140,7 @@ func TestClearStore(t *testing.T) {
 	// Create first VLANPool resource
 	resource1 := new(network.VLANPool)
 	resource1.ID = "0100000001"
+	resource1.Type = vlan
 	resource1.Labels = make(map[string]string)
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
@@ -144,13 +148,14 @@ func TestClearStore(t *testing.T) {
 	// Create second VLANPool resource
 	resource2 := new(network.VLANPool)
 	resource2.ID = "0200000001"
+	resource2.Type = vlan
 	resource2.Labels = make(map[string]string)
 	resource2.RangeStart = 0
 	resource2.RangeEnd = 10
 
-	types := make(map[string]zebra.Resource)
+	types := make(map[string]func() zebra.Resource)
 
-	types["VLANPool"] = new(network.VLANPool)
+	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
 
 	filestore := store.NewFileStore("teststore4", types)
 

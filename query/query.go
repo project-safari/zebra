@@ -100,19 +100,6 @@ func (qs *QueryStore) QueryType(types ...string) []zebra.Resource {
 	return resources
 }
 
-// Return resources with matching type and names.
-func (qs *QueryStore) QueryTypeName(resType string, names []string) []zebra.Resource {
-	resources := qs.QueryType(resType)
-	for i, res := range resources {
-		if !isIn(res.GetName(), names) {
-			resources[i] = resources[len(resources)-1]
-			resources = resources[:len(resources)-1]
-		}
-	}
-
-	return resources
-}
-
 // Return resources with all matching labels.
 func (qs *QueryStore) QueryLabelsMatchAll(queries []LabelQuery) ([]zebra.Resource, error) {
 	resources := make(map[string]zebra.Resource)

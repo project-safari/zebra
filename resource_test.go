@@ -16,14 +16,21 @@ func TestBaseResource(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	res := &zebra.BaseResource{ID: "", Labels: zebra.Labels{"key": "value"}}
+	res := &zebra.BaseResource{
+		ID:     "",
+		Type:   "",
+		Labels: zebra.Labels{"key": "value"},
+	}
 	assert.NotNil(res.Validate(ctx))
 
 	res.ID = "abracadabra"
+	assert.NotNil(res.Validate(ctx))
+
+	res.Type = "BaseResource"
 	assert.Nil(res.Validate(ctx))
 
-	assert.True(res.ID == res.GetID())
-	assert.True(res.GetName() == "")
+	assert.True(res.GetID() == res.ID)
+	assert.True(res.GetType() == res.Type)
 	assert.True(res.GetLabels().HasKey("key"))
 }
 
@@ -35,8 +42,12 @@ func TestNamedResource(t *testing.T) {
 
 	ctx := context.Background()
 	res := &zebra.NamedResource{
-		BaseResource: zebra.BaseResource{ID: "", Labels: zebra.Labels{"key": "value"}},
-		Name:         "",
+		BaseResource: zebra.BaseResource{
+			ID:     "",
+			Type:   "",
+			Labels: zebra.Labels{"key": "value"},
+		},
+		Name: "",
 	}
 	assert.NotNil(res.Validate(ctx))
 
@@ -44,9 +55,12 @@ func TestNamedResource(t *testing.T) {
 	assert.NotNil(res.Validate(ctx))
 	assert.True(res.GetID() == res.ID)
 
+	res.Type = "NamedResource"
+	assert.NotNil(res.Validate(ctx))
+	assert.True(res.GetType() == res.Type)
+
 	res.Name = "jasmine"
 	assert.Nil(res.Validate(ctx))
-	assert.True(res.GetName() == res.Name)
 
 	assert.True(res.GetLabels().HasKey("key"))
 }
@@ -59,14 +73,21 @@ func TestCredentials(t *testing.T) {
 
 	credentials := zebra.Credentials{
 		NamedResource: zebra.NamedResource{
-			BaseResource: zebra.BaseResource{ID: "", Labels: zebra.Labels{}},
-			Name:         "",
+			BaseResource: zebra.BaseResource{
+				ID:     "",
+				Type:   "Credentials",
+				Labels: zebra.Labels{},
+			},
+			Name: "",
 		},
 		Keys: nil,
 	}
 	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.ID = "id"
+	assert.NotNil(credentials.Validate(ctx))
+
+	credentials.Type = "Credentials"
 	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.Name = "name"

@@ -12,13 +12,15 @@ import (
 type Resource interface {
 	Validate(ctx context.Context) error
 	GetID() string
-	GetName() string
+	GetType() string
 	GetLabels() Labels
 }
 
 var ErrNameEmpty = errors.New("name is empty")
 
 var ErrIDEmpty = errors.New("id is empty")
+
+var ErrTypeEmpty = errors.New("type is empty")
 
 var ErrPassLen = errors.New("password is less than 12 characters long")
 
@@ -34,6 +36,7 @@ var ErrNoKeys = errors.New("keys is nil")
 // assigned an ID string.
 type BaseResource struct {
 	ID     string `json:"id"`
+	Type   string `json:"type"`
 	Labels Labels `json:"labels,omitempty"`
 }
 
@@ -42,6 +45,8 @@ type BaseResource struct {
 func (r *BaseResource) Validate(ctx context.Context) error {
 	if r.ID == "" {
 		return ErrIDEmpty
+	} else if r.Type == "" {
+		return ErrTypeEmpty
 	}
 
 	return nil
@@ -53,8 +58,8 @@ func (r *BaseResource) GetID() string {
 }
 
 // BaseResource has no name. Return empty string.
-func (r *BaseResource) GetName() string {
-	return ""
+func (r *BaseResource) GetType() string {
+	return r.Type
 }
 
 // Return labels of BaseResource r.
@@ -81,11 +86,6 @@ func (r *NamedResource) Validate(ctx context.Context) error {
 	}
 
 	return r.BaseResource.Validate(ctx)
-}
-
-// Return name of NamedResource r.
-func (r *NamedResource) GetName() string {
-	return r.Name
 }
 
 // Credentials represents a named resource that has a set of keys (where each key is

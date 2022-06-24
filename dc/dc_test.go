@@ -21,6 +21,7 @@ func TestDatacenter(t *testing.T) {
 	assert.NotNil(datacenter.Validate(ctx))
 
 	datacenter.ID = "abracadabra"
+	datacenter.Type = "Datacenter"
 	datacenter.Name = "jasmine"
 	datacenter.Address = "1 palace st, agrabah"
 	assert.Nil(datacenter.Validate(ctx))
@@ -36,6 +37,7 @@ func TestRack(t *testing.T) {
 	assert.NotNil(rack.Validate(ctx))
 
 	rack.ID = "abracadabra"
+	rack.Type = "Rack"
 	rack.Name = "sher"
 	rack.Row = "bazar"
 	assert.Nil(rack.Validate(ctx))
