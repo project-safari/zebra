@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const Creds string = "Credentials"
+
 func TestServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -21,6 +23,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server.Validate(ctx))
 
 	server.ID = "hello"
+	server.Type = "Server"
 	server.Name = "there"
 	assert.NotNil(server.Validate(ctx))
 
@@ -34,6 +37,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server.Validate(ctx))
 
 	server.Credentials.Name = "c"
+	server.Credentials.Type = Creds
 	server.Credentials.ID = "d"
 	server.Credentials.Keys = make(map[string]string)
 	server.Credentials.Keys["password"] = "e"
@@ -53,6 +57,7 @@ func TestESX(t *testing.T) {
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.ID = "rolling in the deep"
+	esx.Type = "ESX"
 	esx.Name = "adele"
 	assert.NotNil(esx.Validate(ctx))
 
@@ -64,6 +69,7 @@ func TestESX(t *testing.T) {
 
 	esx.Credentials.Name = "k"
 	esx.Credentials.ID = "l"
+	esx.Credentials.Type = Creds
 	esx.Credentials.Keys = make(map[string]string)
 	esx.Credentials.Keys["password"] = "m"
 	assert.NotNil(esx.Validate(ctx))
@@ -82,6 +88,7 @@ func TestVCenter(t *testing.T) {
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.ID = "blah"
+	vcenter.Type = "VCenter"
 	vcenter.Name = "blahblah"
 	assert.NotNil(vcenter.Validate(ctx))
 
@@ -90,6 +97,7 @@ func TestVCenter(t *testing.T) {
 
 	vcenter.Credentials.Name = "n"
 	vcenter.Credentials.ID = "o"
+	vcenter.Credentials.Type = Creds
 	vcenter.Credentials.Keys = make(map[string]string)
 	vcenter.Credentials.Keys["password"] = "p"
 	assert.NotNil(vcenter.Validate(ctx))
@@ -108,6 +116,7 @@ func TestVM(t *testing.T) {
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.ID = "can you hear me"
+	machine.Type = "VM"
 	machine.Name = "you'd like to meet"
 	assert.NotNil(machine.Validate(ctx))
 
@@ -121,6 +130,7 @@ func TestVM(t *testing.T) {
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.Credentials.Name = "s"
+	machine.Credentials.Type = Creds
 	machine.Credentials.ID = "t"
 	machine.Credentials.Keys = make(map[string]string)
 	machine.Credentials.Keys["password"] = "u"

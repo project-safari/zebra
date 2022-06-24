@@ -7,29 +7,24 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"reflect"
-	"strings"
 	"sync"
 	"syscall"
 
 	"github.com/rchamarthy/zebra"
 )
 
-// Store interface requires basic store functionalities.
-type Store interface {
-	Initialize() error
-	Wipe() error
-	Clear() error
-	Load() (map[string]zebra.Resource, error)
-	Create(res zebra.Resource) error
-	Delete(res zebra.Resource) error
+// StoredResource allows information to be loaded from a store and thus queried
+// by type and/or other attributes.
+type storedResource struct {
+	Type     string `json:"type"`
+	Resource []byte `json:"resource"`
 }
 
 // FileStore implements Store.
 type FileStore struct {
 	lock        sync.Mutex
 	storageRoot string
-	types       map[string]zebra.Resource
+	types       map[string]func() zebra.Resource
 }
 
 var ErrTypeInvalid = errors.New("resource type invalid")
@@ -40,19 +35,12 @@ var ErrFileInvalid = errors.New("file invalid")
 
 var ErrTypeUnpack = errors.New("unpack failed, resource type error")
 
-// StoredResource allows information to be loaded from a store and thus queried
-// by type and/or other attributes.
-type storedResource struct {
-	Type     string `json:"type"`
-	Resource []byte `json:"resource"`
-}
-
-func NewFileStore(root string, types map[string]zebra.Resource) *FileStore {
+func NewFileStore(root string, types map[string]func() zebra.Resource) *FileStore {
 	return &FileStore{
 		lock:        sync.Mutex{},
 		storageRoot: root,
-		types: func() map[string]zebra.Resource {
-			typeMap := make(map[string]zebra.Resource, len(types))
+		types: func() map[string]func() zebra.Resource {
+			typeMap := make(map[string]func() zebra.Resource, len(types))
 
 			// Make a copy of types so that they are not mutated after the store has
 			// been created and initialized.
@@ -177,8 +165,7 @@ func (f *FileStore) Create(res zebra.Resource) error {
 		return err
 	}
 
-	fullName := strings.Split(reflect.TypeOf(res).String(), ".")
-	resType := fullName[len(fullName)-1]
+	resType := res.GetType()
 
 	storedRes, err := json.Marshal(storedResource{Type: resType, Resource: object})
 	if err != nil {
@@ -227,13 +214,12 @@ func (f *FileStore) Delete(res zebra.Resource) error {
 // Unpack storedRes.Resource into correct type of resource and return zebra.Resource
 // along with error if occurred.
 func (f *FileStore) unpackResource(storedRes *storedResource) (zebra.Resource, error) {
-	resType := reflect.TypeOf(f.types[storedRes.Type]).Elem()
-
-	res, typeOK := reflect.New(resType).Interface().(zebra.Resource)
-	if !typeOK {
+	creator, ok := f.types[storedRes.Type]
+	if !ok {
 		return nil, ErrTypeUnpack
 	}
 
+	res := creator()
 	if err := json.Unmarshal(storedRes.Resource, res); err != nil {
 		return nil, err
 	}
