@@ -9,6 +9,7 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"sync"
 	"syscall"
 
 	"github.com/rchamarthy/zebra"
@@ -26,6 +27,7 @@ type Store interface {
 
 // FileStore implements Store.
 type FileStore struct {
+	lock        sync.Mutex
 	storageRoot string
 	types       map[string]zebra.Resource
 }
@@ -45,9 +47,36 @@ type storedResource struct {
 	Resource []byte `json:"resource"`
 }
 
+func NewFileStore(root string, types map[string]zebra.Resource) *FileStore {
+	return &FileStore{
+		lock:        sync.Mutex{},
+		storageRoot: root,
+		types: func() map[string]zebra.Resource {
+			typeMap := make(map[string]zebra.Resource, len(types))
+
+			// Make a copy of types so that they are not mutated after the store has
+			// been created and initialized.
+			for t, r := range types {
+				typeMap[t] = r
+			}
+
+			return typeMap
+		}(),
+	}
+}
+
 // Initialize store given path. Path is relative to current file location.
 // If folders already exist, do nothing (existing store is unchanged).
 func (f *FileStore) Initialize() error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	return f.init()
+}
+
+// init implements the store initialization. This function must never be called
+// without holding the write lock.
+func (f *FileStore) init() error {
 	location := f.filestoreResourcesPath()
 	err := os.MkdirAll(location, os.ModePerm)
 
@@ -70,31 +99,31 @@ func (f *FileStore) Initialize() error {
 // Wipe store given path. Path is relative to current file location.
 // If store does not exist, do nothing.
 func (f *FileStore) Wipe() error {
-	err := os.RemoveAll(f.filestoreResourcesPath())
-	if err != nil {
-		return err
-	}
+	f.lock.Lock()
+	defer f.lock.Unlock()
 
-	return nil
+	return os.RemoveAll(f.filestoreResourcesPath())
 }
 
 // Clear store given path (i.e. delete all resource objects). Path is relative
 // to current file location. If store does not exist, create store.
 func (f *FileStore) Clear() error {
-	if err := f.Wipe(); err != nil {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	if err := os.RemoveAll(f.filestoreResourcesPath()); err != nil {
 		return err
 	}
 
-	if err := f.Initialize(); err != nil {
-		return err
-	}
-
-	return nil
+	return f.init() // lock is held
 }
 
 // Load object given storage root path and UUID.
 // If object does not exist, return empty resource.
 func (f *FileStore) Load() (map[string]zebra.Resource, error) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	rootDir := f.filestoreResourcesPath()
 
 	resources := make(map[string]zebra.Resource)
@@ -138,6 +167,9 @@ func (f *FileStore) Load() (map[string]zebra.Resource, error) {
 // Store object given storage root path and resource pointer.
 // If object already exists, overwrite.
 func (f *FileStore) Create(res zebra.Resource) error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	dir := f.resourcesFolderPath(res)
 
 	object, err := json.Marshal(res)
@@ -180,6 +212,9 @@ func (f *FileStore) Create(res zebra.Resource) error {
 // Delete object given storage root path and UUID.
 // If object does not exist, do nothing.
 func (f *FileStore) Delete(res zebra.Resource) error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	path := f.resourcesFilePath(res)
 
 	if err := syscall.Unlink(path); err != nil {
@@ -223,14 +258,4 @@ func (f *FileStore) resourcesFolderPath(res zebra.Resource) string {
 // Return path to filestore resources folder.
 func (f *FileStore) filestoreResourcesPath() string {
 	return path.Join(f.storageRoot, "resources")
-}
-
-// Set storage root.
-func (f *FileStore) SetStorageRoot(root string) {
-	f.storageRoot = root
-}
-
-// Set types.
-func (f *FileStore) SetTypes(types map[string]zebra.Resource) {
-	f.types = types
 }
