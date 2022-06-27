@@ -3,7 +3,7 @@ package query
 import (
 	"errors"
 	"reflect"
-	"strings"
+	"sync"
 
 	"github.com/rchamarthy/zebra"
 )
@@ -19,7 +19,7 @@ const (
 )
 
 // Command struct for label queries.
-type LabelQuery struct {
+type Query struct {
 	Op     Operator
 	Key    string
 	Values []string
@@ -27,57 +27,183 @@ type LabelQuery struct {
 
 // QueryStore keeps track of different maps for fast querying.
 type QueryStore struct { //nolint:revive
-	rAll   []zebra.Resource
+	lock   sync.RWMutex
 	rUUID  map[string]zebra.Resource
 	rType  map[string][]zebra.Resource
-	rLabel map[(string)][]pair
+	rLabel map[string](map[string][]zebra.Resource)
 }
 
-// pair acts as a tuple for tracking label value and associated resource.
-type pair struct {
-	value    string
-	resource zebra.Resource
-}
+var ErrOpVals = errors.New("number of values not valid for query operator")
 
-var ErrQuery = errors.New("query not valid")
+var ErrOp = errors.New("query operator not valid")
 
-// Initialize new query store and set up indexes.
+// Return new query store pointer given resource map.
 func NewQueryStore(resourcesUUID map[string]zebra.Resource) *QueryStore {
-	qs := new(QueryStore)
-	qs.rUUID = resourcesUUID
-	qs.setUp()
+	querystore := &QueryStore{
+		lock: sync.RWMutex{},
+		rUUID: func() map[string]zebra.Resource {
+			resources := make(map[string]zebra.Resource, len(resourcesUUID))
+			// Make a copy of resources so that they are not mutated after the store has
+			// been created and initialized.
+			for id, res := range resourcesUUID {
+				resources[id] = res
+			}
 
-	return qs
+			return resources
+		}(),
+		rType:  nil,
+		rLabel: nil,
+	}
+
+	return querystore
 }
 
-// Set up QueryStore object maps.
-func (qs *QueryStore) setUp() {
-	qs.rAll = make([]zebra.Resource, 0, len(qs.rUUID))
+// Initialize indexes for query store.
+func (qs *QueryStore) Initialize() error {
+	qs.lock.Lock()
+	defer qs.lock.Unlock()
+
+	return qs.init()
+}
+
+// init implements the store initialization. This function must never be called
+// without holding the write lock.
+func (qs *QueryStore) init() error {
 	qs.rType = make(map[string][]zebra.Resource)
-	qs.rLabel = make(map[string][]pair)
+	qs.rLabel = make(map[string](map[string][]zebra.Resource))
 
-	for _, val := range qs.rUUID {
-		qs.rAll = append(qs.rAll, val)
-		fullName := strings.Split(reflect.TypeOf(val).String(), ".")
-		resType := fullName[len(fullName)-1]
-		qs.rType[resType] = append(qs.rType[resType], val)
+	for _, res := range qs.rUUID {
+		resType := res.GetType()
+		qs.rType[resType] = append(qs.rType[resType], res)
 
-		for name, label := range val.GetLabels() {
-			qs.rLabel[name] = append(qs.rLabel[name], pair{label, val})
+		for labelName, labelVal := range res.GetLabels() {
+			if qs.rLabel[labelName] == nil {
+				qs.rLabel[labelName] = make(map[string][]zebra.Resource)
+			}
+
+			qs.rLabel[labelName][labelVal] = append(qs.rLabel[labelName][labelVal], res)
 		}
 	}
+
+	return nil
 }
 
-// Return all resources.
-func (qs *QueryStore) Query() []zebra.Resource {
-	dest := make([]zebra.Resource, len(qs.rAll))
-	copy(dest, qs.rAll)
+// Delete all index maps for qs.
+func (qs *QueryStore) Wipe() error {
+	qs.lock.Lock()
+	defer qs.lock.Unlock()
 
-	return dest
+	qs.rUUID = nil
+	qs.rType = nil
+	qs.rLabel = nil
+
+	return nil
+}
+
+// Clear all index maps for qs.
+func (qs *QueryStore) Clear() error {
+	qs.lock.Lock()
+	defer qs.lock.Unlock()
+
+	qs.rUUID = make(map[string]zebra.Resource)
+	qs.rType = make(map[string][]zebra.Resource)
+	qs.rLabel = make(map[string]map[string][]zebra.Resource)
+
+	return nil
+}
+
+// Return all resources in a map with UUID keys.
+func (qs *QueryStore) Load() (map[string]zebra.Resource, error) {
+	qs.lock.RLock()
+	defer qs.lock.RUnlock()
+
+	resources := make(map[string]zebra.Resource, len(qs.rUUID))
+	for key, val := range qs.rUUID {
+		resources[key] = val
+	}
+
+	return resources, nil
+}
+
+// Create a resource. If a resource with this ID already exists, overwrite.
+func (qs *QueryStore) Create(res zebra.Resource) error {
+	resID := res.GetID()
+	resType := res.GetType()
+
+	// If resource already exists, overwrite.
+	oldRes, exists := qs.rUUID[resID]
+	if exists {
+		_ = qs.Delete(oldRes)
+	}
+
+	qs.lock.Lock()
+	defer qs.lock.Unlock()
+
+	qs.rUUID[resID] = res
+	qs.rType[resType] = append(qs.rType[resType], res)
+
+	for labelName, labelVal := range res.GetLabels() {
+		if qs.rLabel[labelName] == nil {
+			qs.rLabel[labelName] = make(map[string][]zebra.Resource)
+		}
+
+		qs.rLabel[labelName][labelVal] = append(qs.rLabel[labelName][labelVal], res)
+	}
+
+	return nil
+}
+
+// Delete a resource.
+func (qs *QueryStore) Delete(res zebra.Resource) error {
+	qs.lock.Lock()
+	defer qs.lock.Unlock()
+
+	resID := res.GetID()
+	resType := res.GetType()
+
+	delete(qs.rUUID, resID)
+
+	for i, val := range qs.rType[resType] {
+		listLen := len(qs.rType[resType])
+		// To delete from types list, move last elem.
+		if val.GetID() == resID {
+			qs.rType[resType][i] = qs.rType[resType][listLen-1]
+			qs.rType[resType] = qs.rType[resType][:listLen-1]
+		}
+	}
+
+	for labelName, labelVal := range res.GetLabels() {
+		length := len(qs.rLabel[labelName][labelVal])
+
+		for i, val := range qs.rLabel[labelName][labelVal] {
+			if val.GetID() == resID {
+				qs.rLabel[labelName][labelVal][i] = qs.rLabel[labelName][labelVal][length-1]
+				qs.rLabel[labelName][labelVal] = qs.rLabel[labelName][labelVal][:length-1]
+			}
+		}
+	}
+
+	return nil
+}
+
+// Return all resources in a slice.
+func (qs *QueryStore) Query() []zebra.Resource {
+	qs.lock.RLock()
+	defer qs.lock.RUnlock()
+
+	resources := make([]zebra.Resource, 0, len(qs.rUUID))
+	for _, val := range qs.rUUID {
+		resources = append(resources, val)
+	}
+
+	return resources
 }
 
 // Return resources with matching UUIDs.
 func (qs *QueryStore) QueryUUID(uuids []string) []zebra.Resource {
+	qs.lock.RLock()
+	defer qs.lock.RUnlock()
+
 	resources := make([]zebra.Resource, 0, len(uuids))
 
 	for _, id := range uuids {
@@ -92,6 +218,9 @@ func (qs *QueryStore) QueryUUID(uuids []string) []zebra.Resource {
 
 // Return resources with matching types.
 func (qs *QueryStore) QueryType(types ...string) []zebra.Resource {
+	qs.lock.RLock()
+	defer qs.lock.RUnlock()
+
 	resources := []zebra.Resource{}
 	for _, t := range types {
 		resources = append(resources, qs.rType[t]...)
@@ -100,111 +229,97 @@ func (qs *QueryStore) QueryType(types ...string) []zebra.Resource {
 	return resources
 }
 
-// Return resources with all matching labels.
-func (qs *QueryStore) QueryLabelsMatchAll(queries []LabelQuery) ([]zebra.Resource, error) {
-	resources := make(map[string]zebra.Resource)
+// Return resources with matching label.
+func (qs *QueryStore) QueryLabel(query Query) ([]zebra.Resource, error) {
+	qs.lock.RLock()
+	defer qs.lock.RUnlock()
 
-	for queryNum, query := range queries {
-		results, err := qs.matchLabel(query)
-		if err != nil {
-			return nil, err
-		}
-
-		// If it's the first query, only add to resources.
-		// Else, update resources.
-		if queryNum == 0 {
-			for _, res := range results {
-				resources[res.GetID()] = res
-			}
-		} else {
-			for _, res := range resources {
-				id := res.GetID()
-				if results[id] == nil {
-					delete(resources, id)
-				}
-			}
-		}
-	}
-
-	returnVal := make([]zebra.Resource, 0, len(resources))
-	for _, val := range resources {
-		returnVal = append(returnVal, val)
-	}
-
-	return returnVal, nil
-}
-
-// Return resources with at least one matching label.
-func (qs *QueryStore) QueryLabelsMatchOne(queries []LabelQuery) ([]zebra.Resource, error) {
-	resources := make(map[string]zebra.Resource)
-
-	for _, query := range queries {
-		results, err := qs.matchLabel(query)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, res := range results {
-			resources[res.GetID()] = res
-		}
-	}
-
-	returnVal := make([]zebra.Resource, 0, len(resources))
-	for _, val := range resources {
-		returnVal = append(returnVal, val)
-	}
-
-	return returnVal, nil
-}
-
-// Return list of resources filtered by specific label's values.
-func (qs *QueryStore) matchLabel(query LabelQuery) (map[string]zebra.Resource, error) {
 	switch query.Op {
 	case MatchEqual:
 		if len(query.Values) != 1 {
-			return nil, ErrQuery
+			return nil, ErrOpVals
 		}
 
 		fallthrough
 	case MatchIn:
-		return match(qs.rLabel[query.Key], query.Values), nil
+		return qs.labelMatch(query, true)
 	case MatchNotEqual:
 		if len(query.Values) != 1 {
-			return nil, ErrQuery
+			return nil, ErrOpVals
 		}
 
 		fallthrough
 	case MatchNotIn:
-		return notMatch(qs.rLabel[query.Key], query.Values), nil
+		return qs.labelMatch(query, false)
 	default:
-		return nil, ErrQuery
+		return nil, ErrOp
 	}
 }
 
-// Return resources that have label values matching something in vals.
-func match(pairs []pair, vals []string) map[string]zebra.Resource {
-	resources := make(map[string]zebra.Resource)
+// Return resources which match given property/value(s).
+// Naive search implementation, >= O(n) for n resources.
+func (qs *QueryStore) QueryProperty(query Query) ([]zebra.Resource, error) {
+	qs.lock.RLock()
+	defer qs.lock.RUnlock()
 
-	for _, res := range pairs {
-		if isIn(res.value, vals) {
-			resources[res.resource.GetID()] = res.resource
+	switch query.Op {
+	case MatchEqual:
+		if len(query.Values) != 1 {
+			return nil, ErrOpVals
 		}
-	}
 
-	return resources
+		fallthrough
+	case MatchIn:
+		return qs.propertyMatch(query, true)
+	case MatchNotEqual:
+		if len(query.Values) != 1 {
+			return nil, ErrOpVals
+		}
+
+		fallthrough
+	case MatchNotIn:
+		return qs.propertyMatch(query, false)
+	default:
+		return nil, ErrOp
+	}
 }
 
-// Return resources that do not have label values matching something in vals.
-func notMatch(pairs []pair, vals []string) map[string]zebra.Resource {
-	resources := make(map[string]zebra.Resource)
+func (qs *QueryStore) labelMatch(query Query, inVals bool) ([]zebra.Resource, error) {
+	if inVals {
+		results := []zebra.Resource{}
+		for _, val := range query.Values {
+			results = append(results, qs.rLabel[query.Key][val]...)
+		}
 
-	for _, res := range pairs {
-		if !isIn(res.value, vals) {
-			resources[res.resource.GetID()] = res.resource
+		return results, nil
+	}
+
+	results := []zebra.Resource{}
+
+	for val, valMap := range qs.rLabel[query.Key] {
+		if !isIn(val, query.Values) {
+			results = append(results, valMap...)
 		}
 	}
 
-	return resources
+	return results, nil
+}
+
+func (qs *QueryStore) propertyMatch(query Query, inVals bool) ([]zebra.Resource, error) {
+	results := []zebra.Resource{}
+
+	for _, res := range qs.rUUID {
+		val := reflect.ValueOf(res).Elem().FieldByName(query.Key).String()
+		inList := isIn(val, query.Values)
+
+		if inVals && inList {
+			results = append(results, res)
+		} else if !inVals && !inList {
+			results = append(results, res)
+		}
+	}
+
+	return results, nil
 }
 
 // Return if val is in string list.

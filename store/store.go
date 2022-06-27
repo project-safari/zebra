@@ -35,6 +35,8 @@ var ErrFileInvalid = errors.New("file invalid")
 
 var ErrTypeUnpack = errors.New("unpack failed, resource type error")
 
+// Return new FileStore pointer set with storageRoot root, lock, and map of type
+// name keys with corresponding constructor function values.
 func NewFileStore(root string, types map[string]func() zebra.Resource) *FileStore {
 	return &FileStore{
 		lock:        sync.Mutex{},
@@ -106,8 +108,8 @@ func (f *FileStore) Clear() error {
 	return f.init() // lock is held
 }
 
-// Load object given storage root path and UUID.
-// If object does not exist, return empty resource.
+// Load objects from filestore storageRoot.
+// Return list of resources.
 func (f *FileStore) Load() (map[string]zebra.Resource, error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
