@@ -7,5 +7,6 @@ type Store interface {
 	Clear() error
 	Load() (map[string]Resource, error)
 	Create(res Resource) error
+	Update(res Resource) error
 	Delete(res Resource) error
 }

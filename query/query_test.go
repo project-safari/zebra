@@ -115,7 +115,7 @@ func TestClear(t *testing.T) {
 	assert.True(len(ret) == 0)
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateAndUpdate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -141,17 +141,16 @@ func TestCreate(t *testing.T) {
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
 
-	err := querystore.Initialize()
+	assert.Nil(querystore.Initialize())
+
+	_, err := querystore.Load()
 	assert.Nil(err)
+
+	assert.NotNil(querystore.Update(resource2))
+
+	assert.Nil(querystore.Create(resource2))
 
 	ret, err := querystore.Load()
-	assert.True(err == nil && len(ret) == 1)
-	assert.True(ret["0100000001"] == resource1)
-
-	err = querystore.Create(resource2)
-	assert.Nil(err)
-
-	ret, err = querystore.Load()
 	assert.True(err == nil && len(ret) == 2)
 	assert.True(ret["0100000001"] == resource1)
 	assert.True(ret["0200000001"] == resource2)
@@ -164,8 +163,9 @@ func TestCreate(t *testing.T) {
 	resource3.RangeStart = 1
 	resource3.RangeEnd = 5
 
-	err = querystore.Create(resource3)
-	assert.Nil(err)
+	assert.NotNil(querystore.Create(resource2))
+
+	assert.Nil(querystore.Update(resource3))
 
 	res, err := querystore.QueryLabel(query.Query{Op: query.MatchEqual, Key: "stage", Values: []string{"prod"}})
 	assert.True(err == nil && len(res) == 0)
@@ -201,14 +201,12 @@ func TestDelete(t *testing.T) {
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
 
-	err := querystore.Initialize()
-	assert.Nil(err)
+	assert.Nil(querystore.Initialize())
 
 	ret, err := querystore.Load()
 	assert.True(err == nil && len(ret) == 2)
 
-	err = querystore.Delete(resource2)
-	assert.Nil(err)
+	assert.Nil(querystore.Delete(resource2))
 
 	ret, err = querystore.Load()
 	assert.True(err == nil && len(ret) == 1)
@@ -242,8 +240,7 @@ func TestQuery(t *testing.T) {
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
 
-	err := querystore.Initialize()
-	assert.Nil(err)
+	assert.Nil(querystore.Initialize())
 
 	all := querystore.Query()
 	assert.True(len(all) == 2)
@@ -279,8 +276,7 @@ func TestQueryUUID(t *testing.T) {
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
 
-	err := querystore.Initialize()
-	assert.Nil(err)
+	assert.Nil(querystore.Initialize())
 
 	results := querystore.QueryUUID([]string{"0100000001"})
 	assert.True(len(results) == 1 && results[0].GetID() == "0100000001")
@@ -318,8 +314,7 @@ func TestQueryType(t *testing.T) {
 
 	querystore := query.NewQueryStore(resources)
 
-	err := querystore.Initialize()
-	assert.Nil(err)
+	assert.Nil(querystore.Initialize())
 
 	vlanpools := querystore.QueryType("VLANPool")
 	assert.True(len(vlanpools) == 1)
@@ -349,8 +344,7 @@ func TestInvalidLabelQuery(t *testing.T) {
 
 	querystore := query.NewQueryStore(resources)
 
-	err := querystore.Initialize()
-	assert.Nil(err)
+	assert.Nil(querystore.Initialize())
 
 	query := query.Query{
 		Op:     7,
@@ -359,7 +353,7 @@ func TestInvalidLabelQuery(t *testing.T) {
 	}
 
 	// Should fail on invalid query.
-	_, err = querystore.QueryLabel(query)
+	_, err := querystore.QueryLabel(query)
 	assert.NotNil(err)
 }
 
@@ -406,8 +400,7 @@ func TestQueryLabel(t *testing.T) {
 
 	querystore := query.NewQueryStore(resources)
 
-	err := querystore.Initialize()
-	assert.Nil(err)
+	assert.Nil(querystore.Initialize())
 
 	query1 := query.Query{Op: query.MatchEqual, Key: "product-owner", Values: []string{"shravya", "nandyala"}}
 	query2 := query.Query{Op: query.MatchIn, Key: "product-owner", Values: []string{"shravya", "nandyala"}}
@@ -415,7 +408,7 @@ func TestQueryLabel(t *testing.T) {
 	query4 := query.Query{Op: query.MatchNotIn, Key: "product-owner", Values: []string{"shravya", "nandyala"}}
 
 	// Should fail on query 1 and query 3.
-	_, err = querystore.QueryLabel(query1)
+	_, err := querystore.QueryLabel(query1)
 	assert.NotNil(err)
 
 	_, err = querystore.QueryLabel(query3)

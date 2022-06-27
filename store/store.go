@@ -35,6 +35,10 @@ var ErrFileInvalid = errors.New("file invalid")
 
 var ErrTypeUnpack = errors.New("unpack failed, resource type error")
 
+var ErrFileExists = errors.New("called create on resource that already exists")
+
+var ErrFileDoesNotExist = errors.New("called update on resource that does not exist")
+
 // Return new FileStore pointer set with storageRoot root, lock, and map of type
 // name keys with corresponding constructor function values.
 func NewFileStore(root string, types map[string]func() zebra.Resource) *FileStore {
@@ -154,11 +158,15 @@ func (f *FileStore) Load() (map[string]zebra.Resource, error) {
 	return resources, nil
 }
 
-// Store object given storage root path and resource pointer.
-// If object already exists, overwrite.
+// Store new object given storage root path and resource pointer.
+// If object already exists, return error.
 func (f *FileStore) Create(res zebra.Resource) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
+
+	if _, err := os.Stat(f.resourcesFilePath(res)); err == nil {
+		return ErrFileExists
+	}
 
 	dir := f.resourcesFolderPath(res)
 
@@ -180,7 +188,7 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	}
 
 	defer func() {
-		if _, err := os.Stat(file.Name()); err == nil {
+		if _, err := os.Stat(file.Name()); err != nil {
 			os.Remove(file.Name())
 		}
 	}()
@@ -196,6 +204,18 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	}
 
 	return os.Rename(file.Name(), f.resourcesFilePath(res))
+}
+
+// Update existing object. If object does not exist, return error.
+func (f *FileStore) Update(res zebra.Resource) error {
+	filepath := f.resourcesFilePath(res)
+	if _, err := os.Stat(filepath); err == nil {
+		os.Remove(filepath)
+
+		return f.Create(res)
+	}
+
+	return ErrFileDoesNotExist
 }
 
 // Delete object given storage root path and UUID.

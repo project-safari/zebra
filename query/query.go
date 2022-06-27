@@ -37,6 +37,10 @@ var ErrOpVals = errors.New("number of values not valid for query operator")
 
 var ErrOp = errors.New("query operator not valid")
 
+var ErrResExists = errors.New("called create on resource that already exists")
+
+var ErrResDoesNotExist = errors.New("called update on resource that does not exist")
+
 // Return new query store pointer given resource map.
 func NewQueryStore(resourcesUUID map[string]zebra.Resource) *QueryStore {
 	querystore := &QueryStore{
@@ -125,19 +129,22 @@ func (qs *QueryStore) Load() (map[string]zebra.Resource, error) {
 	return resources, nil
 }
 
-// Create a resource. If a resource with this ID already exists, overwrite.
+// Create a resource. If a resource with this ID already exists, return error.
 func (qs *QueryStore) Create(res zebra.Resource) error {
+	qs.lock.RLock()
 	resID := res.GetID()
-	resType := res.GetType()
+	_, exists := qs.rUUID[resID] //nolint:ifshort
+	qs.lock.RUnlock()
 
-	// If resource already exists, overwrite.
-	oldRes, exists := qs.rUUID[resID]
+	// If resource already exists, return error.
 	if exists {
-		_ = qs.Delete(oldRes)
+		return ErrResExists
 	}
 
 	qs.lock.Lock()
 	defer qs.lock.Unlock()
+
+	resType := res.GetType()
 
 	qs.rUUID[resID] = res
 	qs.rType[resType] = append(qs.rType[resType], res)
@@ -149,6 +156,25 @@ func (qs *QueryStore) Create(res zebra.Resource) error {
 
 		qs.rLabel[labelName][labelVal] = append(qs.rLabel[labelName][labelVal], res)
 	}
+
+	return nil
+}
+
+// Update a resource. Return error if resource does not exist.
+func (qs *QueryStore) Update(res zebra.Resource) error {
+	qs.lock.RLock()
+	resID := res.GetID()
+	oldRes, exists := qs.rUUID[resID]
+	qs.lock.RUnlock()
+
+	// If resource does not exist, return error.
+	if !exists {
+		return ErrResDoesNotExist
+	}
+
+	_ = qs.Delete(oldRes)
+
+	_ = qs.Create(res)
 
 	return nil
 }
