@@ -21,7 +21,7 @@ type Datacenter struct {
 
 // Validate returns an error if the given Datacenter object has incorrect values.
 // Else, it returns nil.
-func (dc *Datacenter) Validate(ctx context.Context) error {
+func (dc Datacenter) Validate(ctx context.Context) error {
 	if dc.Address == "" {
 		return ErrAddressEmpty
 	}
@@ -34,6 +34,12 @@ type Lab struct {
 	zebra.NamedResource
 }
 
+// Validate returns an error if the given Datacenter object has incorrect values.
+// Else, it returns nil.
+func (lab Lab) Validate(ctx context.Context) error {
+	return lab.NamedResource.Validate(ctx)
+}
+
 // A Rack represents a datacenter rack. It consists of a name, ID, and associated
 // row.
 type Rack struct {
@@ -43,7 +49,7 @@ type Rack struct {
 
 // Validate returns an error if the given Rack object has incorrect values.
 // Else, it returns nil.
-func (r *Rack) Validate(ctx context.Context) error {
+func (r Rack) Validate(ctx context.Context) error {
 	if r.Row == "" {
 		return ErrRowEmpty
 	}

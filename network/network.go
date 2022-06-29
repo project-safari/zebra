@@ -34,7 +34,7 @@ type Switch struct {
 
 // Validate returns an error if the given Switch object has incorrect values.
 // Else, it returns nil.
-func (s *Switch) Validate(ctx context.Context) error {
+func (s Switch) Validate(ctx context.Context) error {
 	switch {
 	case s.ManagementIP == nil:
 		return ErrIPEmpty
@@ -62,7 +62,7 @@ type IPAddressPool struct {
 
 // Validate returns an error if the given IPAddressPool object has incorrect values.
 // Else, it returns nil.
-func (p *IPAddressPool) Validate(ctx context.Context) error {
+func (p IPAddressPool) Validate(ctx context.Context) error {
 	for _, ip := range p.Subnets {
 		if ip.IP == nil {
 			return ErrIPEmpty
@@ -83,7 +83,7 @@ type VLANPool struct {
 
 // Validate returns an error if the given VLANPool object has incorrect values.
 // Else, it returns nil.
-func (v *VLANPool) Validate(ctx context.Context) error {
+func (v VLANPool) Validate(ctx context.Context) error {
 	if v.RangeStart > v.RangeEnd {
 		return ErrInvalidRange
 	}

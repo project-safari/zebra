@@ -1,9 +1,11 @@
 package store
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -12,13 +14,6 @@ import (
 
 	"github.com/rchamarthy/zebra"
 )
-
-// StoredResource allows information to be loaded from a store and thus queried
-// by type and/or other attributes.
-type storedResource struct {
-	Type     string `json:"type"`
-	Resource []byte `json:"resource"`
-}
 
 // FileStore implements Store.
 type FileStore struct {
@@ -38,6 +33,8 @@ var ErrTypeUnpack = errors.New("unpack failed, resource type error")
 var ErrFileExists = errors.New("called create on resource that already exists")
 
 var ErrFileDoesNotExist = errors.New("called update on resource that does not exist")
+
+var ErrLoadFail = errors.New("partial fail load of resources, some files invalid")
 
 // Return new FileStore pointer set with storageRoot root, lock, and map of type
 // name keys with corresponding constructor function values.
@@ -119,8 +116,9 @@ func (f *FileStore) Load() (map[string]zebra.Resource, error) {
 	defer f.lock.Unlock()
 
 	rootDir := f.filestoreResourcesPath()
-
 	resources := make(map[string]zebra.Resource)
+
+	var retErr error
 
 	dirs, err := os.ReadDir(rootDir)
 	if err != nil {
@@ -133,29 +131,55 @@ func (f *FileStore) Load() (map[string]zebra.Resource, error) {
 			return nil, err
 		}
 
-		for _, file := range files {
-			contents, err := os.ReadFile(path.Join(rootDir, subdir.Name(), file.Name()))
-			if err != nil {
-				return nil, err
-			}
-
-			storedRes := new(storedResource)
-
-			err = json.Unmarshal(contents, storedRes)
-			if err != nil {
-				return nil, err
-			}
-
-			resID := subdir.Name() + file.Name()
-
-			resources[resID], err = f.unpackResource(storedRes)
-			if err != nil {
-				return nil, err
-			}
+		err, retErr = f.loadHelper(rootDir, subdir.Name(), files, resources, retErr)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return resources, nil
+	return resources, retErr
+}
+
+func (f *FileStore) loadHelper(dir string, subdir string, files []fs.DirEntry,
+	resources map[string]zebra.Resource, retErr error,
+) (error, error) {
+	for _, file := range files {
+		contents, err := os.ReadFile(path.Join(dir, subdir, file.Name()))
+		if err != nil {
+			return err, retErr
+		}
+
+		object := make(map[string]interface{})
+		if err = json.Unmarshal(contents, &object); err != nil {
+			return err, retErr
+		}
+
+		// If object does not have a valid type, set error and move on
+		resType, ok := object["type"].(string)
+		creator := f.types[resType]
+
+		if !ok || creator == nil {
+			retErr = ErrLoadFail
+
+			continue
+		}
+
+		res := creator()
+		if err = json.Unmarshal(contents, res); err != nil {
+			return err, retErr
+		}
+
+		if res.Validate(context.TODO()) != nil {
+			retErr = ErrLoadFail
+
+			continue
+		}
+
+		resID := subdir + file.Name()
+		resources[resID] = res
+	}
+
+	return nil, retErr
 }
 
 // Store new object given storage root path and resource pointer.
@@ -164,6 +188,11 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
+	// Check to make sure resource is valid before creation.
+	if err := res.Validate(context.TODO()); err != nil {
+		return err
+	}
+
 	if _, err := os.Stat(f.resourcesFilePath(res)); err == nil {
 		return ErrFileExists
 	}
@@ -171,13 +200,6 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	dir := f.resourcesFolderPath(res)
 
 	object, err := json.Marshal(res)
-	if err != nil {
-		return err
-	}
-
-	resType := res.GetType()
-
-	storedRes, err := json.Marshal(storedResource{Type: resType, Resource: object})
 	if err != nil {
 		return err
 	}
@@ -195,7 +217,7 @@ func (f *FileStore) Create(res zebra.Resource) error {
 
 	defer file.Close()
 
-	if _, err := file.Write(storedRes); err != nil {
+	if _, err := file.Write(object); err != nil {
 		return err
 	}
 
@@ -210,9 +232,11 @@ func (f *FileStore) Create(res zebra.Resource) error {
 func (f *FileStore) Update(res zebra.Resource) error {
 	filepath := f.resourcesFilePath(res)
 	if _, err := os.Stat(filepath); err == nil {
-		os.Remove(filepath)
+		if err = os.Remove(filepath); err == nil {
+			return f.Create(res)
+		}
 
-		return f.Create(res)
+		return err
 	}
 
 	return ErrFileDoesNotExist
@@ -231,22 +255,6 @@ func (f *FileStore) Delete(res zebra.Resource) error {
 	}
 
 	return nil
-}
-
-// Unpack storedRes.Resource into correct type of resource and return zebra.Resource
-// along with error if occurred.
-func (f *FileStore) unpackResource(storedRes *storedResource) (zebra.Resource, error) {
-	creator, ok := f.types[storedRes.Type]
-	if !ok {
-		return nil, ErrTypeUnpack
-	}
-
-	res := creator()
-	if err := json.Unmarshal(storedRes.Resource, res); err != nil {
-		return nil, err
-	}
-
-	return res, nil
 }
 
 // Return file path given resource.

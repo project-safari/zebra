@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestSwitch tests the *Switch Validate function with a pass and a fail case.
+// TestSwitch tests the Switch Validate function with a pass and a fail case.
 func TestSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -56,7 +56,7 @@ func TestSwitch(t *testing.T) {
 	assert.Nil(switch1.Validate(ctx))
 }
 
-// TestIPAddressPool tests the *IPAddressPool Validate function with a pass and a fail case.
+// TestIPAddressPool tests the IPAddressPool Validate function with a pass and a fail case.
 func TestIPAddressPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -87,7 +87,7 @@ func TestIPAddressPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 }
 
-// TestVLANPool tests the *VLANPool Validate function with a pass and a fail case.
+// TestVLANPool tests the VLANPool Validate function with a pass and a fail case.
 func TestVLANPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -316,11 +316,11 @@ func TestQueryType(t *testing.T) {
 
 	assert.Nil(querystore.Initialize())
 
-	vlanpools := querystore.QueryType("VLANPool")
+	vlanpools := querystore.QueryType([]string{"VLANPool"})
 	assert.True(len(vlanpools) == 1)
 	assert.True(vlanpools[0].GetID() == "0100000001")
 
-	ippools := querystore.QueryType(ipool)
+	ippools := querystore.QueryType([]string{ipool})
 	assert.True(len(ippools) == 1)
 	assert.True(ippools[0].GetID() == "0200000001")
 }

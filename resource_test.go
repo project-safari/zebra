@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestBaseResource tests the *BaseResource Validate function with a pass case
+// TestBaseResource tests the BaseResource Validate function with a pass case
 // and a fail case.
 func TestBaseResource(t *testing.T) {
 	t.Parallel()
@@ -34,7 +34,7 @@ func TestBaseResource(t *testing.T) {
 	assert.True(res.GetLabels().HasKey("key"))
 }
 
-// TestBaseResource tests the *NamedResource Validate function with a pass case
+// TestBaseResource tests the NamedResource Validate function with a pass case
 // and a fail case.
 func TestNamedResource(t *testing.T) {
 	t.Parallel()

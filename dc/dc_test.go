@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestDatacenter tests the *Datacenter Validate function with a pass and a fail
+// TestDatacenter tests the Datacenter Validate function with a pass and a fail
 // case.
 func TestDatacenter(t *testing.T) {
 	t.Parallel()
@@ -20,14 +20,30 @@ func TestDatacenter(t *testing.T) {
 	datacenter := new(dc.Datacenter)
 	assert.NotNil(datacenter.Validate(ctx))
 
-	datacenter.ID = "abracadabra"
+	datacenter.ID = "test"
 	datacenter.Type = "Datacenter"
 	datacenter.Name = "jasmine"
 	datacenter.Address = "1 palace st, agrabah"
 	assert.Nil(datacenter.Validate(ctx))
 }
 
-// TestRack tests the *Rack Validate function with a pass and a fail case.
+// TestLab tests the Lab Validate function with a pass and a fail
+// case.
+func TestLab(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	ctx := context.Background()
+	lab := new(dc.Lab)
+	assert.NotNil(lab.Validate(ctx))
+
+	lab.ID = "abracadabra"
+	lab.Type = "Lab"
+	lab.Name = "jasmine"
+	assert.Nil(lab.Validate(ctx))
+}
+
+// TestRack tests the Rack Validate function with a pass and a fail case.
 func TestRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

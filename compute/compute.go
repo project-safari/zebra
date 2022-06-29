@@ -31,7 +31,7 @@ type Server struct {
 	Model        string            `json:"model"`
 }
 
-func (s *Server) Validate(ctx context.Context) error {
+func (s Server) Validate(ctx context.Context) error {
 	switch {
 	case s.SerialNumber == "":
 		return ErrSerialEmpty
@@ -56,7 +56,7 @@ type ESX struct {
 	IP          net.IP            `json:"ip"`
 }
 
-func (e *ESX) Validate(ctx context.Context) error {
+func (e ESX) Validate(ctx context.Context) error {
 	if e.IP == nil {
 		return ErrIPEmpty
 	}
@@ -79,7 +79,7 @@ type VCenter struct {
 	IP          net.IP            `json:"ip"`
 }
 
-func (v *VCenter) Validate(ctx context.Context) error {
+func (v VCenter) Validate(ctx context.Context) error {
 	if v.IP == nil {
 		return ErrIPEmpty
 	}
@@ -101,7 +101,7 @@ type VM struct {
 	VCenterID    string            `json:"vCenterID"`    //nolint:tagliatelle
 }
 
-func (v *VM) Validate(ctx context.Context) error {
+func (v VM) Validate(ctx context.Context) error {
 	switch {
 	case v.ESXID == "":
 		return ErrESXEmpty

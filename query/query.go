@@ -243,7 +243,7 @@ func (qs *QueryStore) QueryUUID(uuids []string) []zebra.Resource {
 }
 
 // Return resources with matching types.
-func (qs *QueryStore) QueryType(types ...string) []zebra.Resource {
+func (qs *QueryStore) QueryType(types []string) []zebra.Resource {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 

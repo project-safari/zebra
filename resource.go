@@ -42,7 +42,7 @@ type BaseResource struct {
 
 // Validate returns an error if the given BaseResource object has incorrect values.
 // Else, it returns nil.
-func (r *BaseResource) Validate(ctx context.Context) error {
+func (r BaseResource) Validate(ctx context.Context) error {
 	if r.ID == "" {
 		return ErrIDEmpty
 	} else if r.Type == "" {
@@ -53,17 +53,17 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 }
 
 // Return ID of BaseResource r.
-func (r *BaseResource) GetID() string {
+func (r BaseResource) GetID() string {
 	return r.ID
 }
 
 // BaseResource has no name. Return empty string.
-func (r *BaseResource) GetType() string {
+func (r BaseResource) GetType() string {
 	return r.Type
 }
 
 // Return labels of BaseResource r.
-func (r *BaseResource) GetLabels() Labels {
+func (r BaseResource) GetLabels() Labels {
 	dest := make(Labels, len(r.Labels))
 	for key, val := range r.Labels {
 		dest[key] = val
@@ -98,7 +98,7 @@ type Credentials struct {
 
 // Validate returns an error if the given Credentials object has incorrect values.
 // Else, it returns nil.
-func (c *Credentials) Validate(ctx context.Context) error {
+func (c Credentials) Validate(ctx context.Context) error {
 	keyValidators := map[string]func(string) error{"password": ValidatePassword, "ssh-key": ValidateSSHKey}
 
 	for keyType, key := range c.Keys {
