@@ -254,9 +254,13 @@ func (qs *QueryStore) QueryType(types []string) zebra.ResourceSet {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
-	resources := make(zebra.ResourceSet, 0)
+	resources := make(zebra.ResourceSet)
+
 	for _, t := range types {
-		resources[t] = append(resources[t], qs.rType[t]...)
+		resList := qs.rType[t]
+		if len(resList) > 0 {
+			resources[t] = append(resources[t], resList...)
+		}
 	}
 
 	return resources
