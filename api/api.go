@@ -12,27 +12,24 @@ import (
 )
 
 type ResourceAPI struct {
-	types      map[string]func() zebra.Resource
+	factory    zebra.ResourceFactory
 	resStore   *store.FileStore
 	queryStore *query.QueryStore
 }
 
 var ErrNumArgs = errors.New("wrong number of args")
 
-func NewResourceAPI(types map[string]func() zebra.Resource) *ResourceAPI {
-	api := new(ResourceAPI)
-	api.types = make(map[string]func() zebra.Resource, len(types))
-
-	for key, val := range types {
-		api.types[key] = val
+func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
+	return &ResourceAPI{
+		factory:    factory,
+		resStore:   nil,
+		queryStore: nil,
 	}
-
-	return api
 }
 
 // Set up store and query store given storage root.
 func (api *ResourceAPI) Initialize(storageRoot string) error {
-	api.resStore = store.NewFileStore(storageRoot, api.types)
+	api.resStore = store.NewFileStore(storageRoot, api.factory)
 
 	err := api.resStore.Initialize()
 	if err != nil {

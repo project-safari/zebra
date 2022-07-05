@@ -9,19 +9,10 @@ type ResourceFactory interface {
 	Add(resourceType string, factory func() Resource) ResourceFactory
 }
 
-type FunctionMap struct {
-	types map[string]func() Resource
-}
+type typeMap map[string]func() Resource
 
-func NewFunctionMap() *FunctionMap {
-	funMap := new(FunctionMap)
-	funMap.types = make(map[string]func() Resource)
-
-	return funMap
-}
-
-func (f *FunctionMap) New(resourceType string) Resource {
-	factory, ok := f.types[resourceType]
+func (t typeMap) New(resourceType string) Resource {
+	factory, ok := t[resourceType]
 	if !ok {
 		return nil
 	}
@@ -31,14 +22,14 @@ func (f *FunctionMap) New(resourceType string) Resource {
 
 // Add adds a type and its factory method to the resource factory and returns the resource factory.
 // The returned resource factory object can be used to add more types in a chained fashion.
-func (f *FunctionMap) Add(resourceType string, factory func() Resource) ResourceFactory {
-	f.types[resourceType] = factory
+func (t typeMap) Add(resourceType string, factory func() Resource) ResourceFactory {
+	t[resourceType] = factory
 
-	return f
+	return t
 }
 
 func Factory() ResourceFactory {
-	return &FunctionMap{types: map[string]func() Resource{}}
+	return typeMap{}
 }
 
 type ResourceList struct {

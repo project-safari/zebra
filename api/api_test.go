@@ -41,9 +41,7 @@ func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
 	api := api.NewResourceAPI(f)
 	assert.Nil(api.Initialize("teststore"))
@@ -53,9 +51,7 @@ func TestGetResources(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
@@ -91,10 +87,7 @@ func TestGetResourcesByID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
-
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -150,10 +143,7 @@ func TestGetResourcesByType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
-
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -199,10 +189,7 @@ func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
-
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -267,10 +254,7 @@ func TestGetResourcesByLabel(t *testing.T) { // nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
-
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 

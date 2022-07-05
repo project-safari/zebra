@@ -26,7 +26,7 @@ func TestNewQueryStore(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -48,7 +48,7 @@ func TestInitialize(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -72,7 +72,7 @@ func TestWipe(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -101,7 +101,7 @@ func TestClear(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -141,7 +141,7 @@ func TestCreateAndUpdate(t *testing.T) {
 	resource2.RangeStart = 1
 	resource2.RangeEnd = 5
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -203,7 +203,7 @@ func TestDelete(t *testing.T) {
 	resource2.RangeStart = 1
 	resource2.RangeEnd = 5
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -247,7 +247,7 @@ func TestQuery(t *testing.T) {
 	mask := ip.DefaultMask()
 	resource2.Subnets = []net.IPNet{{IP: ip, Mask: mask}}
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
 
@@ -286,7 +286,7 @@ func TestQueryUUID(t *testing.T) {
 	mask := ip.DefaultMask()
 	resource2.Subnets = []net.IPNet{{IP: ip, Mask: mask}}
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
 
@@ -329,7 +329,7 @@ func TestQueryType(t *testing.T) {
 	mask := ip.DefaultMask()
 	resource2.Subnets = []net.IPNet{{IP: ip, Mask: mask}}
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
 
@@ -364,7 +364,7 @@ func TestInvalidLabelQuery(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	// Add resources to map
@@ -422,7 +422,7 @@ func TestQueryLabel(t *testing.T) {
 
 	resource1, resource2 := getResources()
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
 
@@ -472,7 +472,7 @@ func TestQueryProperty(t *testing.T) {
 
 	resource1, resource2 := getResources()
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
 

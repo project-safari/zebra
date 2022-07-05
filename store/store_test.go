@@ -39,9 +39,8 @@ func TestCreate(t *testing.T) {
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]func() zebra.Resource)
-
-	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
+	types := zebra.Factory()
+	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	filestore := store.NewFileStore("teststore1", types)
 
@@ -71,9 +70,8 @@ func TestUpdate(t *testing.T) {
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]func() zebra.Resource)
-
-	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
+	types := zebra.Factory()
+	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	filestore := store.NewFileStore("teststore6", types)
 
@@ -123,9 +121,8 @@ func TestLoad(t *testing.T) {
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]func() zebra.Resource)
-
-	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
+	types := zebra.Factory()
+	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	filestore := store.NewFileStore("teststore2", types)
 
@@ -163,9 +160,8 @@ func TestDelete(t *testing.T) {
 	resource.RangeStart = 0
 	resource.RangeEnd = 10
 
-	types := make(map[string]func() zebra.Resource)
-
-	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
+	types := zebra.Factory()
+	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	filestore := store.NewFileStore("teststore3", types)
 
@@ -208,9 +204,8 @@ func TestClearStore(t *testing.T) {
 	resource2.RangeStart = 0
 	resource2.RangeEnd = 10
 
-	types := make(map[string]func() zebra.Resource)
-
-	types[vlan] = func() zebra.Resource { return new(network.VLANPool) }
+	types := zebra.Factory()
+	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
 
 	filestore := store.NewFileStore("teststore4", types)
 

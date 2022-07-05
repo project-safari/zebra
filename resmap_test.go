@@ -8,30 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewFunctionMap(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	assert.NotNil(zebra.NewFunctionMap())
-}
-
 func TestAddNew(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	assert.NotNil(f)
 
 	f.Add("Switch", func() zebra.Resource { return new(network.Switch) })
 	assert.NotNil(f.New("Switch"))
 	assert.Nil(f.New("random"))
-}
-
-func TestFactory(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	assert.NotNil(zebra.Factory())
 }
 
 func TestNewResourceList(t *testing.T) {
@@ -62,7 +48,7 @@ func TestListMarshalUnMarshal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	funMap := zebra.NewFunctionMap()
+	funMap := zebra.Factory()
 	funMap.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
 	resA := zebra.NewResourceList(funMap)
@@ -133,7 +119,7 @@ func TestGetFactory(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.NewFunctionMap()
+	f := zebra.Factory()
 	f.Add("Switch", func() zebra.Resource { return new(network.Switch) })
 
 	resA := zebra.NewResourceMap(f)
@@ -146,7 +132,7 @@ func TestAdd(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	funMap := zebra.NewFunctionMap()
+	funMap := zebra.Factory()
 	funMap.Add("Switch", func() zebra.Resource { return new(network.Switch) })
 
 	resA := zebra.NewResourceMap(funMap)
@@ -162,7 +148,7 @@ func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	funMap := zebra.NewFunctionMap()
+	funMap := zebra.Factory()
 	funMap.Add("Switch", func() zebra.Resource { return new(network.Switch) })
 
 	resA := zebra.NewResourceMap(funMap)
@@ -181,7 +167,7 @@ func TestMapMarshalUnMarshal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	funMap := zebra.NewFunctionMap()
+	funMap := zebra.Factory()
 	funMap.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
 	resA := zebra.NewResourceMap(funMap)
