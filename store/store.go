@@ -167,6 +167,11 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
+	return f.create(res)
+}
+
+// Should not be called without holding the write lock.
+func (f *FileStore) create(res zebra.Resource) error {
 	if _, err := os.Stat(f.resourcesFilePath(res)); err == nil {
 		return ErrFileExists
 	}
@@ -204,11 +209,14 @@ func (f *FileStore) Create(res zebra.Resource) error {
 
 // Update existing object. If object does not exist, return error.
 func (f *FileStore) Update(res zebra.Resource) error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
 	filepath := f.resourcesFilePath(res)
 	if _, err := os.Stat(filepath); err == nil {
-		os.Remove(filepath)
+		_ = f.delete(res)
 
-		return f.Create(res)
+		return f.create(res)
 	}
 
 	return ErrFileDoesNotExist
@@ -220,6 +228,11 @@ func (f *FileStore) Delete(res zebra.Resource) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
+	return f.delete(res)
+}
+
+// Should not be called without holding the write lock.
+func (f *FileStore) delete(res zebra.Resource) error {
 	path := f.resourcesFilePath(res)
 
 	if err := syscall.Unlink(path); err != nil {

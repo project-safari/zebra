@@ -129,18 +129,20 @@ func (qs *QueryStore) Load() (*zebra.ResourceMap, error) {
 
 // Create a resource. If a resource with this ID already exists, return error.
 func (qs *QueryStore) Create(res zebra.Resource) error {
-	qs.lock.RLock()
-	resID := res.GetID()
-	_, exists := qs.rUUID[resID] //nolint:ifshort
-	qs.lock.RUnlock()
-
-	// If resource already exists, return error.
-	if exists {
-		return ErrResExists
-	}
-
 	qs.lock.Lock()
 	defer qs.lock.Unlock()
+
+	return qs.create(res)
+}
+
+// Should not be called without holding the write lock.
+func (qs *QueryStore) create(res zebra.Resource) error {
+	resID := res.GetID()
+
+	// If resource already exists, return error.
+	if _, exists := qs.rUUID[resID]; exists {
+		return ErrResExists
+	}
 
 	resType := res.GetType()
 
@@ -160,19 +162,20 @@ func (qs *QueryStore) Create(res zebra.Resource) error {
 
 // Update a resource. Return error if resource does not exist.
 func (qs *QueryStore) Update(res zebra.Resource) error {
-	qs.lock.RLock()
+	qs.lock.Lock()
+	defer qs.lock.Unlock()
+
 	resID := res.GetID()
 	oldRes, exists := qs.rUUID[resID]
-	qs.lock.RUnlock()
 
 	// If resource does not exist, return error.
 	if !exists {
 		return ErrResDoesNotExist
 	}
 
-	_ = qs.Delete(oldRes)
+	_ = qs.delete(oldRes)
 
-	_ = qs.Create(res)
+	_ = qs.create(res)
 
 	return nil
 }
@@ -182,6 +185,11 @@ func (qs *QueryStore) Delete(res zebra.Resource) error {
 	qs.lock.Lock()
 	defer qs.lock.Unlock()
 
+	return qs.delete(res)
+}
+
+// Should not be called without holding the write lock.
+func (qs *QueryStore) delete(res zebra.Resource) error {
 	delete(qs.rUUID, res.GetID())
 	qs.rType.Delete(res, res.GetType())
 
