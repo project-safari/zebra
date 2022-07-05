@@ -17,7 +17,7 @@ import (
 type FileStore struct {
 	lock        sync.Mutex
 	storageRoot string
-	types       *zebra.FunctionMap
+	factory     zebra.ResourceFactory
 }
 
 var ErrTypeInvalid = errors.New("resource type invalid")
@@ -36,18 +36,11 @@ var ErrNoType = errors.New("resource has no type field")
 
 // Return new FileStore pointer set with storageRoot root, lock, and map of type
 // name keys with corresponding constructor function values.
-func NewFileStore(root string, types map[string]func() zebra.Resource) *FileStore {
+func NewFileStore(root string, resourceFactory zebra.ResourceFactory) *FileStore {
 	return &FileStore{
 		lock:        sync.Mutex{},
 		storageRoot: root,
-		types: func() *zebra.FunctionMap {
-			funMap := zebra.NewFunctionMap()
-			for t, r := range types {
-				funMap.Add(t, r)
-			}
-
-			return funMap
-		}(),
+		factory:     resourceFactory,
 	}
 }
 
@@ -114,7 +107,7 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 
 	rootDir := f.filestoreResourcesPath()
 
-	resources := zebra.NewResourceMap(f.types)
+	resources := zebra.NewResourceMap(f.factory)
 
 	dirs, err := os.ReadDir(rootDir)
 	if err != nil {
@@ -245,7 +238,7 @@ func (f *FileStore) delete(res zebra.Resource) error {
 // Unpack storedRes.Resource into correct type of resource and return zebra.Resource
 // along with error if occurred.
 func (f *FileStore) unpackResource(contents []byte, resType string) (zebra.Resource, error) {
-	res := f.types.New(resType)
+	res := f.factory.New(resType)
 	if res == nil {
 		return nil, ErrTypeUnpack
 	}
