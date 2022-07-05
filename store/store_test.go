@@ -143,8 +143,10 @@ func TestLoad(t *testing.T) {
 	assert.Nil(err)
 
 	assert.True(resources != nil)
-	assert.True(len(resources["VLANPool"]) == 1)
-	assert.True(resources["VLANPool"][0].GetType() == vlan)
+
+	list := resources.Resources["VLANPool"].Resources
+	assert.True(len(list) == 1)
+	assert.True(list[0].GetType() == vlan)
 }
 
 func TestDelete(t *testing.T) {

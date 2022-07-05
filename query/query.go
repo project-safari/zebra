@@ -27,10 +27,11 @@ type Query struct {
 
 // QueryStore keeps track of different maps for fast querying.
 type QueryStore struct { //nolint:revive
-	lock   sync.RWMutex
-	rUUID  map[string]zebra.Resource
-	rType  zebra.ResourceSet
-	rLabel map[string]zebra.ResourceSet
+	lock    sync.RWMutex
+	rUUID   map[string]zebra.Resource
+	rType   *zebra.ResourceMap
+	rLabel  map[string]*zebra.ResourceMap
+	factory zebra.ResourceFactory
 }
 
 var ErrOpVals = errors.New("number of values not valid for query operator")
@@ -42,22 +43,18 @@ var ErrResExists = errors.New("called create on resource that already exists")
 var ErrResDoesNotExist = errors.New("called update on resource that does not exist")
 
 // Return new query store pointer given resource map.
-func NewQueryStore(resources zebra.ResourceSet) *QueryStore {
+func NewQueryStore(resources *zebra.ResourceMap) *QueryStore {
 	querystore := &QueryStore{
 		lock:  sync.RWMutex{},
 		rUUID: nil,
-		rType: func() zebra.ResourceSet {
-			results := make(zebra.ResourceSet, len(resources))
-			// Make a copy of resources so that they are not mutated after the store has
-			// been created and initialized.
-			for resType, resList := range resources {
-				results[resType] = make(zebra.ResourceList, len(resList))
-				copy(results[resType], resList)
-			}
+		rType: func() *zebra.ResourceMap {
+			dest := zebra.NewResourceMap(nil)
+			zebra.CopyResourceMap(dest, resources)
 
-			return results
+			return dest
 		}(),
-		rLabel: nil,
+		rLabel:  nil,
+		factory: resources.GetFactory(),
 	}
 
 	return querystore
@@ -75,18 +72,18 @@ func (qs *QueryStore) Initialize() error {
 // without holding the write lock.
 func (qs *QueryStore) init() error {
 	qs.rUUID = make(map[string]zebra.Resource)
-	qs.rLabel = make(map[string]zebra.ResourceSet)
+	qs.rLabel = make(map[string]*zebra.ResourceMap)
 
-	for _, resList := range qs.rType {
-		for _, res := range resList {
+	for _, resList := range qs.rType.Resources {
+		for _, res := range resList.Resources {
 			qs.rUUID[res.GetID()] = res
 
 			for labelName, labelVal := range res.GetLabels() {
 				if qs.rLabel[labelName] == nil {
-					qs.rLabel[labelName] = make(zebra.ResourceSet, 1)
+					qs.rLabel[labelName] = zebra.NewResourceMap(qs.factory)
 				}
 
-				qs.rLabel[labelName][labelVal] = append(qs.rLabel[labelName][labelVal], res)
+				qs.rLabel[labelName].Add(res, labelVal)
 			}
 		}
 	}
@@ -112,23 +109,20 @@ func (qs *QueryStore) Clear() error {
 	defer qs.lock.Unlock()
 
 	qs.rUUID = make(map[string]zebra.Resource, 0)
-	qs.rType = make(zebra.ResourceSet, 0)
-	qs.rLabel = make(map[string]zebra.ResourceSet, 0)
+	qs.rType = zebra.NewResourceMap(nil)
+	qs.rLabel = make(map[string]*zebra.ResourceMap, 0)
 
 	return nil
 }
 
 // Return all resources in a ResourceSet.
-func (qs *QueryStore) Load() (zebra.ResourceSet, error) {
+func (qs *QueryStore) Load() (*zebra.ResourceMap, error) {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
-	resources := make(zebra.ResourceSet)
+	resources := zebra.NewResourceMap(nil)
 
-	for resType, resList := range qs.rType {
-		resources[resType] = make(zebra.ResourceList, len(resList))
-		copy(resources[resType], resList)
-	}
+	zebra.CopyResourceMap(resources, qs.rType)
 
 	return resources, nil
 }
@@ -151,14 +145,14 @@ func (qs *QueryStore) Create(res zebra.Resource) error {
 	resType := res.GetType()
 
 	qs.rUUID[resID] = res
-	qs.rType[resType] = append(qs.rType[resType], res)
+	qs.rType.Add(res, resType)
 
 	for labelName, labelVal := range res.GetLabels() {
 		if qs.rLabel[labelName] == nil {
-			qs.rLabel[labelName] = make(zebra.ResourceSet, 1)
+			qs.rLabel[labelName] = zebra.NewResourceMap(qs.factory)
 		}
 
-		qs.rLabel[labelName][labelVal] = append(qs.rLabel[labelName][labelVal], res)
+		qs.rLabel[labelName].Add(res, labelVal)
 	}
 
 	return nil
@@ -188,61 +182,39 @@ func (qs *QueryStore) Delete(res zebra.Resource) error {
 	qs.lock.Lock()
 	defer qs.lock.Unlock()
 
-	resID := res.GetID()
-	resType := res.GetType()
-
-	delete(qs.rUUID, resID)
-
-	for i, val := range qs.rType[resType] {
-		listLen := len(qs.rType[resType])
-		// To delete from types list, move last elem.
-		if val.GetID() == resID {
-			qs.rType[resType][i] = qs.rType[resType][listLen-1]
-			qs.rType[resType] = qs.rType[resType][:listLen-1]
-		}
-	}
+	delete(qs.rUUID, res.GetID())
+	qs.rType.Delete(res, res.GetType())
 
 	for labelName, labelVal := range res.GetLabels() {
-		length := len(qs.rLabel[labelName][labelVal])
-
-		for i, val := range qs.rLabel[labelName][labelVal] {
-			if val.GetID() == resID {
-				qs.rLabel[labelName][labelVal][i] = qs.rLabel[labelName][labelVal][length-1]
-				qs.rLabel[labelName][labelVal] = qs.rLabel[labelName][labelVal][:length-1]
-			}
-		}
+		qs.rLabel[labelName].Delete(res, labelVal)
 	}
 
 	return nil
 }
 
-// Return all resources in a slice.
-func (qs *QueryStore) Query() zebra.ResourceSet {
+// Return all resources in a ResourceMap.
+func (qs *QueryStore) Query() *zebra.ResourceMap {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
-	resources := make(zebra.ResourceSet, len(qs.rType))
+	resources := zebra.NewResourceMap(nil)
 
-	for resType, resList := range qs.rType {
-		resources[resType] = make(zebra.ResourceList, len(resList))
-		copy(resources[resType], resList)
-	}
+	zebra.CopyResourceMap(resources, qs.rType)
 
 	return resources
 }
 
 // Return resources with matching UUIDs.
-func (qs *QueryStore) QueryUUID(uuids []string) zebra.ResourceSet {
+func (qs *QueryStore) QueryUUID(uuids []string) *zebra.ResourceMap {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
-	resources := make(zebra.ResourceSet, 0)
+	resources := zebra.NewResourceMap(qs.factory)
 
 	for _, id := range uuids {
 		res, ok := qs.rUUID[id]
 		if ok {
-			resType := res.GetType()
-			resources[resType] = append(resources[resType], res)
+			resources.Add(res, res.GetType())
 		}
 	}
 
@@ -250,16 +222,17 @@ func (qs *QueryStore) QueryUUID(uuids []string) zebra.ResourceSet {
 }
 
 // Return resources with matching types.
-func (qs *QueryStore) QueryType(types []string) zebra.ResourceSet {
+func (qs *QueryStore) QueryType(types []string) *zebra.ResourceMap {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
-	resources := make(zebra.ResourceSet)
+	resources := zebra.NewResourceMap(qs.factory)
 
 	for _, t := range types {
-		resList := qs.rType[t]
-		if len(resList) > 0 {
-			resources[t] = append(resources[t], resList...)
+		resList := qs.rType.Resources[t]
+		if resList != nil {
+			resources.Resources[t] = zebra.NewResourceList(qs.factory)
+			zebra.CopyResourceList(resources.Resources[t], resList)
 		}
 	}
 
@@ -267,7 +240,7 @@ func (qs *QueryStore) QueryType(types []string) zebra.ResourceSet {
 }
 
 // Return resources with matching label.
-func (qs *QueryStore) QueryLabel(query Query) (zebra.ResourceSet, error) {
+func (qs *QueryStore) QueryLabel(query Query) (*zebra.ResourceMap, error) {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
@@ -295,7 +268,7 @@ func (qs *QueryStore) QueryLabel(query Query) (zebra.ResourceSet, error) {
 
 // Return resources which match given property/value(s).
 // Naive search implementation, >= O(n) for n resources.
-func (qs *QueryStore) QueryProperty(query Query) (zebra.ResourceSet, error) {
+func (qs *QueryStore) QueryProperty(query Query) (*zebra.ResourceMap, error) {
 	qs.lock.RLock()
 	defer qs.lock.RUnlock()
 
@@ -321,27 +294,23 @@ func (qs *QueryStore) QueryProperty(query Query) (zebra.ResourceSet, error) {
 	}
 }
 
-func (qs *QueryStore) labelMatch(query Query, inVals bool) (zebra.ResourceSet, error) {
-	if inVals {
-		results := make(zebra.ResourceSet, 0)
+func (qs *QueryStore) labelMatch(query Query, inVals bool) (*zebra.ResourceMap, error) {
+	results := zebra.NewResourceMap(qs.factory)
 
+	if inVals {
 		for _, val := range query.Values {
-			for _, res := range qs.rLabel[query.Key][val] {
-				resType := res.GetType()
-				results[resType] = append(results[resType], res)
+			for _, res := range qs.rLabel[query.Key].Resources[val].Resources {
+				results.Add(res, res.GetType())
 			}
 		}
 
 		return results, nil
 	}
 
-	results := make(zebra.ResourceSet, 0)
-
-	for val, valMap := range qs.rLabel[query.Key] {
+	for val, valMap := range qs.rLabel[query.Key].Resources {
 		if !isIn(val, query.Values) {
-			for _, res := range valMap {
-				resType := res.GetType()
-				results[resType] = append(results[resType], res)
+			for _, res := range valMap.Resources {
+				results.Add(res, res.GetType())
 			}
 		}
 	}
@@ -349,19 +318,17 @@ func (qs *QueryStore) labelMatch(query Query, inVals bool) (zebra.ResourceSet, e
 	return results, nil
 }
 
-func (qs *QueryStore) propertyMatch(query Query, inVals bool) (zebra.ResourceSet, error) {
-	results := make(zebra.ResourceSet, 0)
+func (qs *QueryStore) propertyMatch(query Query, inVals bool) (*zebra.ResourceMap, error) {
+	results := zebra.NewResourceMap(qs.factory)
 
 	for _, res := range qs.rUUID {
 		val := reflect.ValueOf(res).Elem().FieldByName(query.Key).String()
 		inList := isIn(val, query.Values)
 
 		if inVals && inList {
-			resType := res.GetType()
-			results[resType] = append(results[resType], res)
+			results.Add(res, res.GetType())
 		} else if !inVals && !inList {
-			resType := res.GetType()
-			results[resType] = append(results[resType], res)
+			results.Add(res, res.GetType())
 		}
 	}
 

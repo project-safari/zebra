@@ -1,4 +1,3 @@
-//nolint:paralleltest
 package api_test
 
 import (
@@ -9,52 +8,64 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rchamarthy/zebra"
 	"github.com/rchamarthy/zebra/api"
+	"github.com/rchamarthy/zebra/network"
 	"github.com/stretchr/testify/assert"
 	"gojini.dev/web"
 )
 
 //nolint:gochecknoglobals
 var (
-	handlerAll      = http.HandlerFunc(api.GetResources)
-	handlerID       = http.HandlerFunc(api.GetResourcesByID)
-	handlerType     = http.HandlerFunc(api.GetResourcesByType)
-	handlerProperty = http.HandlerFunc(api.GetResourcesByProperty)
-	handlerLabel    = http.HandlerFunc(api.GetResourcesByLabel)
-)
-
-//nolint:gochecknoglobals
-var (
 	resource1 = `{"VLANPool":[{"id":"0100000001","type":"VLANPool","labels":{"owner":"shravya"},` +
-		`"rangeStart":0,"rangeEnd":10}]}` + "\n"
+		`"rangeStart":0,"rangeEnd":10}]}`
 	resource2 = `{"VLANPool":[{"id":"0100000002","type":"VLANPool","labels":{"owner":"nandyala"},` +
-		`"rangeStart":1,"rangeEnd":5}]}` + "\n"
+		`"rangeStart":1,"rangeEnd":5}]}`
 	resources = `{"VLANPool":[{"id":"0100000001","type":"VLANPool","labels":{"owner":"shravya"},` +
 		`"rangeStart":0,"rangeEnd":10},{"id":"0100000002","type":"VLANPool","labels":{"owner":"nandyala"},` +
-		`"rangeStart":1,"rangeEnd":5}]}` + "\n"
+		`"rangeStart":1,"rangeEnd":5}]}`
 	otherResources = `{"VLANPool":[{"id":"0100000002","type":"VLANPool","labels":{"owner":"nandyala"},` +
 		`"rangeStart":1,"rangeEnd":5},{"id":"0100000001","type":"VLANPool","labels":{"owner":"shravya"},` +
-		`"rangeStart":0,"rangeEnd":10}]}` + "\n"
-	noResources = "{}\n"
+		`"rangeStart":0,"rangeEnd":10}]}`
+	noResources = "{}"
 )
 
-func TestSetUp(t *testing.T) {
+func TestNew(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
-	assert.Nil(api.SetUp("teststore"))
+	assert.NotNil(api.NewResourceAPI(nil))
+}
+
+func TestInitialize(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	f := map[string]func() zebra.Resource{
+		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
+	}
+
+	api := api.NewResourceAPI(f)
+	assert.Nil(api.Initialize("teststore"))
 }
 
 func TestGetResources(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
-	assert.Nil(api.SetUp("teststore"))
+	f := map[string]func() zebra.Resource{
+		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
+	}
+
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
 
 	cfg := &web.Config{
 		Address: web.NewAddress("127.0.0.1:9999"),
 		TLS:     nil,
 	}
 
-	server := web.NewServer(cfg, handlerAll)
+	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResources))
 	assert.NotNil(server)
 
 	ctx := context.Background()
@@ -77,16 +88,22 @@ func TestGetResources(t *testing.T) {
 }
 
 func TestGetResourcesByID(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
-	assert.Nil(api.SetUp("teststore"))
+	f := map[string]func() zebra.Resource{
+		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
+	}
+
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
 
 	cfg := &web.Config{
 		Address: web.NewAddress("127.0.0.1:9998"),
 		TLS:     nil,
 	}
 
-	server := web.NewServer(cfg, handlerID)
+	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByID))
 	assert.NotNil(server)
 
 	ctx := context.Background()
@@ -130,16 +147,22 @@ func TestGetResourcesByID(t *testing.T) {
 }
 
 func TestGetResourcesByType(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
-	assert.Nil(api.SetUp("teststore"))
+	f := map[string]func() zebra.Resource{
+		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
+	}
+
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
 
 	cfg := &web.Config{
 		Address: web.NewAddress("127.0.0.1:9997"),
 		TLS:     nil,
 	}
 
-	server := web.NewServer(cfg, handlerType)
+	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByType))
 	assert.NotNil(server)
 
 	ctx := context.Background()
@@ -172,16 +195,22 @@ func TestGetResourcesByType(t *testing.T) {
 	assert.Nil(server.Stop(ctx, nil))
 }
 
-func TestGetResourcesByProperty(t *testing.T) {
+func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
+	t.Parallel()
 	assert := assert.New(t)
 
-	assert.Nil(api.SetUp("teststore"))
+	f := map[string]func() zebra.Resource{
+		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
+	}
+
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
 
 	cfg := &web.Config{
 		Address: web.NewAddress("127.0.0.1:9996"),
 		TLS:     nil,
 	}
-	server := web.NewServer(cfg, handlerProperty)
+	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByProperty))
 
 	assert.NotNil(server)
 
@@ -234,16 +263,22 @@ func TestGetResourcesByProperty(t *testing.T) {
 	assert.Nil(server.Stop(ctx, nil))
 }
 
-func TestGetResourcesByLabel(t *testing.T) {
+func TestGetResourcesByLabel(t *testing.T) { // nolint:funlen
+	t.Parallel()
 	assert := assert.New(t)
 
-	assert.Nil(api.SetUp("teststore"))
+	f := map[string]func() zebra.Resource{
+		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
+	}
+
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
 
 	cfg := &web.Config{
 		Address: web.NewAddress("127.0.0.1:9995"),
 		TLS:     nil,
 	}
-	server := web.NewServer(cfg, handlerLabel)
+	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByLabel))
 	assert.NotNil(server)
 
 	ctx := context.Background()

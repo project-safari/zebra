@@ -17,7 +17,7 @@ import (
 type FileStore struct {
 	lock        sync.Mutex
 	storageRoot string
-	types       map[string]func() zebra.Resource
+	types       *zebra.FunctionMap
 }
 
 var ErrTypeInvalid = errors.New("resource type invalid")
@@ -40,16 +40,13 @@ func NewFileStore(root string, types map[string]func() zebra.Resource) *FileStor
 	return &FileStore{
 		lock:        sync.Mutex{},
 		storageRoot: root,
-		types: func() map[string]func() zebra.Resource {
-			typeMap := make(map[string]func() zebra.Resource, len(types))
-
-			// Make a copy of types so that they are not mutated after the store has
-			// been created and initialized.
+		types: func() *zebra.FunctionMap {
+			funMap := zebra.NewFunctionMap()
 			for t, r := range types {
-				typeMap[t] = r
+				funMap.Add(t, r)
 			}
 
-			return typeMap
+			return funMap
 		}(),
 	}
 }
@@ -108,8 +105,8 @@ func (f *FileStore) Clear() error {
 }
 
 // Load objects from filestore storageRoot.
-// Return resources as ResourceSet.
-func (f *FileStore) Load() (zebra.ResourceSet, error) {
+// Return resources as ResourceMap where keys are types.
+func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -117,7 +114,7 @@ func (f *FileStore) Load() (zebra.ResourceSet, error) {
 
 	rootDir := f.filestoreResourcesPath()
 
-	resources := make(zebra.ResourceSet)
+	resources := zebra.NewResourceMap(f.types)
 
 	dirs, err := os.ReadDir(rootDir)
 	if err != nil {
@@ -157,7 +154,7 @@ func (f *FileStore) Load() (zebra.ResourceSet, error) {
 				continue
 			}
 
-			resources[resType] = append(resources[resType], newRes)
+			resources.Add(newRes, resType)
 		}
 	}
 
@@ -235,12 +232,11 @@ func (f *FileStore) Delete(res zebra.Resource) error {
 // Unpack storedRes.Resource into correct type of resource and return zebra.Resource
 // along with error if occurred.
 func (f *FileStore) unpackResource(contents []byte, resType string) (zebra.Resource, error) {
-	creator, ok := f.types[resType]
-	if !ok {
+	res := f.types.New(resType)
+	if res == nil {
 		return nil, ErrTypeUnpack
 	}
 
-	res := creator()
 	if err := json.Unmarshal(contents, res); err != nil {
 		return nil, err
 	}
