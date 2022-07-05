@@ -26,9 +26,12 @@ func TestNewQueryStore(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
 
 	qs := query.NewQueryStore(resources)
 	assert.NotNil(qs)
@@ -45,9 +48,12 @@ func TestInitialize(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -66,9 +72,12 @@ func TestWipe(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -92,9 +101,12 @@ func TestClear(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -107,7 +119,7 @@ func TestClear(t *testing.T) {
 
 	ret, err := querystore.Load()
 	assert.Nil(err)
-	assert.True(len(ret) == 0)
+	assert.True(len(ret.Resources) == 0)
 }
 
 func TestCreateAndUpdate(t *testing.T) {
@@ -129,9 +141,12 @@ func TestCreateAndUpdate(t *testing.T) {
 	resource2.RangeStart = 1
 	resource2.RangeEnd = 5
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -146,9 +161,9 @@ func TestCreateAndUpdate(t *testing.T) {
 	assert.Nil(querystore.Create(resource2))
 
 	ret, err := querystore.Load()
-	assert.True(err == nil && len(ret) == 1 && len(ret[vlan]) == 2)
-	assert.True(ret[vlan][0] == resource1 || ret[vlan][1] == resource1)
-	assert.True(ret[vlan][0] == resource2 || ret[vlan][1] == resource2)
+	assert.True(err == nil && len(ret.Resources) == 1 && len(ret.Resources[vlan].Resources) == 2)
+	assert.True(ret.Resources[vlan].Resources[0] == resource1 || ret.Resources[vlan].Resources[1] == resource1)
+	assert.True(ret.Resources[vlan].Resources[0] == resource2 || ret.Resources[vlan].Resources[1] == resource2)
 
 	// Create a third VLANPool resource with same ID as resource2
 	resource3 := new(network.VLANPool)
@@ -163,10 +178,10 @@ func TestCreateAndUpdate(t *testing.T) {
 	assert.Nil(querystore.Update(resource3))
 
 	res, err := querystore.QueryLabel(query.Query{Op: query.MatchEqual, Key: "stage", Values: []string{"prod"}})
-	assert.True(err == nil && len(res) == 0)
+	assert.True(err == nil && len(res.Resources) == 0)
 
 	res, err = querystore.QueryLabel(query.Query{Op: query.MatchEqual, Key: "stagetest", Values: []string{"dev"}})
-	assert.True(err == nil && len(res) == 1 && res[vlan][0].GetID() == "0200000001")
+	assert.True(err == nil && len(res.Resources) == 1 && res.Resources[vlan].Resources[0].GetID() == "0200000001")
 }
 
 func TestDelete(t *testing.T) {
@@ -188,9 +203,13 @@ func TestDelete(t *testing.T) {
 	resource2.RangeStart = 1
 	resource2.RangeEnd = 5
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1, resource2}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, vlan)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -198,14 +217,15 @@ func TestDelete(t *testing.T) {
 	assert.Nil(querystore.Initialize())
 
 	ret, err := querystore.Load()
-	assert.True(err == nil && len(ret) == 1 && len(ret[vlan]) == 2)
+	retRes := ret.Resources
+	assert.True(err == nil && len(retRes) == 1 && len(retRes[vlan].Resources) == 2)
 
 	assert.Nil(querystore.Delete(resource2))
 
-	ret, err = querystore.Load()
+	_, err = querystore.Load()
 	assert.Nil(err)
-	assert.True(len(ret) == len(resources))
-	assert.True(ret[vlan][0] == resource1)
+	assert.True(len(retRes) == len(resources.Resources))
+	assert.True(retRes[vlan].Resources[0] == resource1)
 }
 
 func TestQuery(t *testing.T) {
@@ -227,10 +247,14 @@ func TestQuery(t *testing.T) {
 	mask := ip.DefaultMask()
 	resource2.Subnets = []net.IPNet{{IP: ip, Mask: mask}}
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
-	resources[ipool] = zebra.ResourceList{resource2}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, ipool)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -238,9 +262,9 @@ func TestQuery(t *testing.T) {
 	assert.Nil(querystore.Initialize())
 
 	all := querystore.Query()
-	assert.True(len(all) == len(resources))
-	assert.True(all[vlan][0].GetID() == "0100000001")
-	assert.True(all[ipool][0].GetID() == "0200000001")
+	assert.True(len(all.Resources) == len(resources.Resources))
+	assert.True(all.Resources[vlan].Resources[0].GetID() == "0100000001")
+	assert.True(all.Resources[ipool].Resources[0].GetID() == "0200000001")
 }
 
 func TestQueryUUID(t *testing.T) {
@@ -262,10 +286,14 @@ func TestQueryUUID(t *testing.T) {
 	mask := ip.DefaultMask()
 	resource2.Subnets = []net.IPNet{{IP: ip, Mask: mask}}
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
-	resources[ipool] = zebra.ResourceList{resource2}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, ipool)
 
 	querystore := query.NewQueryStore(resources)
 	assert.NotNil(querystore)
@@ -273,13 +301,13 @@ func TestQueryUUID(t *testing.T) {
 	assert.Nil(querystore.Initialize())
 
 	results := querystore.QueryUUID([]string{"0100000001"})
-	assert.True(len(results) == 1 && results[vlan][0].GetID() == "0100000001")
+	assert.True(len(results.Resources) == 1 && results.Resources[vlan].Resources[0].GetID() == "0100000001")
 
 	results = querystore.QueryUUID([]string{"0100000001", "0200000001"})
-	assert.True(len(results) == 2)
+	assert.True(len(results.Resources) == 2)
 
 	results = querystore.QueryUUID([]string{"0100000001", "0300000001"})
-	assert.True(len(results) == 1)
+	assert.True(len(results.Resources) == 1)
 }
 
 func TestQueryType(t *testing.T) {
@@ -301,22 +329,26 @@ func TestQueryType(t *testing.T) {
 	mask := ip.DefaultMask()
 	resource2.Subnets = []net.IPNet{{IP: ip, Mask: mask}}
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
-	resources[ipool] = zebra.ResourceList{resource2}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, ipool)
 
 	querystore := query.NewQueryStore(resources)
 
 	assert.Nil(querystore.Initialize())
 
 	vlanpools := querystore.QueryType([]string{vlan})
-	assert.True(len(vlanpools) == 1)
-	assert.True(vlanpools[vlan][0].GetID() == "0100000001")
+	assert.True(len(vlanpools.Resources) == 1)
+	assert.True(vlanpools.Resources[vlan].Resources[0].GetID() == "0100000001")
 
 	ippools := querystore.QueryType([]string{ipool})
-	assert.True(len(ippools) == 1)
-	assert.True(ippools[ipool][0].GetID() == "0200000001")
+	assert.True(len(ippools.Resources) == 1)
+	assert.True(ippools.Resources[ipool].Resources[0].GetID() == "0200000001")
 }
 
 func TestInvalidLabelQuery(t *testing.T) {
@@ -332,9 +364,12 @@ func TestInvalidLabelQuery(t *testing.T) {
 	resource1.RangeStart = 0
 	resource1.RangeEnd = 10
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
 
 	querystore := query.NewQueryStore(resources)
 
@@ -387,10 +422,14 @@ func TestQueryLabel(t *testing.T) {
 
 	resource1, resource2 := getResources()
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
-	resources[ipool] = zebra.ResourceList{resource2}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, ipool)
 
 	querystore := query.NewQueryStore(resources)
 
@@ -411,20 +450,20 @@ func TestQueryLabel(t *testing.T) {
 	// Update query 1, should succeed.
 	query1.Values = []string{"nandyala"}
 	pos, err := querystore.QueryLabel(query1)
-	assert.True(err == nil && len(pos) == 1 && pos[ipool][0].GetID() == resource2.ID)
+	assert.True(err == nil && len(pos.Resources) == 1 && pos.Resources[ipool].Resources[0].GetID() == resource2.ID)
 
 	// Should succeed on query 2, return both resources.
 	pos, err = querystore.QueryLabel(query2)
-	assert.True(err == nil && len(pos) == 2)
+	assert.True(err == nil && len(pos.Resources) == 2)
 
 	// Should succeed on query 4, return no resources.
 	pos, err = querystore.QueryLabel(query4)
-	assert.True(err == nil && len(pos) == 0)
+	assert.True(err == nil && len(pos.Resources) == 0)
 
 	// Update query 3 to be valid, return 1 resource.
 	query3.Values = []string{"shravya"}
 	pos, err = querystore.QueryLabel(query3)
-	assert.True(err == nil && len(pos) == 1 && pos[ipool][0].GetID() == "0200000001")
+	assert.True(err == nil && len(pos.Resources) == 1 && pos.Resources[ipool].Resources[0].GetID() == "0200000001")
 }
 
 func TestQueryProperty(t *testing.T) {
@@ -433,10 +472,14 @@ func TestQueryProperty(t *testing.T) {
 
 	resource1, resource2 := getResources()
 
+	f := zebra.NewFunctionMap()
+	f.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	f.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
+
 	// Add resources to map
-	resources := make(zebra.ResourceSet)
-	resources[vlan] = zebra.ResourceList{resource1}
-	resources[ipool] = zebra.ResourceList{resource2}
+	resources := zebra.NewResourceMap(f)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, ipool)
 
 	querystore := query.NewQueryStore(resources)
 
@@ -459,25 +502,25 @@ func TestQueryProperty(t *testing.T) {
 	query1.Values = []string{ipool}
 	pos, err := querystore.QueryProperty(query1)
 	assert.Nil(err)
-	assert.True(len(pos) == 1 && len(pos[ipool]) == 1)
-	assert.True(pos[ipool][0].GetID() == resource2.ID)
+	assert.True(len(pos.Resources) == 1 && len(pos.Resources[ipool].Resources) == 1)
+	assert.True(pos.Resources[ipool].Resources[0].GetID() == resource2.ID)
 
 	// Should succeed on query 2, return first resource.
 	pos, err = querystore.QueryProperty(query2)
 	assert.Nil(err)
-	assert.True(len(pos) == 1)
-	assert.True(pos[vlan][0].GetID() == resource1.ID)
+	assert.True(len(pos.Resources) == 1)
+	assert.True(pos.Resources[vlan].Resources[0].GetID() == resource1.ID)
 
 	// Should succeed on query 4, return no resources.
 	pos, err = querystore.QueryProperty(query4)
-	assert.True(err == nil && len(pos) == 0)
+	assert.True(err == nil && len(pos.Resources) == 0)
 
 	// Update query 3 to be valid, return 1 resource.
 	query3.Values = []string{ipool}
 	pos, err = querystore.QueryProperty(query3)
 	assert.Nil(err)
-	assert.True(len(pos) == 1)
-	assert.True(pos[vlan][0].GetID() == resource1.ID)
+	assert.True(len(pos.Resources) == 1)
+	assert.True(pos.Resources[vlan].Resources[0].GetID() == resource1.ID)
 
 	pos, err = querystore.QueryProperty(query.Query{Op: 0x7, Key: "", Values: []string{""}})
 	assert.Nil(pos)

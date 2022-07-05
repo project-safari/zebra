@@ -7,40 +7,46 @@ import (
 	"strings"
 
 	"github.com/rchamarthy/zebra"
-	"github.com/rchamarthy/zebra/network"
 	"github.com/rchamarthy/zebra/query"
 	"github.com/rchamarthy/zebra/store"
 )
 
-//nolint:gochecknoglobals
-var (
+type ResourceAPI struct {
 	types      map[string]func() zebra.Resource
 	resStore   *store.FileStore
 	queryStore *query.QueryStore
+}
 
-	ErrNumArgs = errors.New("wrong number of args")
-)
+var ErrNumArgs = errors.New("wrong number of args")
+
+func NewResourceAPI(types map[string]func() zebra.Resource) *ResourceAPI {
+	api := new(ResourceAPI)
+	api.types = make(map[string]func() zebra.Resource, len(types))
+
+	for key, val := range types {
+		api.types[key] = val
+	}
+
+	return api
+}
 
 // Set up store and query store given storage root.
-func SetUp(storageRoot string) error {
-	types = map[string]func() zebra.Resource{
-		"VLANPool": func() zebra.Resource { return new(network.VLANPool) },
-	}
-	resStore = store.NewFileStore(storageRoot, types)
+func (api *ResourceAPI) Initialize(storageRoot string) error {
+	api.resStore = store.NewFileStore(storageRoot, api.types)
 
-	err := resStore.Initialize()
+	err := api.resStore.Initialize()
 	if err != nil {
 		return err
 	}
 
-	resMap, err := resStore.Load()
+	resMap, err := api.resStore.Load()
 	if err != nil {
 		return err
 	}
 
-	queryStore = query.NewQueryStore(resMap)
+	api.queryStore = query.NewQueryStore(resMap)
 
-	err = queryStore.Initialize()
+	err = api.queryStore.Initialize()
 	if err != nil {
 		return err
 	}
@@ -48,45 +54,50 @@ func SetUp(storageRoot string) error {
 	return nil
 }
 
-func GetResources(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
-	results := queryStore.Query()
+func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+	results := api.queryStore.Query()
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	err := json.NewEncoder(w).Encode(results)
+	bytes, err := json.Marshal(results)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes) // nolint:errcheck
 }
 
-func GetResourcesByID(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
 	uuids := strings.Split(req.URL.Query().Get("id"), ",")
-	results := queryStore.QueryUUID(uuids)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	results := api.queryStore.QueryUUID(uuids)
 
-	err := json.NewEncoder(w).Encode(results)
+	bytes, err := json.Marshal(results)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes) // nolint:errcheck
 }
 
-func GetResourcesByType(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByType(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
 	resTypes := strings.Split(req.URL.Query().Get("type"), ",")
-	results := queryStore.QueryType(resTypes)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	results := api.queryStore.QueryType(resTypes)
 
-	err := json.NewEncoder(w).Encode(results)
+	bytes, err := json.Marshal(results)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes) // nolint:errcheck
 }
 
-func GetResourcesByProperty(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
 	query, err := buildQuery(req.URL.Query().Get("property"), true)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -94,23 +105,24 @@ func GetResourcesByProperty(w http.ResponseWriter, req *http.Request) { //nolint
 		return
 	}
 
-	results, err := queryStore.QueryProperty(query)
+	results, err := api.queryStore.QueryProperty(query)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	err = json.NewEncoder(w).Encode(results)
+	bytes, err := json.Marshal(results)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes) // nolint:errcheck
 }
 
-func GetResourcesByLabel(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByLabel(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
 	query, err := buildQuery(req.URL.Query().Get("label"), false)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -118,20 +130,21 @@ func GetResourcesByLabel(w http.ResponseWriter, req *http.Request) { //nolint:va
 		return
 	}
 
-	results, err := queryStore.QueryLabel(query)
+	results, err := api.queryStore.QueryLabel(query)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	err = json.NewEncoder(w).Encode(results)
+	bytes, err := json.Marshal(results)
 	if err != nil {
 		panic(err)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes) // nolint:errcheck
 }
 
 func buildQuery(url string, isProperty bool) (query.Query, error) {

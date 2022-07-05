@@ -7,11 +7,6 @@ import (
 	"unicode"
 )
 
-type (
-	ResourceList []Resource
-	ResourceSet  map[string]ResourceList
-)
-
 // Resource interface is implemented by all resources and provides resource
 // validation and label selection methods.
 type Resource interface {
