@@ -16,3 +16,5 @@
 .vscode
 coverage.txt
 bin/
+zebra-server
+zebra
