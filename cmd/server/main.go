@@ -14,6 +14,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/rchamarthy/zebra"
 	"github.com/rchamarthy/zebra/api"
+	"github.com/rchamarthy/zebra/compute"
+	"github.com/rchamarthy/zebra/dc"
 	"github.com/rchamarthy/zebra/network"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
@@ -113,8 +115,52 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 
 func initTypes() zebra.ResourceFactory {
 	factory := zebra.Factory()
+
+	// network resources
+	factory.Add("Switch", func() zebra.Resource {
+		return new(network.Switch)
+	})
+	factory.Add("IPAddressPool", func() zebra.Resource {
+		return new(network.IPAddressPool)
+	})
 	factory.Add("VLANPool", func() zebra.Resource {
 		return new(network.VLANPool)
+	})
+
+	// dc resources
+	factory.Add("Datacenter", func() zebra.Resource {
+		return new(dc.Datacenter)
+	})
+	factory.Add("Lab", func() zebra.Resource {
+		return new(dc.Lab)
+	})
+	factory.Add("Rack", func() zebra.Resource {
+		return new(dc.Rack)
+	})
+
+	// compute resources
+	factory.Add("Server", func() zebra.Resource {
+		return new(compute.Server)
+	})
+	factory.Add("ESX", func() zebra.Resource {
+		return new(compute.ESX)
+	})
+	factory.Add("VCenter", func() zebra.Resource {
+		return new(compute.VCenter)
+	})
+	factory.Add("VM", func() zebra.Resource {
+		return new(compute.VM)
+	})
+
+	// other resources
+	factory.Add("BaseResource", func() zebra.Resource {
+		return new(zebra.BaseResource)
+	})
+	factory.Add("NamedResource", func() zebra.Resource {
+		return new(zebra.NamedResource)
+	})
+	factory.Add("Credentials", func() zebra.Resource {
+		return new(zebra.Credentials)
 	})
 
 	// Need to add all the known types here
