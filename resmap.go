@@ -67,7 +67,7 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 	// unmarshal the byte array into that resource object.
 	for _, value := range values {
 		// all resources must have type
-		vAny, ok := value["type"] // nolint:varnamelen
+		vAny, ok := value["type"]
 		if !ok {
 			return ErrTypeEmpty
 		}

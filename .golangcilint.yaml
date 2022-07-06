@@ -3,7 +3,7 @@ run:
 
 linters:
   enable-all: true
-  disable: maligned,golint,scopelint,interfacer,ireturn,wrapcheck,forbidigo
+  disable: maligned,golint,scopelint,interfacer,ireturn,wrapcheck,forbidigo,varnamelen
 
 output:
   format: colored-line-number

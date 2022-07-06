@@ -49,7 +49,7 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 	return nil
 }
 
-func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
 	results := api.queryStore.Query()
 
 	bytes, err := json.Marshal(results)
@@ -62,7 +62,7 @@ func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
 	w.Write(bytes) // nolint:errcheck
 }
 
-func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Request) {
 	uuids := strings.Split(req.URL.Query().Get("id"), ",")
 
 	results := api.queryStore.QueryUUID(uuids)
@@ -77,7 +77,7 @@ func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Reques
 	w.Write(bytes) // nolint:errcheck
 }
 
-func (api *ResourceAPI) GetResourcesByType(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByType(w http.ResponseWriter, req *http.Request) {
 	resTypes := strings.Split(req.URL.Query().Get("type"), ",")
 
 	results := api.queryStore.QueryType(resTypes)
@@ -92,7 +92,7 @@ func (api *ResourceAPI) GetResourcesByType(w http.ResponseWriter, req *http.Requ
 	w.Write(bytes) // nolint:errcheck
 }
 
-func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.Request) {
 	query, err := buildQuery(req.URL.Query().Get("property"), true)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -117,7 +117,7 @@ func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.
 	w.Write(bytes) // nolint:errcheck
 }
 
-func (api *ResourceAPI) GetResourcesByLabel(w http.ResponseWriter, req *http.Request) { //nolint:varnamelen
+func (api *ResourceAPI) GetResourcesByLabel(w http.ResponseWriter, req *http.Request) {
 	query, err := buildQuery(req.URL.Query().Get("label"), false)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
