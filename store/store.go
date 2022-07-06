@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,6 +34,8 @@ var ErrFileExists = errors.New("called create on resource that already exists")
 var ErrFileDoesNotExist = errors.New("called update on resource that does not exist")
 
 var ErrNoType = errors.New("resource has no type field")
+
+var ErrFactoryNil = errors.New("resource factory is nil for filestore")
 
 // Return new FileStore pointer set with storageRoot root, lock, and map of type
 // name keys with corresponding constructor function values.
@@ -157,6 +160,10 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 // Store new object given storage root path and resource pointer.
 // If object already exists, return error.
 func (f *FileStore) Create(res zebra.Resource) error {
+	if err := res.Validate(context.Background()); err != nil {
+		return err
+	}
+
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -202,6 +209,10 @@ func (f *FileStore) create(res zebra.Resource) error {
 
 // Update existing object. If object does not exist, return error.
 func (f *FileStore) Update(res zebra.Resource) error {
+	if err := res.Validate(context.Background()); err != nil {
+		return err
+	}
+
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -218,6 +229,10 @@ func (f *FileStore) Update(res zebra.Resource) error {
 // Delete object given storage root path and UUID.
 // If object does not exist, do nothing.
 func (f *FileStore) Delete(res zebra.Resource) error {
+	if err := res.Validate(context.Background()); err != nil {
+		return err
+	}
+
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -238,12 +253,20 @@ func (f *FileStore) delete(res zebra.Resource) error {
 // Unpack storedRes.Resource into correct type of resource and return zebra.Resource
 // along with error if occurred.
 func (f *FileStore) unpackResource(contents []byte, resType string) (zebra.Resource, error) {
+	if f.factory == nil {
+		return nil, ErrFactoryNil
+	}
+
 	res := f.factory.New(resType)
 	if res == nil {
 		return nil, ErrTypeUnpack
 	}
 
 	if err := json.Unmarshal(contents, res); err != nil {
+		return nil, err
+	}
+
+	if err := res.Validate(context.Background()); err != nil {
 		return nil, err
 	}
 

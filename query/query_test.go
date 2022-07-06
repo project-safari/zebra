@@ -526,3 +526,25 @@ func TestQueryProperty(t *testing.T) {
 	assert.Nil(pos)
 	assert.NotNil(err)
 }
+
+func TestBadCreateUpdateDelete(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	factory := zebra.Factory()
+	factory.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(ipool, func() zebra.Resource { return new(network.IPAddressPool) })
+
+	resource1, resource2 := getResources()
+
+	// Add resources to map
+	resources := zebra.NewResourceMap(factory)
+	resources.Add(resource1, vlan)
+	resources.Add(resource2, ipool)
+
+	querystore := query.NewQueryStore(resources)
+	assert.Nil(querystore.Initialize())
+	assert.NotNil(querystore.Create(new(network.Switch)))
+	assert.NotNil(querystore.Update(new(network.Switch)))
+	assert.NotNil(querystore.Delete(new(network.Switch)))
+}

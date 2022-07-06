@@ -21,7 +21,7 @@ func TestSwitch(t *testing.T) {
 	switch1 := new(network.Switch)
 	assert.NotNil(switch1.Validate(ctx))
 
-	switch1.ID = "a"
+	switch1.ID = "aaaa"
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.Type = "Switch"
@@ -65,7 +65,7 @@ func TestIPAddressPool(t *testing.T) {
 	pool := new(network.IPAddressPool)
 	assert.NotNil(pool.Validate(ctx))
 
-	pool.ID = "a"
+	pool.ID = "aaaa"
 	pool.Type = "IPAddressPool"
 	assert.Nil(pool.Validate(ctx))
 
@@ -75,13 +75,13 @@ func TestIPAddressPool(t *testing.T) {
 	assert.Nil(pool.Validate(ctx))
 
 	pool = new(network.IPAddressPool)
-	pool.ID = "b"
+	pool.ID = "bbbb"
 	ipnet1 := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
 	pool.Subnets = append(pool.Subnets, ipnet1)
 	assert.NotNil(pool.Validate(ctx))
 
 	pool = new(network.IPAddressPool)
-	pool.ID = "c"
+	pool.ID = "cccc"
 	ipnet2 := net.IPNet{IP: nil, Mask: nil}
 	pool.Subnets = append(pool.Subnets, ipnet2)
 	assert.NotNil(pool.Validate(ctx))
@@ -96,7 +96,7 @@ func TestVLANPool(t *testing.T) {
 	pool := new(network.VLANPool)
 	assert.NotNil(pool.Validate(ctx))
 
-	pool.ID = "c"
+	pool.ID = "cccc"
 	pool.Type = "VLANPool"
 	pool.RangeStart = 10
 	pool.RangeEnd = 1

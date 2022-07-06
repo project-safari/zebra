@@ -1,6 +1,7 @@
 package query
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"sync"
@@ -144,6 +145,10 @@ func (qs *QueryStore) create(res zebra.Resource) error {
 		return ErrResExists
 	}
 
+	if err := res.Validate(context.Background()); err != nil {
+		return err
+	}
+
 	resType := res.GetType()
 
 	qs.rUUID[resID] = res
@@ -165,6 +170,10 @@ func (qs *QueryStore) Update(res zebra.Resource) error {
 	qs.lock.Lock()
 	defer qs.lock.Unlock()
 
+	if err := res.Validate(context.Background()); err != nil {
+		return err
+	}
+
 	resID := res.GetID()
 	oldRes, exists := qs.rUUID[resID]
 
@@ -184,6 +193,10 @@ func (qs *QueryStore) Update(res zebra.Resource) error {
 func (qs *QueryStore) Delete(res zebra.Resource) error {
 	qs.lock.Lock()
 	defer qs.lock.Unlock()
+
+	if err := res.Validate(context.Background()); err != nil {
+		return err
+	}
 
 	return qs.delete(res)
 }

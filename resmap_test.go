@@ -44,7 +44,7 @@ func TestCopyResourceList(t *testing.T) {
 	assert.True(len(resB.Resources) == 1)
 }
 
-func TestListMarshalUnMarshal(t *testing.T) {
+func TestListMarshalUnmarshal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -89,6 +89,22 @@ func TestListMarshalUnMarshal(t *testing.T) {
 	err = resB.UnmarshalJSON(bytes)
 	assert.Nil(err)
 	assert.True(len(resB.Resources) == 1)
+}
+
+func TestErrorMarshalUnmarshal(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	funMap := zebra.Factory()
+	funMap.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	resList := zebra.NewResourceList(funMap)
+	assert.NotNil(resList.UnmarshalJSON(nil))
+	assert.NotNil(resList.UnmarshalJSON([]byte(`[{"id":"0100000001"}]`)))
+	assert.NotNil(resList.UnmarshalJSON([]byte(`[{"id":"0100000001", "type":123}]`)))
+
+	resMap := zebra.NewResourceMap(nil)
+	assert.NotNil(resMap.UnmarshalJSON(nil))
+	assert.NotNil(resMap.UnmarshalJSON([]byte(`{"VLANPool":[{"id":"0100000001", "type":123}]}`)))
 }
 
 func TestNewResourceMap(t *testing.T) {

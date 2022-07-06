@@ -31,8 +31,7 @@ func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 func (api *ResourceAPI) Initialize(storageRoot string) error {
 	api.resStore = store.NewFileStore(storageRoot, api.factory)
 
-	err := api.resStore.Initialize()
-	if err != nil {
+	if err := api.resStore.Initialize(); err != nil {
 		return err
 	}
 
@@ -43,8 +42,7 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 
 	api.queryStore = query.NewQueryStore(resMap)
 
-	err = api.queryStore.Initialize()
-	if err != nil {
+	if err = api.queryStore.Initialize(); err != nil {
 		return err
 	}
 

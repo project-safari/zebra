@@ -20,6 +20,8 @@ var ErrNameEmpty = errors.New("name is empty")
 
 var ErrIDEmpty = errors.New("id is empty")
 
+var ErrIDShort = errors.New("id must be at least 3 characters long")
+
 var ErrTypeEmpty = errors.New("type is empty")
 
 var ErrPassLen = errors.New("password is less than 12 characters long")
@@ -43,9 +45,12 @@ type BaseResource struct {
 // Validate returns an error if the given BaseResource object has incorrect values.
 // Else, it returns nil.
 func (r *BaseResource) Validate(ctx context.Context) error {
-	if r.ID == "" {
+	switch {
+	case r.ID == "":
 		return ErrIDEmpty
-	} else if r.Type == "" {
+	case len(r.ID) < 3: // nolint:gomnd
+		return ErrIDShort
+	case r.Type == "":
 		return ErrTypeEmpty
 	}
 
