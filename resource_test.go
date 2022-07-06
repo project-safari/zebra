@@ -84,7 +84,7 @@ func TestCredentials(t *testing.T) {
 	}
 	assert.NotNil(credentials.Validate(ctx))
 
-	credentials.ID = "id"
+	credentials.ID = "id123"
 	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.Type = "Credentials"

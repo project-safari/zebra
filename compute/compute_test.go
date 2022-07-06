@@ -38,7 +38,7 @@ func TestServer(t *testing.T) {
 
 	server.Credentials.Name = "c"
 	server.Credentials.Type = Creds
-	server.Credentials.ID = "d"
+	server.Credentials.ID = "dddd"
 	server.Credentials.Keys = make(map[string]string)
 	server.Credentials.Keys["password"] = "e"
 	assert.NotNil(server.Validate(ctx))
@@ -68,7 +68,7 @@ func TestESX(t *testing.T) {
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.Credentials.Name = "k"
-	esx.Credentials.ID = "l"
+	esx.Credentials.ID = "lllll"
 	esx.Credentials.Type = Creds
 	esx.Credentials.Keys = make(map[string]string)
 	esx.Credentials.Keys["password"] = "m"
@@ -96,7 +96,7 @@ func TestVCenter(t *testing.T) {
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.Credentials.Name = "n"
-	vcenter.Credentials.ID = "o"
+	vcenter.Credentials.ID = "oooo"
 	vcenter.Credentials.Type = Creds
 	vcenter.Credentials.Keys = make(map[string]string)
 	vcenter.Credentials.Keys["password"] = "p"
@@ -131,7 +131,7 @@ func TestVM(t *testing.T) {
 
 	machine.Credentials.Name = "s"
 	machine.Credentials.Type = Creds
-	machine.Credentials.ID = "t"
+	machine.Credentials.ID = "tttt"
 	machine.Credentials.Keys = make(map[string]string)
 	machine.Credentials.Keys["password"] = "u"
 	assert.NotNil(machine.Validate(ctx))
