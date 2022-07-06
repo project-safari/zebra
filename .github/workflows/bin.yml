@@ -24,3 +24,13 @@ jobs:
         timeout-minutes: 30
         run: |
           cd $GITHUB_WORKSPACE && make bin
+
+      - if: github.event_name == 'release' && github.event.action == 'published'
+        name: Publish artifacts on releases
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: zebra*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
