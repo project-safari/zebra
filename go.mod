@@ -1,4 +1,4 @@
-module github.com/rchamarthy/zebra
+module github.com/project-safari/zebra
 
 go 1.18
 

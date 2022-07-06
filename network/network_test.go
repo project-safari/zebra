@@ -7,8 +7,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/rchamarthy/zebra"
-	"github.com/rchamarthy/zebra/network"
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
 

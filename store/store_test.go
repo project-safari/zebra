@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rchamarthy/zebra"
-	"github.com/rchamarthy/zebra/network"
-	"github.com/rchamarthy/zebra/store"
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 

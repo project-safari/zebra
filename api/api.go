@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rchamarthy/zebra"
-	"github.com/rchamarthy/zebra/query"
-	"github.com/rchamarthy/zebra/store"
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/query"
+	"github.com/project-safari/zebra/store"
 )
 
 type ResourceAPI struct {

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/rchamarthy/zebra"
+	"github.com/project-safari/zebra"
 )
 
 // FileStore implements Store.
