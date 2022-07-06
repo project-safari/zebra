@@ -7,7 +7,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/rchamarthy/zebra/compute"
+	"github.com/project-safari/zebra/compute"
 	"github.com/stretchr/testify/assert"
 )
 

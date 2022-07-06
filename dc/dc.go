@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/rchamarthy/zebra"
+	"github.com/project-safari/zebra"
 )
 
 var ErrAddressEmpty = errors.New("address is empty")

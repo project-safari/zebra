@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net"
 
-	"github.com/rchamarthy/zebra"
+	"github.com/project-safari/zebra"
 )
 
 var ErrSerialEmpty = errors.New("serial number is nil")

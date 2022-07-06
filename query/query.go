@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/rchamarthy/zebra"
+	"github.com/project-safari/zebra"
 )
 
 type Operator uint8

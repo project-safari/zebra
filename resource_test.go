@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/rchamarthy/zebra"
+	"github.com/project-safari/zebra"
 	"github.com/stretchr/testify/assert"
 )
 

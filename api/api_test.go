@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rchamarthy/zebra"
-	"github.com/rchamarthy/zebra/api"
-	"github.com/rchamarthy/zebra/network"
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/api"
+	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 	"gojini.dev/web"
 )
