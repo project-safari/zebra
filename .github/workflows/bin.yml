@@ -5,6 +5,9 @@ on:
   pull_request:
     branches:
       - main
+  release:
+    types:
+      - published
 
 name: bin
 jobs:
