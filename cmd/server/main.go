@@ -40,8 +40,8 @@ func main() {
 			s, _ := os.Getwd()
 
 			return s
-		}(), "zebra-server.json"),
-		"config file (default: $PWD/zebra-server.json",
+		}(), "server.json"),
+		"config file (default: $PWD/server.json",
 	)
 
 	if err := rootCmd.Execute(); err != nil {
