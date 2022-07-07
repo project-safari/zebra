@@ -136,6 +136,17 @@ func TestGetResourcesByID(t *testing.T) {
 	assert.Equal(resources, string(body))
 	assert.Nil(resp.Body.Close())
 
+	//GET noResources
+	resp, err = http.Get(fmt.Sprintf("http://%s?id=0100000002", cfg.Address))
+	assert.True(err == nil && resp != nil)
+
+	body, err = ioutil.ReadAll(resp.Body)
+	assert.Nil(err)
+
+	assert.NotEqual(noResources, string(body))
+	assert.Nil(resp.Body.Close())
+
+	//done
 	assert.Nil(server.Stop(ctx, nil))
 }
 
@@ -208,6 +219,8 @@ func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
 	}()
 	time.Sleep(time.Second)
 
+	//otherResources
+
 	resp, err := http.Get(fmt.Sprintf("http://%s?property=Type-in-VLANPool,IPAddressPool", cfg.Address))
 	assert.True(err == nil && resp != nil)
 
@@ -216,6 +229,8 @@ func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
 
 	assert.True(string(body) == resources || string(body) == otherResources)
 	assert.Nil(resp.Body.Close())
+
+	//noResources
 
 	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-notin-VLANPool,IPAddressPool", cfg.Address))
 	assert.True(err == nil && resp != nil)
