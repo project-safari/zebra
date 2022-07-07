@@ -5,11 +5,13 @@ go 1.18
 require (
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zerologr v1.2.2
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.7.1
 	gojini.dev/config v0.0.1
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 )
 
 require (
