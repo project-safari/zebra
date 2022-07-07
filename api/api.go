@@ -14,7 +14,7 @@ import (
 type ResourceAPI struct {
 	factory    zebra.ResourceFactory
 	resStore   *store.FileStore
-	queryStore *query.QueryStore
+	QueryStore *query.QueryStore
 }
 
 var ErrNumArgs = errors.New("wrong number of args")
@@ -23,7 +23,7 @@ func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
 		factory:    factory,
 		resStore:   nil,
-		queryStore: nil,
+		QueryStore: nil,
 	}
 }
 
@@ -40,9 +40,9 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 		return err
 	}
 
-	api.queryStore = query.NewQueryStore(resMap)
+	api.QueryStore = query.NewQueryStore(resMap)
 
-	if err = api.queryStore.Initialize(); err != nil {
+	if err = api.QueryStore.Initialize(); err != nil {
 		return err
 	}
 
@@ -50,11 +50,13 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 }
 
 func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
-	results := api.queryStore.Query()
+	results := api.QueryStore.Query()
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -65,11 +67,13 @@ func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
 func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Request) {
 	uuids := strings.Split(req.URL.Query().Get("id"), ",")
 
-	results := api.queryStore.QueryUUID(uuids)
+	results := api.QueryStore.QueryUUID(uuids)
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -80,11 +84,13 @@ func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Reques
 func (api *ResourceAPI) GetResourcesByType(w http.ResponseWriter, req *http.Request) {
 	resTypes := strings.Split(req.URL.Query().Get("type"), ",")
 
-	results := api.queryStore.QueryType(resTypes)
+	results := api.QueryStore.QueryType(resTypes)
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -100,7 +106,7 @@ func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.
 		return
 	}
 
-	results, err := api.queryStore.QueryProperty(query)
+	results, err := api.QueryStore.QueryProperty(query)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
@@ -109,7 +115,9 @@ func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -125,16 +133,18 @@ func (api *ResourceAPI) GetResourcesByLabel(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	results, err := api.queryStore.QueryLabel(query)
+	results, err := api.QueryStore.QueryLabel(query)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 
 		return
 	}
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
