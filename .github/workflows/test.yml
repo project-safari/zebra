@@ -6,9 +6,9 @@ on:
     branches:
       - main
 
-name: test
+name: covtest
 jobs:
-  test:
+  covtest:
     name: Test
     runs-on: ubuntu-latest
     steps:
@@ -20,9 +20,11 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v1
 
-      - name: Run test
+      - name: Run test and coverage
         timeout-minutes: 30
-        run: |
-          cd $GITHUB_WORKSPACE && make test
-      - name: Upload code coverage
-        uses: codecov/codecov-action@v2
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_REPORTED_ID }}
+        with:
+          coverageCommand: make test
+          coverageLocations: ${{github.workspace}}/coverage.txt:gocov
