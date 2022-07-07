@@ -54,6 +54,9 @@ func TestUser(t *testing.T) {
 	assert.NotNil(god.Validate(ctx))
 
 	god.Role = admin
+	assert.NotNil(god.Validate(ctx))
+
+	god.PasswordHash = auth.HashPassword("youhaveachoice")
 	assert.Nil(god.Validate(ctx))
 
 	luciferKey, err := auth.Generate()
@@ -66,6 +69,7 @@ func TestUser(t *testing.T) {
 	lucifer.Type = userType
 	lucifer.Key = luciferKey
 	lucifer.Role = writer
+	lucifer.PasswordHash = auth.HashPassword("youwillbetempted")
 
 	adamKey, err := auth.Generate()
 	assert.Nil(err)
@@ -77,6 +81,7 @@ func TestUser(t *testing.T) {
 	adam.Type = userType
 	adam.Key = adamKey
 	adam.Role = user
+	adam.PasswordHash = auth.HashPassword("iloveeve")
 
 	eveKey, err := auth.Generate()
 	assert.Nil(err)
@@ -88,13 +93,16 @@ func TestUser(t *testing.T) {
 	eve.Type = userType
 	eve.Key = eveKey
 	eve.Role = user
+	eve.PasswordHash = auth.HashPassword("iloveadam")
 
 	token, err := godKey.Sign([]byte(auth.SharedSecret))
 	assert.Nil(err)
 	assert.NotEmpty(token)
 
 	assert.Nil(god.Authenticate(string(token)))
+	assert.Nil(god.AuthenticatePassword("youhaveachoice"))
 	assert.NotNil(lucifer.Authenticate(string(token)))
+	assert.NotNil(lucifer.AuthenticatePassword("youhaveachoice"))
 
 	assert.True(god.Create("universe"))
 	assert.True(god.Read("universe"))
