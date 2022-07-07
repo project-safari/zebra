@@ -25,4 +25,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE && make test
       - name: Upload code coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          flags: unittests
