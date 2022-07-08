@@ -1,5 +1,13 @@
 package zebra
 
+import "errors"
+
+var (
+	ErrCreateExists  = errors.New("called create on a resource that already exists")
+	ErrUpdateNoExist = errors.New("called update on a resource that does not exist")
+	ErrNotFound      = errors.New("resource not found in store")
+)
+
 // Store interface requires basic store functionalities.
 type Store interface {
 	Initialize() error
