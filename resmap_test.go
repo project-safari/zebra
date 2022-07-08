@@ -126,6 +126,8 @@ func TestCopyResourceMap(t *testing.T) {
 	resB := zebra.NewResourceMap(nil)
 	assert.NotNil(resB)
 
+	zebra.CopyResourceMap(resB, nil)
+
 	zebra.CopyResourceMap(resB, resA)
 	assert.True(len(resB.Resources) == 1)
 	assert.True(len(resB.Resources["IPAddressPool"].Resources) == 1)

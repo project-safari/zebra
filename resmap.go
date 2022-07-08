@@ -117,6 +117,10 @@ func NewResourceMap(f ResourceFactory) *ResourceMap {
 }
 
 func CopyResourceMap(dest *ResourceMap, src *ResourceMap) {
+	if dest == nil || src == nil {
+		return
+	}
+
 	dest.factory = src.factory
 	dest.Resources = make(map[string]*ResourceList, len(src.Resources))
 
