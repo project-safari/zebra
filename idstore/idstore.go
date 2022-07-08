@@ -1,4 +1,4 @@
-package resourcestore
+package idstore
 
 import (
 	"context"
@@ -7,15 +7,15 @@ import (
 	"github.com/project-safari/zebra"
 )
 
-type ResourceStore struct {
+type IDStore struct {
 	lock      sync.RWMutex
 	factory   zebra.ResourceFactory
 	resources map[string]zebra.Resource
 }
 
 // Return new resource store pointer given resource map.
-func NewResourceStore(resources *zebra.ResourceMap) *ResourceStore {
-	rs := &ResourceStore{
+func NewIDStore(resources *zebra.ResourceMap) *IDStore {
+	ids := &IDStore{
 		lock:    sync.RWMutex{},
 		factory: resources.GetFactory(),
 		resources: func() map[string]zebra.Resource {
@@ -30,39 +30,39 @@ func NewResourceStore(resources *zebra.ResourceMap) *ResourceStore {
 		}(),
 	}
 
-	return rs
+	return ids
 }
 
-func (rs *ResourceStore) Initialize() error {
+func (ids *IDStore) Initialize() error {
 	return nil
 }
 
-func (rs *ResourceStore) Wipe() error {
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+func (ids *IDStore) Wipe() error {
+	ids.lock.Lock()
+	defer ids.lock.Unlock()
 
-	rs.resources = nil
+	ids.resources = nil
 
 	return nil
 }
 
-func (rs *ResourceStore) Clear() error {
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+func (ids *IDStore) Clear() error {
+	ids.lock.Lock()
+	defer ids.lock.Unlock()
 
-	rs.resources = make(map[string]zebra.Resource)
+	ids.resources = make(map[string]zebra.Resource)
 
 	return nil
 }
 
 // Return all resources in a ResourceMap with UUID key and res in list val.
-func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
-	rs.lock.RLock()
-	defer rs.lock.RUnlock()
+func (ids *IDStore) Load() (*zebra.ResourceMap, error) {
+	ids.lock.RLock()
+	defer ids.lock.RUnlock()
 
-	resMap := zebra.NewResourceMap(rs.factory)
+	resMap := zebra.NewResourceMap(ids.factory)
 
-	for key, val := range rs.resources {
+	for key, val := range ids.resources {
 		resMap.Add(val, key)
 	}
 
@@ -70,76 +70,76 @@ func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
 }
 
 // Create a resource. If a resource with this ID already exists, return error.
-func (rs *ResourceStore) Create(res zebra.Resource) error {
+func (ids *IDStore) Create(res zebra.Resource) error {
 	if err := res.Validate(context.Background()); err != nil {
 		return err
 	}
 
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+	ids.lock.Lock()
+	defer ids.lock.Unlock()
 
-	return rs.create(res)
+	return ids.create(res)
 }
 
 // Should not be called without holding the write lock.
-func (rs *ResourceStore) create(res zebra.Resource) error {
+func (ids *IDStore) create(res zebra.Resource) error {
 	// Check if resource already exists
-	if _, err := rs.find(res.GetID()); err == nil {
+	if _, err := ids.find(res.GetID()); err == nil {
 		return zebra.ErrCreateExists
 	}
 
-	rs.resources[res.GetID()] = res
+	ids.resources[res.GetID()] = res
 
 	return nil
 }
 
 // Update a resource. Return error if resource does not exist.
-func (rs *ResourceStore) Update(res zebra.Resource) error {
+func (ids *IDStore) Update(res zebra.Resource) error {
 	if err := res.Validate(context.Background()); err != nil {
 		return err
 	}
 
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+	ids.lock.Lock()
+	defer ids.lock.Unlock()
 
-	oldRes, err := rs.find(res.GetID())
+	oldRes, err := ids.find(res.GetID())
 	// If resource does not exist, return error.
 	if err != nil {
 		return zebra.ErrUpdateNoExist
 	}
 
-	_ = rs.delete(oldRes)
+	_ = ids.delete(oldRes)
 
-	_ = rs.create(res)
+	_ = ids.create(res)
 
 	return nil
 }
 
 // Delete a resource.
-func (rs *ResourceStore) Delete(res zebra.Resource) error {
+func (ids *IDStore) Delete(res zebra.Resource) error {
 	if err := res.Validate(context.Background()); err != nil {
 		return err
 	}
 
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+	ids.lock.Lock()
+	defer ids.lock.Unlock()
 
-	return rs.delete(res)
+	return ids.delete(res)
 }
 
 // Should not be called without holding the write lock.
-func (rs *ResourceStore) delete(res zebra.Resource) error {
-	delete(rs.resources, res.GetID())
+func (ids *IDStore) delete(res zebra.Resource) error {
+	delete(ids.resources, res.GetID())
 
 	return nil
 }
 
 // Return all resources of given UUIDs in a ResourceMap.
-func (rs *ResourceStore) Query(ids []string) *zebra.ResourceMap {
-	retMap := zebra.NewResourceMap(rs.factory)
+func (ids *IDStore) Query(uuids []string) *zebra.ResourceMap {
+	retMap := zebra.NewResourceMap(ids.factory)
 
-	for _, id := range ids {
-		res, ok := rs.resources[id]
+	for _, id := range uuids {
+		res, ok := ids.resources[id]
 		if !ok {
 			return nil
 		}
@@ -150,10 +150,10 @@ func (rs *ResourceStore) Query(ids []string) *zebra.ResourceMap {
 	return retMap
 }
 
-// Find given resource in ResourceStore. If not found, return nil and error.
+// Find given resource in IDStore. If not found, return nil and error.
 // If found, return resource and nil.
-func (rs *ResourceStore) find(resID string) (zebra.Resource, error) {
-	res, ok := rs.resources[resID]
+func (ids *IDStore) find(resID string) (zebra.Resource, error) {
+	res, ok := ids.resources[resID]
 	if !ok {
 		return nil, zebra.ErrNotFound
 	}

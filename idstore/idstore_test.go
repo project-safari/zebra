@@ -1,20 +1,20 @@
-package resourcestore_test
+package idstore_test
 
 import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/idstore"
 	"github.com/project-safari/zebra/network"
-	"github.com/project-safari/zebra/resourcestore"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewResourceStore(t *testing.T) {
+func TestNewIDStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	resMap := zebra.NewResourceMap(nil)
-	assert.NotNil(resourcestore.NewResourceStore(resMap))
+	assert.NotNil(idstore.NewIDStore(resMap))
 }
 
 func TestInitialize(t *testing.T) {
@@ -23,7 +23,7 @@ func TestInitialize(t *testing.T) {
 
 	resMap := zebra.NewResourceMap(nil)
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	assert.Nil(rs.Initialize())
@@ -35,7 +35,7 @@ func TestWipe(t *testing.T) {
 
 	resMap := zebra.NewResourceMap(nil)
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	assert.Nil(rs.Wipe())
@@ -69,7 +69,7 @@ func TestClear(t *testing.T) {
 	resMap.Add(vlan1, "VLANPool")
 	resMap.Add(vlan2, "VLANPool")
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	resources, err := rs.Load()
@@ -111,7 +111,7 @@ func TestLoad(t *testing.T) {
 	resMap.Add(vlan1, "VLANPool")
 	resMap.Add(vlan2, "VLANPool")
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	resources, err := rs.Load()
@@ -147,7 +147,7 @@ func TestCreate(t *testing.T) {
 
 	resMap := zebra.NewResourceMap(nil)
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	// Create new resource, should pass
@@ -194,7 +194,7 @@ func TestUpdate(t *testing.T) {
 
 	resMap := zebra.NewResourceMap(nil)
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	// Create new resource, should pass
@@ -236,7 +236,7 @@ func TestDelete(t *testing.T) {
 
 	resMap := zebra.NewResourceMap(nil)
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	// Create new resource, should pass
@@ -280,7 +280,7 @@ func TestQuery(t *testing.T) {
 	resMap.Add(vlan1, "VLANPool")
 	resMap.Add(vlan2, "VLANPool")
 
-	rs := resourcestore.NewResourceStore(resMap)
+	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
 
 	resources := rs.Query([]string{})

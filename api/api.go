@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/filestore"
 	"github.com/project-safari/zebra/query"
-	"github.com/project-safari/zebra/store"
 )
 
 type ResourceAPI struct {
 	factory    zebra.ResourceFactory
-	resStore   *store.FileStore
+	resStore   *filestore.FileStore
 	QueryStore *query.QueryStore
 }
 
@@ -29,7 +29,7 @@ func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 
 // Set up store and query store given storage root.
 func (api *ResourceAPI) Initialize(storageRoot string) error {
-	api.resStore = store.NewFileStore(storageRoot, api.factory)
+	api.resStore = filestore.NewFileStore(storageRoot, api.factory)
 
 	if err := api.resStore.Initialize(); err != nil {
 		return err
