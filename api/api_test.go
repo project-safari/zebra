@@ -202,6 +202,7 @@ func TestGetResourcesByType(t *testing.T) {
 	assert.Nil(server.Stop(ctx, nil))
 }
 
+
 func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
