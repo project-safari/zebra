@@ -147,6 +147,8 @@ func TestGetResourcesByID(t *testing.T) {
 	body, err = ioutil.ReadAll(resp.Body)
 	assert.Nil(err)
 
+	assert.Equal(noResources, "{}")
+
 	assert.NotEqual(noResources, string(body))
 	assert.Nil(resp.Body.Close())
 
