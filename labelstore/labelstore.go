@@ -138,7 +138,7 @@ func (ls *LabelStore) Delete(res zebra.Resource) error {
 		}
 	}
 
-	ls.uuids[res.GetID()] = nil
+	delete(ls.uuids, res.GetID())
 
 	return nil
 }

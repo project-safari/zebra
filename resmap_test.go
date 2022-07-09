@@ -38,10 +38,10 @@ func TestCopyResourceList(t *testing.T) {
 
 	resB := zebra.NewResourceList(nil)
 	assert.NotNil(resB)
-	assert.True(len(resB.Resources) == 0)
+	assert.Empty(len(resB.Resources))
 
 	zebra.CopyResourceList(resB, resA)
-	assert.True(len(resB.Resources) == 1)
+	assert.Equal(1, len(resB.Resources))
 }
 
 func TestListMarshalUnmarshal(t *testing.T) {
@@ -88,7 +88,7 @@ func TestListMarshalUnmarshal(t *testing.T) {
 
 	err = resB.UnmarshalJSON(bytes)
 	assert.Nil(err)
-	assert.True(len(resB.Resources) == 1)
+	assert.Equal(1, len(resB.Resources))
 }
 
 func TestErrorMarshalUnmarshal(t *testing.T) {
@@ -129,8 +129,8 @@ func TestCopyResourceMap(t *testing.T) {
 	zebra.CopyResourceMap(resB, nil)
 
 	zebra.CopyResourceMap(resB, resA)
-	assert.True(len(resB.Resources) == 1)
-	assert.True(len(resB.Resources["IPAddressPool"].Resources) == 1)
+	assert.Equal(1, len(resB.Resources))
+	assert.Equal(1, len(resB.Resources["IPAddressPool"].Resources))
 }
 
 func TestGetFactory(t *testing.T) {
@@ -178,6 +178,8 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(len(resA.Resources["Switch"].Resources) == 1)
 
 	resA.Delete(switch1, "Switch")
+
+	resA.Delete(switch1, "invalid_key")
 
 	_, ok := resA.Resources["Switch"]
 	assert.NotNil(ok)

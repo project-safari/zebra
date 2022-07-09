@@ -320,6 +320,10 @@ func (qs *QueryStore) labelMatch(query Query, inVals bool) (*zebra.ResourceMap, 
 
 	if inVals {
 		for _, val := range query.Values {
+			if qs.rLabel[query.Key] == nil || qs.rLabel[query.Key].Resources[val] == nil {
+				continue
+			}
+
 			for _, res := range qs.rLabel[query.Key].Resources[val].Resources {
 				results.Add(res, res.GetType())
 			}

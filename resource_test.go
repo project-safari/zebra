@@ -29,8 +29,8 @@ func TestBaseResource(t *testing.T) {
 	res.Type = "BaseResource"
 	assert.Nil(res.Validate(ctx))
 
-	assert.True(res.GetID() == res.ID)
-	assert.True(res.GetType() == res.Type)
+	assert.Equal(res.ID, res.GetID())
+	assert.Equal(res.Type, res.GetType())
 	assert.True(res.GetLabels().HasKey("key"))
 }
 
@@ -53,11 +53,11 @@ func TestNamedResource(t *testing.T) {
 
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
-	assert.True(res.GetID() == res.ID)
+	assert.Equal(res.ID, res.GetID())
 
 	res.Type = "NamedResource"
 	assert.NotNil(res.Validate(ctx))
-	assert.True(res.GetType() == res.Type)
+	assert.Equal(res.Type, res.GetType())
 
 	res.Name = "jasmine"
 	assert.Nil(res.Validate(ctx))

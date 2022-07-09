@@ -45,25 +45,8 @@ func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	vlan1 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 43,
-		RangeEnd:   47,
-	}
-
-	vlan2 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100002",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 18,
-		RangeEnd:   30,
-	}
+	vlan1 := getVLAN()
+	vlan2 := getVLAN()
 
 	resMap := zebra.NewResourceMap(nil)
 	resMap.Add(vlan1, "VLANPool")
@@ -74,38 +57,21 @@ func TestClear(t *testing.T) {
 
 	resources, err := rs.Load()
 	assert.Nil(err)
-	assert.True(len(resources.Resources) == 2)
+	assert.Equal(2, len(resources.Resources))
 
 	assert.Nil(rs.Clear())
 
 	resources, err = rs.Load()
 	assert.Nil(err)
-	assert.True(len(resources.Resources) == 0)
+	assert.Empty(len(resources.Resources))
 }
 
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	vlan1 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 43,
-		RangeEnd:   47,
-	}
-
-	vlan2 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100002",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 18,
-		RangeEnd:   30,
-	}
+	vlan1 := getVLAN()
+	vlan2 := getVLAN()
 
 	resMap := zebra.NewResourceMap(nil)
 	resMap.Add(vlan1, "VLANPool")
@@ -116,34 +82,17 @@ func TestLoad(t *testing.T) {
 
 	resources, err := rs.Load()
 	assert.Nil(err)
-	assert.True(len(resources.Resources) == 2)
-	assert.True(len(resources.Resources["0100001"].Resources) == 1)
-	assert.True(len(resources.Resources["0100002"].Resources) == 1)
+	assert.Equal(2, len(resources.Resources))
+	assert.Equal(1, len(resources.Resources[vlan1.ID].Resources))
+	assert.Equal(1, len(resources.Resources[vlan2.ID].Resources))
 }
 
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	vlan1 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 43,
-		RangeEnd:   47,
-	}
-
-	vlan2 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100002",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 18,
-		RangeEnd:   30,
-	}
+	vlan1 := getVLAN()
+	vlan2 := getVLAN()
 
 	resMap := zebra.NewResourceMap(nil)
 
@@ -155,81 +104,22 @@ func TestCreate(t *testing.T) {
 
 	resources, err := rs.Load()
 	assert.Nil(err)
-	assert.True(len(resources.Resources) == 1)
-	assert.True(len(resources.Resources["0100001"].Resources) == 1)
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(1, len(resources.Resources[vlan1.ID].Resources))
 
 	// Create another new resource, should pass
 	assert.Nil(rs.Create(vlan2))
 
-	// Create duplicate resource, should fail
-	assert.NotNil(rs.Create(vlan1))
-}
-
-func TestUpdate(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	vlan1 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 43,
-		RangeEnd:   47,
-	}
-
-	vlan2 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100002",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 18,
-		RangeEnd:   30,
-	}
-
-	resMap := zebra.NewResourceMap(nil)
-
-	rs := idstore.NewIDStore(resMap)
-	assert.NotNil(rs)
-
-	// Create new resource, should pass
+	// Create duplicate resource, should update
 	assert.Nil(rs.Create(vlan1))
-
-	// Try to update, should pass
-	assert.Nil(rs.Update(vlan1))
-
-	// Try to update non-existent resource, should fail
-	assert.NotNil(rs.Update(vlan2))
-
-	// Try to update an invalid resource, should fail
-	assert.NotNil(rs.Update(new(network.IPAddressPool)))
 }
 
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	vlan1 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 43,
-		RangeEnd:   47,
-	}
-
-	vlan2 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100002",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 18,
-		RangeEnd:   30,
-	}
+	vlan1 := getVLAN()
+	vlan2 := getVLAN()
 
 	resMap := zebra.NewResourceMap(nil)
 
@@ -250,25 +140,9 @@ func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	vlan1 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 43,
-		RangeEnd:   47,
-	}
+	vlan1 := getVLAN()
 
-	vlan2 := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100002",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 18,
-		RangeEnd:   30,
-	}
+	vlan2 := getVLAN()
 
 	resMap := zebra.NewResourceMap(nil)
 	resMap.Add(vlan1, "VLANPool")
@@ -278,13 +152,21 @@ func TestQuery(t *testing.T) {
 	assert.NotNil(rs)
 
 	resources := rs.Query([]string{})
-	assert.True(len(resources.Resources) == 0)
+	assert.Empty(len(resources.Resources))
 
-	resources = rs.Query([]string{"0100001"})
-	assert.True(len(resources.Resources) == 1)
-	assert.True(len(resources.Resources["VLANPool"].Resources) == 1)
+	resources = rs.Query([]string{vlan1.ID})
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
 
-	resources = rs.Query([]string{"0100001", "0100002"})
-	assert.True(len(resources.Resources) == 1)
-	assert.True(len(resources.Resources["VLANPool"].Resources) == 2)
+	resources = rs.Query([]string{vlan1.ID, vlan2.ID})
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(2, len(resources.Resources["VLANPool"].Resources))
+}
+
+func getVLAN() *network.VLANPool {
+	return &network.VLANPool{
+		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		RangeStart:   0,
+		RangeEnd:     1,
+	}
 }

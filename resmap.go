@@ -143,6 +143,10 @@ func (r *ResourceMap) Add(res Resource, key string) {
 }
 
 func (r *ResourceMap) Delete(res Resource, key string) {
+	if r.Resources[key] == nil {
+		return
+	}
+
 	listLen := len(r.Resources[key].Resources)
 
 	for i, val := range r.Resources[key].Resources {
