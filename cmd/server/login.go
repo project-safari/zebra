@@ -9,11 +9,11 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/query"
 )
 
-func handleLogin(ctx context.Context, store *query.QueryStore, authKey string) httprouter.Handle {
+func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		log := logr.FromContextOrDiscard(ctx)
 		userData := &struct {
@@ -67,7 +67,7 @@ func makeCookie(jwt string) *http.Cookie {
 	return cookie
 }
 
-func findUser(store *query.QueryStore, userName string) *auth.User {
+func findUser(store zebra.Store, userName string) *auth.User {
 	resMap := store.QueryType([]string{"User"})
 	users := resMap.Resources["User"]
 

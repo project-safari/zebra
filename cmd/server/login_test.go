@@ -8,11 +8,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/query"
+	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,9 +24,13 @@ const (
 
 func TestFindUser(t *testing.T) {
 	t.Parallel()
-
 	assert := assert.New(t)
-	store := makeQueryStore(assert, makeUser(assert))
+
+	root := "teststore1"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
+	store := makeQueryStore(root, assert, makeUser(assert))
 
 	assert.Nil(findUser(store, "ali"))
 	assert.NotNil(findUser(store, "jini"))
@@ -55,14 +60,16 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	return jini
 }
 
-func makeQueryStore(assert *assert.Assertions, user *auth.User) *query.QueryStore {
+func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zebra.Store {
 	factory := initTypes()
 	assert.NotNil(factory)
 
-	users := zebra.NewResourceMap(factory)
-	users.Add(user, "User")
+	store := store.NewResourceStore(root, factory)
+	if store.Initialize() != nil || store.Create(user) != nil {
+		return nil
+	}
 
-	return query.NewQueryStore(users)
+	return store
 }
 
 func makeRequest(assert *assert.Assertions, user string, password string) *http.Request {
@@ -78,11 +85,14 @@ func makeRequest(assert *assert.Assertions, user string, password string) *http.
 
 func TestBadUser(t *testing.T) {
 	t.Parallel()
-
 	assert := assert.New(t)
 
+	root := "teststore2"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
 	req := makeRequest(assert, "ali", "aliOfAgrabha")
-	store := makeQueryStore(assert, makeUser(assert))
+	store := makeQueryStore(root, assert, makeUser(assert))
 
 	h := handleLogin(context.Background(), store, authKey)
 	rr := httptest.NewRecorder()
@@ -101,11 +111,14 @@ func TestBadUser(t *testing.T) {
 
 func TestBadLogin(t *testing.T) {
 	t.Parallel()
-
 	assert := assert.New(t)
 
+	root := "teststore3"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
 	req := makeRequest(assert, "jini", "aliOfAgrabha")
-	store := makeQueryStore(assert, makeUser(assert))
+	store := makeQueryStore(root, assert, makeUser(assert))
 	h := handleLogin(context.Background(), store, authKey)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -118,11 +131,14 @@ func TestBadLogin(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 	t.Parallel()
-
 	assert := assert.New(t)
 
+	root := "teststore4"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
 	req := makeRequest(assert, "jini", jiniWords)
-	store := makeQueryStore(assert, makeUser(assert))
+	store := makeQueryStore(root, assert, makeUser(assert))
 	h := handleLogin(setupLogger(nil), store, authKey)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

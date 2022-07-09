@@ -82,7 +82,9 @@ func (ts *TypeStore) Query(types []string) *zebra.ResourceMap {
 	retMap := zebra.NewResourceMap(factory)
 
 	for _, t := range types {
-		retMap.Resources[t] = ts.resources.Resources[t]
+		if ts.resources.Resources[t] != nil {
+			retMap.Resources[t] = ts.resources.Resources[t]
+		}
 	}
 
 	return retMap

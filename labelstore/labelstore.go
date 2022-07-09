@@ -4,23 +4,6 @@ import (
 	"github.com/project-safari/zebra"
 )
 
-type Operator uint8
-
-// Constants defined for QueryOperator type.
-const (
-	MatchEqual Operator = iota
-	MatchNotEqual
-	MatchIn
-	MatchNotIn
-)
-
-// Command struct for label queries.
-type Query struct {
-	Op     Operator
-	Key    string
-	Values []string
-}
-
 type LabelStore struct {
 	factory   zebra.ResourceFactory
 	uuids     map[string]zebra.Resource
@@ -30,8 +13,18 @@ type LabelStore struct {
 // Return new label store pointer given resource map.
 func NewLabelStore(resources *zebra.ResourceMap) *LabelStore {
 	labelstore := &LabelStore{
-		factory:   resources.GetFactory(),
-		uuids:     make(map[string]zebra.Resource),
+		factory: resources.GetFactory(),
+		uuids: func() map[string]zebra.Resource {
+			ret := make(map[string]zebra.Resource)
+
+			for _, l := range resources.Resources {
+				for _, res := range l.Resources {
+					ret[res.GetID()] = res
+				}
+			}
+
+			return ret
+		}(),
 		resources: makeLabelMap(resources),
 	}
 
@@ -78,13 +71,10 @@ func (ls *LabelStore) Clear() error {
 func (ls *LabelStore) Load() (*zebra.ResourceMap, error) {
 	retMap := zebra.NewResourceMap(ls.factory)
 
-	for label, valMap := range ls.resources {
-		for val, resList := range valMap.Resources {
-			list := zebra.NewResourceList(nil)
+	for _, res := range ls.uuids {
+		for label, val := range res.GetLabels() {
 			key := label + " = " + val
-
-			zebra.CopyResourceList(list, resList)
-			retMap.Resources[key] = list
+			retMap.Add(res, key)
 		}
 	}
 
@@ -144,30 +134,30 @@ func (ls *LabelStore) Delete(res zebra.Resource) error {
 }
 
 // Return all resources of given label - label value pairs in a ResourceMap.
-func (ls *LabelStore) Query(query Query) *zebra.ResourceMap {
+func (ls *LabelStore) Query(query zebra.Query) (*zebra.ResourceMap, error) {
 	switch query.Op {
-	case MatchEqual:
+	case zebra.MatchEqual:
 		if len(query.Values) != 1 {
-			return nil
+			return nil, zebra.ErrInvalidQuery
 		}
 
 		fallthrough
-	case MatchIn:
-		return ls.labelMatch(query, true)
-	case MatchNotEqual:
+	case zebra.MatchIn:
+		return ls.labelMatch(query, true), nil
+	case zebra.MatchNotEqual:
 		if len(query.Values) != 1 {
-			return nil
+			return nil, zebra.ErrInvalidQuery
 		}
 
 		fallthrough
-	case MatchNotIn:
-		return ls.labelMatch(query, false)
+	case zebra.MatchNotIn:
+		return ls.labelMatch(query, false), nil
 	default:
-		return nil
+		return nil, zebra.ErrInvalidQuery
 	}
 }
 
-func (ls *LabelStore) labelMatch(query Query, inVals bool) *zebra.ResourceMap {
+func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.ResourceMap {
 	results := zebra.NewResourceMap(ls.factory)
 
 	if inVals {

@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/query"
 )
 
-func handleRefresh(ctx context.Context, store *query.QueryStore, authKey string) httprouter.Handle {
+func handleRefresh(ctx context.Context, store zebra.Store, authKey string) httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		log := logr.FromContextOrDiscard(ctx)
 

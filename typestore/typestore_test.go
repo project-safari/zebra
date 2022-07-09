@@ -25,7 +25,6 @@ func TestInitialize(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
-
 	assert.Nil(ts.Initialize())
 }
 
@@ -37,6 +36,7 @@ func TestWipe(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
+	assert.Nil(ts.Initialize())
 
 	assert.Nil(ts.Wipe())
 }
@@ -51,6 +51,7 @@ func TestClear(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
+	assert.Nil(ts.Initialize())
 
 	resources, err := ts.Load()
 	assert.Nil(err)
@@ -73,6 +74,7 @@ func TestLoad(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
+	assert.Nil(ts.Initialize())
 
 	resources, err := ts.Load()
 	assert.Nil(err)
@@ -98,6 +100,7 @@ func TestCreate(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
+	assert.Nil(ts.Initialize())
 
 	// Create new resource, should pass
 	assert.Nil(ts.Create(vlan1))
@@ -135,6 +138,7 @@ func TestDelete(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
+	assert.Nil(ts.Initialize())
 
 	// Create new resource, should pass
 	assert.Nil(ts.Create(vlan1))
@@ -156,6 +160,7 @@ func TestQuery(t *testing.T) {
 
 	ts := typestore.NewTypeStore(resMap)
 	assert.NotNil(ts)
+	assert.Nil(ts.Initialize())
 
 	resources := ts.Query([]string{})
 	assert.Empty(len(resources.Resources))

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"reflect"
 	"sync"
 
 	"github.com/project-safari/zebra"
@@ -12,31 +13,35 @@ import (
 )
 
 type ResourceStore struct {
-	lock sync.RWMutex
-	fs   *filestore.FileStore
-	ids  *idstore.IDStore
-	ls   *labelstore.LabelStore
-	ts   *typestore.TypeStore
+	lock        sync.RWMutex
+	StorageRoot string
+	Factory     zebra.ResourceFactory
+	fs          *filestore.FileStore
+	ids         *idstore.IDStore
+	ls          *labelstore.LabelStore
+	ts          *typestore.TypeStore
 }
 
 func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore {
 	return &ResourceStore{
-		lock: sync.RWMutex{},
-		fs: func() *filestore.FileStore {
-			fs := filestore.NewFileStore(root, factory)
-			_ = fs.Initialize()
-
-			return fs
-		}(),
-		ids: nil,
-		ls:  nil,
-		ts:  nil,
+		lock:        sync.RWMutex{},
+		StorageRoot: root,
+		Factory:     factory,
+		fs:          nil,
+		ids:         nil,
+		ls:          nil,
+		ts:          nil,
 	}
 }
 
 func (rs *ResourceStore) Initialize() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
+
+	rs.fs = filestore.NewFileStore(rs.StorageRoot, rs.Factory)
+	if err := rs.fs.Initialize(); err != nil {
+		return err
+	}
 
 	resources, err := rs.fs.Load()
 	if err != nil {
@@ -153,4 +158,127 @@ func (rs *ResourceStore) Delete(res zebra.Resource) error {
 	}
 
 	return nil
+}
+
+// Return all resources in a ResourceMap.
+func (rs *ResourceStore) Query() *zebra.ResourceMap {
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
+	resMap, err := rs.ts.Load()
+	if err != nil {
+		return nil
+	}
+
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
+	zebra.CopyResourceMap(retMap, resMap)
+
+	return retMap
+}
+
+// Return resources with matching UUIDs.
+func (rs *ResourceStore) QueryUUID(uuids []string) *zebra.ResourceMap {
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
+	resMap := rs.ids.Query(uuids)
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
+	zebra.CopyResourceMap(retMap, resMap)
+
+	return retMap
+}
+
+// Return resources with matching types.
+func (rs *ResourceStore) QueryType(types []string) *zebra.ResourceMap {
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
+	resMap := rs.ts.Query(types)
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
+	zebra.CopyResourceMap(retMap, resMap)
+
+	return retMap
+}
+
+// Return resources with matching label.
+func (rs *ResourceStore) QueryLabel(query zebra.Query) (*zebra.ResourceMap, error) {
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
+	resMap, err := rs.ls.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
+	zebra.CopyResourceMap(retMap, resMap)
+
+	return retMap, nil
+}
+
+// Return resources which match given property/value(s).
+// Naive search implementation, >= O(n) for n resources.
+func (rs *ResourceStore) QueryProperty(query zebra.Query) (*zebra.ResourceMap, error) {
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
+	switch query.Op {
+	case zebra.MatchEqual:
+		if len(query.Values) != 1 {
+			return nil, zebra.ErrInvalidQuery
+		}
+
+		fallthrough
+	case zebra.MatchIn:
+		return rs.propertyMatch(query, true)
+	case zebra.MatchNotEqual:
+		if len(query.Values) != 1 {
+			return nil, zebra.ErrInvalidQuery
+		}
+
+		fallthrough
+	case zebra.MatchNotIn:
+		return rs.propertyMatch(query, false)
+	default:
+		return nil, zebra.ErrInvalidQuery
+	}
+}
+
+func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.ResourceMap, error) {
+	resMap, err := rs.ts.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	retMap := zebra.NewResourceMap(rs.Factory)
+
+	for t, l := range resMap.Resources {
+		for _, res := range l.Resources {
+			val := reflect.ValueOf(res).Elem().FieldByName(query.Key).String()
+			inList := isIn(val, query.Values)
+
+			if inVals && inList {
+				retMap.Add(res, t)
+			} else if !inVals && !inList {
+				retMap.Add(res, t)
+			}
+		}
+	}
+
+	return retMap, nil
+}
+
+// Return if val is in string list.
+func isIn(val string, list []string) bool {
+	for _, v := range list {
+		if val == v {
+			return true
+		}
+	}
+
+	return false
 }

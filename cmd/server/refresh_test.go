@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
@@ -12,8 +13,11 @@ import (
 
 func TestRefresh(t *testing.T) {
 	t.Parallel()
-
 	assert := assert.New(t)
+
+	root := "teststore5"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
 
 	jini := makeUser(assert)
 	claims := auth.NewClaims("zebra", jini.Name, jini.Role)
@@ -22,7 +26,7 @@ func TestRefresh(t *testing.T) {
 	req := makeRequest(assert, "jini", jiniWords)
 	req.AddCookie(makeCookie(jwtStr))
 
-	store := makeQueryStore(assert, jini)
+	store := makeQueryStore(root, assert, jini)
 	h := handleRefresh(setupLogger(nil), store, authKey)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

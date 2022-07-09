@@ -20,8 +20,6 @@ func TestInitialize(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll("teststore") })
 
 	fs := filestore.NewFileStore("teststore", nil)
-
-	assert.Nil(fs.Initialize())
 	assert.Nil(fs.Initialize())
 }
 

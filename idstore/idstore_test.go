@@ -37,6 +37,7 @@ func TestWipe(t *testing.T) {
 
 	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
 	assert.Nil(rs.Wipe())
 }
@@ -54,6 +55,7 @@ func TestClear(t *testing.T) {
 
 	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
 	resources, err := rs.Load()
 	assert.Nil(err)
@@ -79,6 +81,7 @@ func TestLoad(t *testing.T) {
 
 	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
 	resources, err := rs.Load()
 	assert.Nil(err)
@@ -98,6 +101,7 @@ func TestCreate(t *testing.T) {
 
 	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
 	// Create new resource, should pass
 	assert.Nil(rs.Create(vlan1))
@@ -125,6 +129,7 @@ func TestDelete(t *testing.T) {
 
 	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
 	// Create new resource, should pass
 	assert.Nil(rs.Create(vlan1))
@@ -150,6 +155,7 @@ func TestQuery(t *testing.T) {
 
 	rs := idstore.NewIDStore(resMap)
 	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
 	resources := rs.Query([]string{})
 	assert.Empty(len(resources.Resources))
