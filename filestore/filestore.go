@@ -160,10 +160,6 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 // Store new object given storage root path and resource pointer.
 // If object already exists, return error.
 func (f *FileStore) Create(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -209,10 +205,6 @@ func (f *FileStore) create(res zebra.Resource) error {
 
 // Update existing object. If object does not exist, return error.
 func (f *FileStore) Update(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -229,10 +221,6 @@ func (f *FileStore) Update(res zebra.Resource) error {
 // Delete object given storage root path and UUID.
 // If object does not exist, do nothing.
 func (f *FileStore) Delete(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	f.lock.Lock()
 	defer f.lock.Unlock()
 

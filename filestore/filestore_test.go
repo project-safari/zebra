@@ -344,17 +344,17 @@ func TestBadCreate(t *testing.T) {
 	fs := filestore.NewFileStore("badtest2", nil)
 
 	assert.Nil(fs.Initialize())
-	assert.NotNil(fs.Create(new(network.VLANPool)))
 
 	resource := &network.VLANPool{
 		BaseResource: zebra.BaseResource{
-			ID:     "01",
+			ID:     "001",
 			Type:   "VLANPool",
 			Labels: nil,
 		},
 		RangeStart: 0,
 		RangeEnd:   10,
 	}
+	assert.Nil(fs.Create(resource))
 	assert.NotNil(fs.Create(resource))
 }
 
@@ -367,7 +367,17 @@ func TestBadUpdate(t *testing.T) {
 	fs := filestore.NewFileStore("badtest3", nil)
 
 	assert.Nil(fs.Initialize())
-	assert.NotNil(fs.Update(new(network.VLANPool)))
+
+	resource := &network.VLANPool{
+		BaseResource: zebra.BaseResource{
+			ID:     "001",
+			Type:   "VLANPool",
+			Labels: nil,
+		},
+		RangeStart: 0,
+		RangeEnd:   10,
+	}
+	assert.NotNil(fs.Update(resource))
 }
 
 func TestBadDelete(t *testing.T) {
@@ -389,7 +399,5 @@ func TestBadDelete(t *testing.T) {
 		RangeStart: 0,
 		RangeEnd:   10,
 	}
-
-	assert.NotNil(fs.Delete(new(network.VLANPool)))
 	assert.NotNil(fs.Delete(resource))
 }

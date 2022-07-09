@@ -163,9 +163,6 @@ func TestCreate(t *testing.T) {
 
 	// Create duplicate resource, should fail
 	assert.NotNil(rs.Create(vlan1))
-
-	// Create invalid resource, should fail
-	assert.NotNil(rs.Create(new(network.VLANPool)))
 }
 
 func TestUpdate(t *testing.T) {
@@ -247,9 +244,6 @@ func TestDelete(t *testing.T) {
 
 	// Try to delete non-existent resource, should pass anyways
 	assert.Nil(rs.Delete(vlan2))
-
-	// Try to delete invalid resource, should fail
-	assert.NotNil(rs.Delete(new(network.Switch)))
 }
 
 func TestQuery(t *testing.T) {

@@ -1,7 +1,6 @@
 package typestore
 
 import (
-	"context"
 	"sync"
 
 	"github.com/project-safari/zebra"
@@ -63,10 +62,6 @@ func (ts *TypeStore) Load() (*zebra.ResourceMap, error) {
 
 // Create a resource. If a resource with this ID already exists, return error.
 func (ts *TypeStore) Create(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 
@@ -87,10 +82,6 @@ func (ts *TypeStore) create(res zebra.Resource) error {
 
 // Update a resource. Return error if resource does not exist.
 func (ts *TypeStore) Update(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 
@@ -109,10 +100,6 @@ func (ts *TypeStore) Update(res zebra.Resource) error {
 
 // Delete a resource.
 func (ts *TypeStore) Delete(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 

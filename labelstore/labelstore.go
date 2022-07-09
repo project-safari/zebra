@@ -1,7 +1,6 @@
 package labelstore
 
 import (
-	"context"
 	"sync"
 
 	"github.com/project-safari/zebra"
@@ -107,10 +106,6 @@ func (ls *LabelStore) Load() (*zebra.ResourceMap, error) {
 
 // Create a resource. If a resource with this ID already exists, return error.
 func (ls *LabelStore) Create(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ls.lock.Lock()
 	defer ls.lock.Unlock()
 
@@ -139,10 +134,6 @@ func (ls *LabelStore) create(res zebra.Resource) error {
 
 // Update a resource. Return error if resource does not exist.
 func (ls *LabelStore) Update(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ls.lock.Lock()
 	defer ls.lock.Unlock()
 
@@ -161,10 +152,6 @@ func (ls *LabelStore) Update(res zebra.Resource) error {
 
 // Delete a resource.
 func (ls *LabelStore) Delete(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ls.lock.Lock()
 	defer ls.lock.Unlock()
 

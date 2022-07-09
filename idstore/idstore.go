@@ -1,7 +1,6 @@
 package idstore
 
 import (
-	"context"
 	"sync"
 
 	"github.com/project-safari/zebra"
@@ -71,10 +70,6 @@ func (ids *IDStore) Load() (*zebra.ResourceMap, error) {
 
 // Create a resource. If a resource with this ID already exists, return error.
 func (ids *IDStore) Create(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ids.lock.Lock()
 	defer ids.lock.Unlock()
 
@@ -95,10 +90,6 @@ func (ids *IDStore) create(res zebra.Resource) error {
 
 // Update a resource. Return error if resource does not exist.
 func (ids *IDStore) Update(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ids.lock.Lock()
 	defer ids.lock.Unlock()
 
@@ -117,10 +108,6 @@ func (ids *IDStore) Update(res zebra.Resource) error {
 
 // Delete a resource.
 func (ids *IDStore) Delete(res zebra.Resource) error {
-	if err := res.Validate(context.Background()); err != nil {
-		return err
-	}
-
 	ids.lock.Lock()
 	defer ids.lock.Unlock()
 
