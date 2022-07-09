@@ -35,6 +35,9 @@ func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore
 }
 
 func (rs *ResourceStore) Initialize() error {
+	rs.lock.Lock()
+	defer rs.lock.Unlock()
+
 	resources, err := rs.fs.Load()
 	if err != nil {
 		return err
@@ -48,6 +51,9 @@ func (rs *ResourceStore) Initialize() error {
 }
 
 func (rs *ResourceStore) Wipe() error {
+	rs.lock.Lock()
+	defer rs.lock.Unlock()
+
 	rs.fs = nil
 	rs.ids = nil
 	rs.ls = nil
@@ -57,16 +63,33 @@ func (rs *ResourceStore) Wipe() error {
 }
 
 func (rs *ResourceStore) Clear() error {
-	_ = rs.fs.Clear()
-	_ = rs.ids.Clear()
-	_ = rs.ls.Clear()
-	_ = rs.ts.Clear()
+	rs.lock.Lock()
+	defer rs.lock.Unlock()
+
+	if err := rs.fs.Clear(); err != nil {
+		return err
+	}
+
+	if err := rs.ids.Clear(); err != nil {
+		return err
+	}
+
+	if err := rs.ls.Clear(); err != nil {
+		return err
+	}
+
+	if err := rs.ts.Clear(); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // Return ResourceMap with resource type as key and list of resources as val.
 func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
 	return rs.ts.Load()
 }
 
@@ -94,37 +117,6 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	}
 
 	err = rs.ts.Create(res)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (rs *ResourceStore) Update(res zebra.Resource) error {
-	if res == nil || res.Validate(context.Background()) != nil {
-		return zebra.ErrInvalidResource
-	}
-
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
-
-	err := rs.fs.Update(res)
-	if err != nil {
-		return err
-	}
-
-	err = rs.ids.Update(res)
-	if err != nil {
-		return err
-	}
-
-	err = rs.ls.Update(res)
-	if err != nil {
-		return err
-	}
-
-	err = rs.ts.Update(res)
 	if err != nil {
 		return err
 	}

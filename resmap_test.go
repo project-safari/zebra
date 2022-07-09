@@ -178,7 +178,9 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(len(resA.Resources["Switch"].Resources) == 1)
 
 	resA.Delete(switch1, "Switch")
-	assert.NotNil(len(resA.Resources["Switch"].Resources) == 0)
+
+	_, ok := resA.Resources["Switch"]
+	assert.NotNil(ok)
 }
 
 func TestMapMarshalUnMarshal(t *testing.T) {

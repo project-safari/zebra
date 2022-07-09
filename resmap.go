@@ -149,6 +149,13 @@ func (r *ResourceMap) Delete(res Resource, key string) {
 		if val.GetID() == res.GetID() {
 			r.Resources[key].Resources[i] = r.Resources[key].Resources[listLen-1]
 			r.Resources[key].Resources = r.Resources[key].Resources[:listLen-1]
+
+			// If all values from key have been deleted, delete key entry
+			if len(r.Resources[key].Resources) == 0 {
+				delete(r.Resources, key)
+			}
+
+			return
 		}
 	}
 }

@@ -1,13 +1,10 @@
 package idstore
 
 import (
-	"sync"
-
 	"github.com/project-safari/zebra"
 )
 
 type IDStore struct {
-	lock      sync.RWMutex
 	factory   zebra.ResourceFactory
 	resources map[string]zebra.Resource
 }
@@ -15,7 +12,6 @@ type IDStore struct {
 // Return new resource store pointer given resource map.
 func NewIDStore(resources *zebra.ResourceMap) *IDStore {
 	ids := &IDStore{
-		lock:    sync.RWMutex{},
 		factory: resources.GetFactory(),
 		resources: func() map[string]zebra.Resource {
 			resMap := make(map[string]zebra.Resource)
@@ -37,18 +33,12 @@ func (ids *IDStore) Initialize() error {
 }
 
 func (ids *IDStore) Wipe() error {
-	ids.lock.Lock()
-	defer ids.lock.Unlock()
-
 	ids.resources = nil
 
 	return nil
 }
 
 func (ids *IDStore) Clear() error {
-	ids.lock.Lock()
-	defer ids.lock.Unlock()
-
 	ids.resources = make(map[string]zebra.Resource)
 
 	return nil
@@ -56,9 +46,6 @@ func (ids *IDStore) Clear() error {
 
 // Return all resources in a ResourceMap with UUID key and res in list val.
 func (ids *IDStore) Load() (*zebra.ResourceMap, error) {
-	ids.lock.RLock()
-	defer ids.lock.RUnlock()
-
 	resMap := zebra.NewResourceMap(ids.factory)
 
 	for key, val := range ids.resources {
@@ -68,19 +55,11 @@ func (ids *IDStore) Load() (*zebra.ResourceMap, error) {
 	return resMap, nil
 }
 
-// Create a resource. If a resource with this ID already exists, return error.
+// Create a resource. If a resource with this ID already exists, update.
 func (ids *IDStore) Create(res zebra.Resource) error {
-	ids.lock.Lock()
-	defer ids.lock.Unlock()
-
-	return ids.create(res)
-}
-
-// Should not be called without holding the write lock.
-func (ids *IDStore) create(res zebra.Resource) error {
 	// Check if resource already exists
-	if _, err := ids.find(res.GetID()); err == nil {
-		return zebra.ErrCreateExists
+	if oldRes, err := ids.find(res.GetID()); err == nil {
+		return ids.update(oldRes, res)
 	}
 
 	ids.resources[res.GetID()] = res
@@ -88,34 +67,17 @@ func (ids *IDStore) create(res zebra.Resource) error {
 	return nil
 }
 
-// Update a resource. Return error if resource does not exist.
-func (ids *IDStore) Update(res zebra.Resource) error {
-	ids.lock.Lock()
-	defer ids.lock.Unlock()
-
-	oldRes, err := ids.find(res.GetID())
-	// If resource does not exist, return error.
-	if err != nil {
-		return zebra.ErrUpdateNoExist
+// Update a resource.
+func (ids *IDStore) update(oldRes zebra.Resource, res zebra.Resource) error {
+	if err := ids.Delete(oldRes); err != nil {
+		return err
 	}
 
-	_ = ids.delete(oldRes)
-
-	_ = ids.create(res)
-
-	return nil
+	return ids.Create(res)
 }
 
 // Delete a resource.
 func (ids *IDStore) Delete(res zebra.Resource) error {
-	ids.lock.Lock()
-	defer ids.lock.Unlock()
-
-	return ids.delete(res)
-}
-
-// Should not be called without holding the write lock.
-func (ids *IDStore) delete(res zebra.Resource) error {
 	delete(ids.resources, res.GetID())
 
 	return nil

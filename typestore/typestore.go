@@ -1,22 +1,18 @@
 package typestore
 
 import (
-	"sync"
-
 	"github.com/project-safari/zebra"
 )
 
 type TypeStore struct {
-	lock      sync.RWMutex
 	resources *zebra.ResourceMap
 }
 
 // Return new type store pointer given resource map.
 func NewTypeStore(resources *zebra.ResourceMap) *TypeStore {
 	typestore := &TypeStore{
-		lock: sync.RWMutex{},
 		resources: func() *zebra.ResourceMap {
-			dest := zebra.NewResourceMap(nil)
+			dest := zebra.NewResourceMap(resources.GetFactory())
 			zebra.CopyResourceMap(dest, resources)
 
 			return dest
@@ -31,18 +27,12 @@ func (ts *TypeStore) Initialize() error {
 }
 
 func (ts *TypeStore) Wipe() error {
-	ts.lock.Lock()
-	defer ts.lock.Unlock()
-
 	ts.resources = nil
 
 	return nil
 }
 
 func (ts *TypeStore) Clear() error {
-	ts.lock.Lock()
-	defer ts.lock.Unlock()
-
 	ts.resources = zebra.NewResourceMap(ts.resources.GetFactory())
 
 	return nil
@@ -50,64 +40,37 @@ func (ts *TypeStore) Clear() error {
 
 // Return all resources in a ResourceMap.
 func (ts *TypeStore) Load() (*zebra.ResourceMap, error) {
-	ts.lock.RLock()
-	defer ts.lock.RUnlock()
-
-	resources := zebra.NewResourceMap(nil)
+	resources := zebra.NewResourceMap(ts.resources.GetFactory())
 
 	zebra.CopyResourceMap(resources, ts.resources)
 
 	return resources, nil
 }
 
-// Create a resource. If a resource with this ID already exists, return error.
+// Create a resource. If a resource with this ID already exists, update.
 func (ts *TypeStore) Create(res zebra.Resource) error {
-	ts.lock.Lock()
-	defer ts.lock.Unlock()
-
-	return ts.create(res)
-}
-
-// Should not be called without holding the write lock.
-func (ts *TypeStore) create(res zebra.Resource) error {
 	// Check if resource already exists
-	if _, err := ts.find(res.GetID(), res.GetType()); err == nil {
-		return zebra.ErrCreateExists
+	if oldRes, err := ts.find(res.GetID(), res.GetType()); err == nil {
+		return ts.update(oldRes, res)
 	}
 
+	// If it doesn't, add to resource map
 	ts.resources.Add(res, res.GetType())
 
 	return nil
 }
 
-// Update a resource. Return error if resource does not exist.
-func (ts *TypeStore) Update(res zebra.Resource) error {
-	ts.lock.Lock()
-	defer ts.lock.Unlock()
-
-	oldRes, err := ts.find(res.GetID(), res.GetType())
-	// If resource does not exist, return error.
-	if err != nil {
-		return zebra.ErrUpdateNoExist
+// Update a resource.
+func (ts *TypeStore) update(oldRes zebra.Resource, res zebra.Resource) error {
+	if err := ts.Delete(oldRes); err != nil {
+		return err
 	}
 
-	_ = ts.delete(oldRes)
-
-	_ = ts.create(res)
-
-	return nil
+	return ts.Create(res)
 }
 
 // Delete a resource.
 func (ts *TypeStore) Delete(res zebra.Resource) error {
-	ts.lock.Lock()
-	defer ts.lock.Unlock()
-
-	return ts.delete(res)
-}
-
-// Should not be called without holding the write lock.
-func (ts *TypeStore) delete(res zebra.Resource) error {
 	ts.resources.Delete(res, res.GetType())
 
 	return nil
@@ -119,9 +82,7 @@ func (ts *TypeStore) Query(types []string) *zebra.ResourceMap {
 	retMap := zebra.NewResourceMap(factory)
 
 	for _, t := range types {
-		list := zebra.NewResourceList(factory)
-		zebra.CopyResourceList(list, ts.resources.Resources[t])
-		retMap.Resources[t] = list
+		retMap.Resources[t] = ts.resources.Resources[t]
 	}
 
 	return retMap
