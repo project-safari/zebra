@@ -9,6 +9,12 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+/*type Human struct {
+	name     string
+	password string
+}
+*/
+
 func User() map[string]string {
 	fmt.Println("Test usernames")
 	people := make(map[string]string)
@@ -24,6 +30,7 @@ func User() map[string]string {
 		"another-user",
 		" ",
 	}
+	//usernames := []string{}
 
 	password_list := []string{
 		"pass1",
@@ -45,7 +52,17 @@ func User() map[string]string {
 			people[name] = password
 		}
 	}
-	
+
+	/*
+		//passwords := []string{}
+		for i := 0; i < len(password_list); i++ {
+
+			if password_list[i] != " " {
+				h.password = password_list[i]
+				//passwords = append(passwords, h.password)
+			}
+		}
+	*/
 	return people
 }
 
@@ -73,7 +90,7 @@ func CreateLabels() map[string]string {
 	return codes
 }
 
-func CreateBaseResource(resType string, labels zebra.Labels) *zebra.BaseResource {
+func CreateResource(resType string, labels zebra.Labels) *zebra.BaseResource {
 	id := uuid.New().String()
 
 	if resType == "" {
@@ -90,6 +107,8 @@ func CreateBaseResource(resType string, labels zebra.Labels) *zebra.BaseResource
 
 var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " ", "BaseResource", "NamedResource", "Credentials"}
 
+//var Ids = []string{"01000000", "01000001", "01000002", "01000003", "01000004", "01000005", "01000006", "01000007", "02000000", "02000001", "02000002", "02000003", "02000004", "02000005", "02000006", "02000007", "03000000", "03000001", "03000002", "03000003", "03000004", "03000005", "03000006", "03000007", "10000000", "10000001", "10000003", "10000004", "10000005", "10000006", "10000007", "20000000", "20000001", "20000002", "20000003", "20000004", "20000005", "20000006", "20000007", "30000000", "30000001", "30000002", "30000003", "30000004", "30000005", "30000006", "30000007"}
+
 func Generate_Data() {
 
 	credentials := User()
@@ -99,7 +118,7 @@ func Generate_Data() {
 
 		theType := RandType(resourceTypes)
 		theLabels := CreateLabels()
-		theData := CreateBaseResource(theType, theLabels)
+		theData := CreateResource(theType, theLabels)
 		fmt.Println("The username, password, corresponding resource and its respective labels: ", theData)
 		all[credentials] = theData
 	}
