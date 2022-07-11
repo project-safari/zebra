@@ -1,395 +1,197 @@
 package store_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 
-const vlan string = "VLANPool"
+func TestNewResourceStore(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	root := "teststore"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
+	assert.NotNil(store.NewResourceStore(root, nil))
+}
 
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	t.Cleanup(func() { os.RemoveAll("teststore") })
+	root := "teststore1"
 
-	filestore := store.NewFileStore("teststore", nil)
+	t.Cleanup(func() { os.RemoveAll(root) })
 
-	assert.Nil(filestore.Initialize())
-	assert.Nil(filestore.Initialize())
+	rs := store.NewResourceStore(root, nil)
+	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 }
 
-func TestCreate(t *testing.T) {
+func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	t.Cleanup(func() { os.RemoveAll("teststore1") })
+	root := "teststore2"
 
-	// Create VLANPool resource
-	resource := new(network.VLANPool)
-	resource.ID = "0100000001"
-	resource.Type = vlan
-	resource.Labels = make(map[string]string)
-	resource.Labels["key"] = "value"
-	resource.RangeStart = 0
-	resource.RangeEnd = 10
+	t.Cleanup(func() { os.RemoveAll(root) })
 
-	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
-
-	filestore := store.NewFileStore("teststore1", types)
-
-	// Initialize store
-	assert.Nil(filestore.Initialize())
-
-	// Store object
-	assert.Nil(filestore.Create(resource))
-
-	// Check that object is indeed stored
-	_, err := os.Stat("teststore1/resources/01/00000001")
-	assert.Nil(err)
+	rs := store.NewResourceStore(root, nil)
+	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
+	assert.Nil(rs.Wipe())
 }
 
-func TestUpdate(t *testing.T) {
+func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	t.Cleanup(func() { os.RemoveAll("teststore6") })
+	root := "teststore3"
 
-	// Create VLANPool resource
-	resource := new(network.VLANPool)
-	resource.ID = "0100000001"
-	resource.Type = vlan
-	resource.Labels = make(map[string]string)
-	resource.Labels["key"] = "value"
-	resource.RangeStart = 0
-	resource.RangeEnd = 10
+	t.Cleanup(func() { os.RemoveAll(root) })
 
-	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	factory := zebra.Factory()
+	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
-	filestore := store.NewFileStore("teststore6", types)
+	rs := store.NewResourceStore(root, factory)
+	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
-	// Initialize store
-	assert.Nil(filestore.Initialize())
+	assert.Nil(rs.Create(getVLAN()))
+	assert.Nil(rs.Create(getVLAN()))
 
-	assert.NotNil(filestore.Update(resource))
-
-	// Store object
-	assert.Nil(filestore.Create(resource))
-
-	// Check that object is indeed stored
-	_, err := os.Stat("teststore6/resources/01/00000001")
+	resources, err := rs.Load()
 	assert.Nil(err)
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(2, len(resources.Resources["VLANPool"].Resources))
 
-	// Create VLANPool resource
-	resource = new(network.VLANPool)
-	resource.ID = "0100000001"
-	resource.Type = vlan
-	resource.Labels = make(map[string]string)
-	resource.Labels["key1"] = "value1"
-	resource.RangeStart = 0
-	resource.RangeEnd = 10
+	assert.Nil(rs.Clear())
 
-	err = filestore.Create(resource)
-	assert.NotNil(err)
-
-	err = filestore.Update(resource)
+	resources, err = rs.Load()
 	assert.Nil(err)
-
-	// Check that object is stored
-	_, err = os.Stat("teststore6/resources/01/00000001")
-	assert.Nil(err)
+	assert.Empty(len(resources.Resources))
 }
 
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	t.Cleanup(func() { os.RemoveAll("teststore2") })
+	root := "teststore4"
 
-	// Create VLANPool resource
-	resource := new(network.VLANPool)
-	resource.ID = "0100000001"
-	resource.Type = vlan
-	resource.Labels = make(map[string]string)
-	resource.RangeStart = 0
-	resource.RangeEnd = 10
+	t.Cleanup(func() { os.RemoveAll(root) })
 
-	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	factory := zebra.Factory()
+	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
-	filestore := store.NewFileStore("teststore2", types)
+	rs := store.NewResourceStore(root, factory)
+	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
-	// Initialize store
-	assert.Nil(filestore.Initialize())
-
-	// Store object
-	assert.Nil(filestore.Create(resource))
-
-	// Check that object is indeed stored
-	_, err := os.Stat("teststore2/resources/01/00000001")
+	resources, err := rs.Load()
 	assert.Nil(err)
+	assert.Empty(len(resources.Resources))
 
-	resources, err := filestore.Load()
+	assert.Nil(rs.Create(getVLAN()))
+	resources, err = rs.Load()
 	assert.Nil(err)
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
 
-	assert.True(resources != nil)
+	assert.Nil(rs.Create(getVLAN()))
 
-	list := resources.Resources["VLANPool"].Resources
-	assert.True(len(list) == 1)
-	assert.True(list[0].GetType() == vlan)
+	resources, err = rs.Load()
+	assert.Nil(err)
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(2, len(resources.Resources["VLANPool"].Resources))
+}
+
+func TestCreate(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	root := "teststore5"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
+	factory := zebra.Factory()
+	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+
+	rs := store.NewResourceStore(root, factory)
+	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
+
+	// Invalid resource, should fail
+	assert.NotNil(rs.Create(nil))
+
+	// Valid resource, should pass
+	vlan := getVLAN()
+	assert.Nil(rs.Create(vlan))
+
+	resources, err := rs.Load()
+	assert.Nil(err)
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
+
+	// Duplicate resource, should update
+	assert.Nil(rs.Create(vlan))
 }
 
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	t.Cleanup(func() { os.RemoveAll("teststore3") })
+	root := "teststore6"
 
-	// Create VLANPool resource
-	resource := new(network.VLANPool)
-	resource.ID = "0100000001"
-	resource.Type = vlan
-	resource.Labels = make(map[string]string)
-	resource.RangeStart = 0
-	resource.RangeEnd = 10
+	t.Cleanup(func() { os.RemoveAll(root) })
 
-	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	factory := zebra.Factory()
+	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 
-	filestore := store.NewFileStore("teststore3", types)
+	rs := store.NewResourceStore(root, factory)
+	assert.NotNil(rs)
+	assert.Nil(rs.Initialize())
 
-	// Initialize store
-	assert.Nil(filestore.Initialize())
+	// Valid resource, should pass
+	vlan := getVLAN()
+	assert.Nil(rs.Create(vlan))
 
-	// Store object
-	assert.Nil(filestore.Create(resource))
-
-	// Check that object is indeed stored
-	_, err := os.Stat("teststore3/resources/01/00000001")
+	resources, err := rs.Load()
 	assert.Nil(err)
+	assert.Equal(1, len(resources.Resources))
+	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
 
-	// Delete object and check it is deleted
-	assert.Nil(filestore.Delete(resource))
+	// Delete resource, should pass
+	assert.Nil(rs.Delete(vlan))
 
-	_, err = os.Stat("teststore3/resources/01/00000001")
-	assert.True(os.IsNotExist(err))
+	// Delete non-existent resource, should fail
+	assert.NotNil(rs.Delete(nil))
+
+	// Delete uncreated resource, should pass anyways
+	assert.NotNil(rs.Delete(getLab()))
 }
 
-func TestClearStore(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	t.Cleanup(func() { os.RemoveAll("teststore4") })
-
-	// Create first VLANPool resource
-	resource1 := new(network.VLANPool)
-	resource1.ID = "0100000001"
-	resource1.Type = vlan
-	resource1.Labels = make(map[string]string)
-	resource1.RangeStart = 0
-	resource1.RangeEnd = 10
-
-	// Create second VLANPool resource
-	resource2 := new(network.VLANPool)
-	resource2.ID = "0200000001"
-	resource2.Type = vlan
-	resource2.Labels = make(map[string]string)
-	resource2.RangeStart = 0
-	resource2.RangeEnd = 10
-
-	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
-
-	filestore := store.NewFileStore("teststore4", types)
-
-	// Initialize store
-	assert.Nil(filestore.Initialize())
-
-	// Store object
-	assert.Nil(filestore.Create(resource1))
-	assert.Nil(filestore.Create(resource2))
-
-	// Check that object is indeed stored
-	_, err := os.Stat("teststore4/resources/01/00000001")
-	assert.Nil(err)
-
-	_, err = os.Stat("teststore4/resources/02/00000001")
-	assert.Nil(err)
-
-	// Delete object and check it is deleted
-	assert.Nil(filestore.Clear())
-
-	_, err = os.Stat("teststore4/resources/01/00000001")
-	assert.True(os.IsNotExist(err))
-
-	_, err = os.Stat("teststore4/resources/02/00000001")
-	assert.True(os.IsNotExist(err))
-}
-
-func TestWipeStore(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	t.Cleanup(func() { os.RemoveAll("teststore5") })
-
-	filestore := store.NewFileStore("teststore5", nil)
-
-	assert.Nil(filestore.Initialize())
-	assert.Nil(filestore.Wipe())
-
-	_, err := os.Stat("teststore5/resources")
-	assert.True(os.IsNotExist(err))
-}
-
-func TestBadLoad1(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	t.Cleanup(func() { os.RemoveAll("badtest1") })
-
-	filestore := store.NewFileStore("badtest1", nil)
-
-	vals, err := filestore.Load()
-	assert.Nil(vals)
-	assert.NotNil(err)
-
-	assert.Nil(os.MkdirAll("badtest1/resources/01", os.ModePerm))
-
-	fd, err := os.OpenFile("badtest1/resources/01/00", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
-	assert.Nil(err)
-
-	_, err = fmt.Fprintf(fd, `{"id":"0100000001","type":"VLANPool","rangeStart":0, "rangeEnd":10}`)
-	assert.Nil(err)
-	fd.Close()
-
-	_, err = filestore.Load()
-	assert.NotNil(err)
-}
-
-func TestBadLoad2(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	t.Cleanup(func() { os.RemoveAll("badtest1a") })
-
-	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
-	types.Add("Switch", func() zebra.Resource { return new(network.Switch) })
-
-	filestore := store.NewFileStore("badtest1a", types)
-
-	assert.Nil(os.MkdirAll("badtest1a/resources/01", os.ModePerm))
-
-	fileDes, err := os.OpenFile("badtest1a/resources/01/01", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
-	assert.Nil(err)
-
-	_, err = fmt.Fprintf(fileDes, `{"id":"00", "type":123}`)
-	assert.Nil(err)
-
-	_, err = filestore.Load()
-	assert.NotNil(err)
-
-	fileDes, err = os.OpenFile("badtest1a/resources/01/02", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
-	assert.Nil(err)
-
-	_, err = fmt.Fprintf(fileDes, `{"id":"0100000001","type":"VLANPool","rangeStart":0}`)
-	assert.Nil(err)
-
-	_, err = filestore.Load()
-	assert.NotNil(err)
-
-	fileDes, err = os.OpenFile("badtest1a/resources/01/04", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
-	assert.Nil(err)
-
-	_, err = fmt.Fprintf(fileDes, `{"id":"0100000002","type":"invalid","rangeStart":0, "rangeEnd":10}`)
-	assert.Nil(err)
-
-	_, err = filestore.Load()
-	assert.NotNil(err)
-
-	fileDes, err = os.OpenFile("badtest1a/resources/01/05", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
-	assert.Nil(err)
-
-	_, err = fmt.Fprintf(fileDes, `{"id":"0100000002","type":"Switch","rangeStart":0, "rangeEnd":10}`)
-	assert.Nil(err)
-
-	_, err = filestore.Load()
-	assert.NotNil(err)
-
-	fileDes, err = os.OpenFile("badtest1a/resources/01/03", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
-	assert.Nil(err)
-
-	_, err = fmt.Fprintf(fileDes, "blahblah")
-	assert.Nil(err)
-	fileDes.Close()
-
-	_, err = filestore.Load()
-	assert.NotNil(err)
-}
-
-func TestBadCreate(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	t.Cleanup(func() { os.RemoveAll("badtest2") })
-
-	filestore := store.NewFileStore("badtest2", nil)
-
-	assert.Nil(filestore.Initialize())
-	assert.NotNil(filestore.Create(new(network.VLANPool)))
-
-	resource := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "01",
-			Type:   "VLANPool",
-			Labels: nil,
-		},
-		RangeStart: 0,
-		RangeEnd:   10,
+func getVLAN() *network.VLANPool {
+	return &network.VLANPool{
+		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		RangeStart:   0,
+		RangeEnd:     1,
 	}
-	assert.NotNil(filestore.Create(resource))
 }
 
-func TestBadUpdate(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
+func getLab() *dc.Lab {
+	br := *zebra.NewBaseResource("Lab", nil)
 
-	t.Cleanup(func() { os.RemoveAll("badtest3") })
-
-	filestore := store.NewFileStore("badtest3", nil)
-
-	assert.Nil(filestore.Initialize())
-	assert.NotNil(filestore.Update(new(network.VLANPool)))
-}
-
-func TestBadDelete(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	t.Cleanup(func() { os.RemoveAll("badtest4") })
-
-	filestore := store.NewFileStore("badtest4", nil)
-
-	assert.Nil(filestore.Initialize())
-
-	resource := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "010",
-			Type:   "VLANPool",
-			Labels: nil,
+	return &dc.Lab{
+		NamedResource: zebra.NamedResource{
+			BaseResource: br,
+			Name:         "lab" + br.ID,
 		},
-		RangeStart: 0,
-		RangeEnd:   10,
 	}
-
-	assert.NotNil(filestore.Delete(new(network.VLANPool)))
-	assert.NotNil(filestore.Delete(resource))
 }

@@ -7,54 +7,38 @@ import (
 	"strings"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/query"
 	"github.com/project-safari/zebra/store"
 )
 
 type ResourceAPI struct {
-	factory    zebra.ResourceFactory
-	resStore   *store.FileStore
-	queryStore *query.QueryStore
+	factory zebra.ResourceFactory
+	Store   zebra.Store
 }
 
 var ErrNumArgs = errors.New("wrong number of args")
 
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
-		factory:    factory,
-		resStore:   nil,
-		queryStore: nil,
+		factory: factory,
+		Store:   nil,
 	}
 }
 
 // Set up store and query store given storage root.
 func (api *ResourceAPI) Initialize(storageRoot string) error {
-	api.resStore = store.NewFileStore(storageRoot, api.factory)
+	api.Store = store.NewResourceStore(storageRoot, api.factory)
 
-	if err := api.resStore.Initialize(); err != nil {
-		return err
-	}
-
-	resMap, err := api.resStore.Load()
-	if err != nil {
-		return err
-	}
-
-	api.queryStore = query.NewQueryStore(resMap)
-
-	if err = api.queryStore.Initialize(); err != nil {
-		return err
-	}
-
-	return nil
+	return api.Store.Initialize()
 }
 
 func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
-	results := api.queryStore.Query()
+	results := api.Store.Query()
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -65,11 +49,13 @@ func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
 func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Request) {
 	uuids := strings.Split(req.URL.Query().Get("id"), ",")
 
-	results := api.queryStore.QueryUUID(uuids)
+	results := api.Store.QueryUUID(uuids)
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -80,11 +66,13 @@ func (api *ResourceAPI) GetResourcesByID(w http.ResponseWriter, req *http.Reques
 func (api *ResourceAPI) GetResourcesByType(w http.ResponseWriter, req *http.Request) {
 	resTypes := strings.Split(req.URL.Query().Get("type"), ",")
 
-	results := api.queryStore.QueryType(resTypes)
+	results := api.Store.QueryType(resTypes)
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -100,7 +88,7 @@ func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.
 		return
 	}
 
-	results, err := api.queryStore.QueryProperty(query)
+	results, err := api.Store.QueryProperty(query)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
@@ -109,7 +97,9 @@ func (api *ResourceAPI) GetResourcesByProperty(w http.ResponseWriter, req *http.
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -125,16 +115,18 @@ func (api *ResourceAPI) GetResourcesByLabel(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	results, err := api.queryStore.QueryLabel(query)
+	results, err := api.Store.QueryLabel(query)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 
 		return
 	}
 
 	bytes, err := json.Marshal(results)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -142,29 +134,29 @@ func (api *ResourceAPI) GetResourcesByLabel(w http.ResponseWriter, req *http.Req
 	w.Write(bytes) // nolint:errcheck
 }
 
-func buildQuery(url string, isProperty bool) (query.Query, error) {
+func buildQuery(url string, isProperty bool) (zebra.Query, error) {
 	params := strings.Split(url, "-")
 
 	if len(params) != 3 { //nolint:gomnd
-		return query.Query{}, ErrNumArgs
+		return zebra.Query{}, ErrNumArgs
 	}
 
 	key := params[0]
 
-	var operator query.Operator
+	var operator zebra.Operator
 
 	switch params[1] {
 	case "equal":
-		operator = query.MatchEqual
+		operator = zebra.MatchEqual
 	case "notequal":
-		operator = query.MatchNotEqual
+		operator = zebra.MatchNotEqual
 	case "in":
-		operator = query.MatchIn
+		operator = zebra.MatchIn
 	case "notin":
-		operator = query.MatchNotIn
+		operator = zebra.MatchNotIn
 	}
 
 	values := strings.Split(params[2], ",")
 
-	return query.Query{Op: operator, Key: key, Values: values}, nil
+	return zebra.Query{Op: operator, Key: key, Values: values}, nil
 }

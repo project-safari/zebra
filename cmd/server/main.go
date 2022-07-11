@@ -14,6 +14,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/api"
+	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/compute"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
@@ -67,7 +68,7 @@ func setupLogger(cfgStore *config.Store) context.Context {
 	zl := zerolog.New(os.Stderr).Level(zerolog.DebugLevel)
 	logger := zerologr.New(&zl)
 
-	return logr.NewContext(ctx, logger.WithName("helper"))
+	return logr.NewContext(ctx, logger.WithName("zebra"))
 }
 
 func startServer(cfgStore *config.Store) error {
@@ -99,6 +100,15 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 		panic(e)
 	}
 
+	authKey := struct {
+		Key string `json:"authKey"`
+	}{Key: ""}
+
+	if e := cfgStore.Get("authKey", &authKey); e != nil {
+		log.Error(e, "auth key missing")
+		panic(e)
+	}
+
 	factory := initTypes()
 
 	resAPI := api.NewResourceAPI(factory)
@@ -108,7 +118,8 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 	}
 
 	router := httprouter.New()
-	router.GET("/api/v1/resources", handle(resAPI))
+	router.GET("/api/v1/resources", handleQuery(resAPI))
+	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey.Key))
 
 	return router
 }
@@ -156,18 +167,24 @@ func initTypes() zebra.ResourceFactory {
 	factory.Add("BaseResource", func() zebra.Resource {
 		return new(zebra.BaseResource)
 	})
+
 	factory.Add("NamedResource", func() zebra.Resource {
 		return new(zebra.NamedResource)
 	})
+
 	factory.Add("Credentials", func() zebra.Resource {
 		return new(zebra.Credentials)
+	})
+
+	factory.Add("User", func() zebra.Resource {
+		return new(auth.User)
 	})
 
 	// Need to add all the known types here
 	return factory
 }
 
-func handle(resAPI *api.ResourceAPI) httprouter.Handle {
+func handleQuery(resAPI *api.ResourceAPI) httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		switch {
 		case strings.HasPrefix(req.URL.RawQuery, "id"):

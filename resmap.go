@@ -44,7 +44,22 @@ func NewResourceList(f ResourceFactory) *ResourceList {
 	}
 }
 
+func (r *ResourceList) Delete(res Resource) {
+	listLen := len(r.Resources)
+
+	for i, val := range r.Resources {
+		if val.GetID() == res.GetID() {
+			r.Resources[i] = r.Resources[listLen-1]
+			r.Resources = r.Resources[:listLen-1]
+		}
+	}
+}
+
 func CopyResourceList(dest *ResourceList, src *ResourceList) {
+	if dest == nil || src == nil {
+		return
+	}
+
 	dest.factory = src.factory
 	dest.Resources = make([]Resource, len(src.Resources))
 	copy(dest.Resources, src.Resources)
@@ -117,8 +132,12 @@ func NewResourceMap(f ResourceFactory) *ResourceMap {
 }
 
 func CopyResourceMap(dest *ResourceMap, src *ResourceMap) {
+	if dest == nil || src == nil {
+		return
+	}
+
 	dest.factory = src.factory
-	dest.Resources = make(map[string]*ResourceList, len(src.Resources))
+	dest.Resources = make(map[string]*ResourceList)
 
 	for key, val := range src.Resources {
 		dest.Resources[key] = NewResourceList(dest.factory)
@@ -139,13 +158,14 @@ func (r *ResourceMap) Add(res Resource, key string) {
 }
 
 func (r *ResourceMap) Delete(res Resource, key string) {
-	listLen := len(r.Resources[key].Resources)
+	if r.Resources[key] == nil {
+		return
+	}
 
-	for i, val := range r.Resources[key].Resources {
-		if val.GetID() == res.GetID() {
-			r.Resources[key].Resources[i] = r.Resources[key].Resources[listLen-1]
-			r.Resources[key].Resources = r.Resources[key].Resources[:listLen-1]
-		}
+	r.Resources[key].Delete(res)
+
+	if len(r.Resources[key].Resources) == 0 {
+		delete(r.Resources, key)
 	}
 }
 
