@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-	"github.com/google/uuid"
+
 	"github.com/project-safari/zebra"
-)
+	"github.com/project-safari/zebra/auth"
 )
 
-func User() map[string]string {
-	fmt.Println("Test usernames")
-	people := make(map[string]string)
+var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " ", "BaseResource", "NamedResource", "Credentials"}
 
-	// take care of usernames and passwords
-	
+// some usernames
+func User() string {
+
 	name_list := []string{
 		"user1",
 		"user2",
@@ -26,6 +25,12 @@ func User() map[string]string {
 		" ",
 	}
 
+	username := RandData(name_list)
+	return username
+}
+
+//some passwords
+func Password() string {
 	password_list := []string{
 		"pass1",
 		"pass2",
@@ -36,23 +41,13 @@ func User() map[string]string {
 		"another-password",
 		" ",
 	}
+	pwd := RandData(password_list)
 
-	for i := 0; i < len(name_list); i++ {
-
-		if name_list[i] != " " {
-			name := name_list[i]
-			password := password_list[i]
-			//usernames = append(usernames, h.name)
-			people[name] = password
-		}
-	}
-
-	// return user info
-	return people
+	return pwd
 }
 
-// generate randomly selected tyoes from the list of possibilities
-func RandType(res []string) string {
+//random selection from lists
+func RandData(res []string) string {
 	rand.Seed(time.Now().UnixNano())
 	var length = len(res)
 	var ind int = rand.Intn(length - 1)
@@ -60,7 +55,7 @@ func RandType(res []string) string {
 	return typ
 }
 
-// create labels as key-value pairs
+//sample labels
 func CreateLabels() map[string]string {
 	codes := make(map[string]string)
 	col := " "
@@ -69,46 +64,34 @@ func CreateLabels() map[string]string {
 	letters := []string{"alpha", "beta", "gamma", "delta", "epsilon", "eta", "theta", "Iota", "Kappa", "Lambda", "Mu", "Nu"}
 
 	for i := 0; i < len(colors); i++ {
-		col = RandType(colors)
-		let = RandType(letters)
+		col = RandData(colors)
+		let = RandData(letters)
 		codes[let] = col
 	}
 
 	return codes
 }
 
-
-func CreateResource(resType string, labels zebra.Labels) *zebra.BaseResource {
-	id := uuid.New().String()
-
-	if resType == "" {
-		resType = "BaseResource"
-	}
-
-	return &zebra.BaseResource{
-		ID:     id,
-		Type:   resType,
-		Labels: labels,
-	}
-
-}
-
-
-var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " ", "BaseResource", "NamedResource", "Credentials"}
-
-
+//put it all together
 func Generate_Data() {
 
-	credentials := User()
-	allC := make(map[interface{}]interface{})
-	//all := make(map[string]*zebra.BaseResource)
+	creds := auth.User
 	for each := 0; each < 100; each++ {
 
-		theType := RandType(resourceTypes)
+		theType := RandData(resourceTypes)
 		theLabels := CreateLabels()
-		theData := CreateResource(theType, theLabels)
-		fmt.Println("The password, corresponding resource and its respective labels: ", theData)
-		allC[credentials] = theData
-		fmt.Println("The updated data with username, password, corresponding resource and its respective labels: ", allC)
+
+		//theData := zebra.CreateBaseResource(theType, theLabels)
+
+		creds.zebra.NamedResource = zebra.CreateBaseResource(theType, theLabels)
+
+		creds.PasswordHash = Password()
+
+		creds.Role = User()
+
+		creds.Key = CreateLabels()
+
+		fmt.Println("The updated data with username, password, corresponding resource and its respective labels: ", creds)
+
 	}
 }
