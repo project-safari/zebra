@@ -1,17 +1,11 @@
 package generate_data
 
-/*
-create resources and users 
-generate sample data and users
-*/
-
 import (
 	"fmt"
 	"math/rand"
 	"net"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/dc"
@@ -21,6 +15,7 @@ import (
 var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
 
 // create user roles
+
 func User() string {
 
 	// some usernames
@@ -47,8 +42,8 @@ func User() string {
 }
 
 //create some passwords
+
 func Password() string {
-	
 	password_list := []string{
 		"pass123",
 		"pass222",
@@ -67,20 +62,20 @@ func Password() string {
 	pwd := RandData(password_list)
 
 	return pwd
-	
 }
 
 //random selection from lists
+
 func RandData(res []string) string {
 	rand.Seed(time.Now().UnixNano())
 	var length = len(res)
 	var ind int = rand.Intn(length - 1)
 	typ := res[ind]
-	
 	return typ
 }
 
 // creating random starting and end points
+
 func Range() uint16 {
 
 	nums := []uint16{0, 11, 121, 44, 32, 234, 9, 64, 33, 2, 5, 8, 16, 200, 14, 77}
@@ -88,100 +83,101 @@ func Range() uint16 {
 	var length = len(nums)
 	var ind int = rand.Intn(length - 1)
 	num := nums[ind]
-	
 	return num
 }
 
 // creating random ports
+
 func Ports() uint32 {
-	
 	nums := []uint32{1, 2, 3, 4, 6, 8, 9, 16, 27, 32, 36, 54, 72, 64, 81, 128, 162, 216, 256, 512}
 	rand.Seed(time.Now().UnixNano())
 	var length = len(nums)
 	var ind int = rand.Intn(length - 1)
 	port := nums[ind]
-	
 	return port
-	
+
 }
 
 // create random sample model names
+
 func Models() string {
-	
 	models := []string{"model A", "modelB", "modelC", "modelD", "modelA.1", "modelA.1.1", "modelE", "modelD.010", "modelF", "modelG", "modelG.1", "modelG.1.1"}
 	model := RandData(models)
-	
 	return model
-	
 }
 
 // create random serial codes
+
 func Serials() string {
-	
 	nums := []string{"00000", "00001", "00002", "00003", "00004", "00005", "00006", "00007", "00008", "00009", "00010", "00020", "00030", "00040", "00050", "00060", "00070", "00080", "00090", "00100", "00200", "00300", "00400", "00500", "01000", "02000", "03000"}
 	return RandData(nums)
-	
 }
 
 //creating various resource types
-func CreateResource(resType string, labels zebra.Labels, start uint16, theRes zebra.BaseResource, ip net.IP, serial string, model string, ports uint32, namedRes zebra.NamedResource) zebra.Resource {
 
-	id := uuid.New().String()
+func CreateVlanPool(labels zebra.Labels, theRes zebra.BaseResource) *network.VLANPool {
+	var start uint16 = Range()
 
-	// base case (i.e. nothing exists for resource type)
-	if resType == " " {
-		resType = "BaseResource"
+	return &network.VLANPool{
+
+		BaseResource: theRes,
+		RangeStart:   start,
+		RangeEnd:     (start + 100),
 	}
+}
 
-	if resType == "VLANPool" {
-		return &network.VLANPool{
+func CreateSwitch(theRes zebra.BaseResource, ip net.IP) *network.Switch {
+	var serial string = Serials()
+	var model string = Models()
+	var ports uint32 = Ports()
 
-			BaseResource: theRes,
-			RangeStart:   start,
-			RangeEnd:     (start + 100),
-		}
-	} else if resType == "Switch" {
-		return &network.Switch{
+	return &network.Switch{
 
-			BaseResource: theRes,
-			ManagementIP: ip,
-			SerialNumber: serial,
-			Model:        model,
-			NumPorts:     ports,
-		}
-	} else if resType == "IPAddressPool" {
-		return &network.IPAddressPool{
-			BaseResource: theRes,
-			//Subnets:      []net.IPNet,
-		}
-
-	} else if resType == "Datacenter" {
-		return &dc.Datacenter{
-			NamedResource: namedRes,
-			Address:       "sample address",
-		}
-	} else if resType == "Lab" {
-		return &dc.Lab{
-			NamedResource: namedRes,
-		}
-	} else if resType == "Rack" {
-		return &dc.Rack{
-			NamedResource: namedRes,
-			Row:           "sample row",
-		}
+		BaseResource: theRes,
+		ManagementIP: ip,
+		SerialNumber: serial,
+		Model:        model,
+		NumPorts:     ports,
 	}
-	// if none of those apply, just use base resource info
-	return &zebra.BaseResource{
-		ID:     id,
-		Type:   resType,
-		Labels: labels,
-	}
+}
 
+func CreateIpAddressPool(theRes zebra.BaseResource, ip net.IP) *network.IPAddressPool {
+	return &network.IPAddressPool{
+		BaseResource: theRes,
+		//Subnets:      []net.IPNet,
+	}
+}
+
+func CreateDatacenter(theRes zebra.BaseResource) *dc.Datacenter {
+	namedRes := new(zebra.NamedResource)
+
+	return &dc.Datacenter{
+		NamedResource: *namedRes,
+		Address:       "sample address",
+	}
+}
+
+func CreateLab(theRes zebra.BaseResource) *dc.Lab {
+	namedRes := new(zebra.NamedResource)
+
+	return &dc.Lab{
+		NamedResource: *namedRes,
+	}
+}
+
+func CreateRack(theRes zebra.BaseResource) *dc.Rack {
+
+	namedRes := new(zebra.NamedResource)
+
+	return &dc.Rack{
+		NamedResource: *namedRes,
+		Row:           "sample row",
+	}
 }
 
 //sample labels
-func CreateLabels() (string, map[string]string) {
-	
+
+func CreateLabels() map[string]string {
 	codes := make(map[string]string)
 	col := " "
 	let := " "
@@ -192,42 +188,79 @@ func CreateLabels() (string, map[string]string) {
 	let = RandData(letters)
 	codes[let] = col
 
-	// get the key and the label pair
+	// get the key
 
-	return codes[let], codes
-	
+	return codes
 }
 
-
 //put it all together
+
 func Generate_Data() {
 
 	// go through each resource type
+
 	for i := 0; i < len(resourceTypes); i++ {
 
 		theType := resourceTypes[i]
 
 		// 100 resources of each type
+
 		for each := 0; each < 100; each++ {
 
 			creds := new(auth.User)
 
-			keys, theLabels := CreateLabels()
-			start := Range()
-			base := zebra.NewBaseResource(theType, theLabels)
-			serial := Serials()
-			port := Ports()
-			model := Models()
-			sampleIP := "192.332.11.05"
-			named := new(zebra.NamedResource)
+			//theType := RandData(resourceTypes)
+			theLabels := CreateLabels()
 
-			creds.zebra.NamedResource = CreateResource(theType, theLabels, start, base, net.IP(sampleIP), serial, model, port, named)
+			base := zebra.NewBaseResource(theType, theLabels)
+
+			sampleIP := "192.332.11.05"
+
+			//named := zebra.NamedResource(base)
+
+			//theData := zebra.CreateBaseResource(theType, theLabels)
+
+			//creds.zebra.NamedResource = CreateResource(theType, theLabels, base, net.IP(sampleIP))
+
 			creds.PasswordHash = Password()
-			creds.Role = User()
-			creds.Key = keys
+
+			creds.Role.Name = User()
+
+			creds.Key = auth.Generate()
+
+			if theType == "VLANPool" {
+
+				creds.zebra.NamedResource = CreateVlanPool(theLabels, base)
+
+			} else if theType == "Switch" {
+
+				creds.zebra.NamedResource = CreateSwitch(base, net.IP(sampleIP))
+
+			} else if theType == "IPAddressPool" {
+
+				creds.zebra.NamedResource = CreateIpAddressPool(base, net.IP(sampleIP))
+
+			} else if theType == "Datacenter" {
+
+				creds.zebra.NamedResource = CreateDatacenter(base)
+
+			} else if theType == "Lab" {
+
+				creds.zebra.NamedResource = CreateLab(base)
+
+			} else if theType == "Rack" {
+
+				creds.zebra.NamedResource = CreateRack(base)
+
+			}
 
 			fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", creds)
 
+			/*
+				fmt.Println("The updated data with username, password, corresponding resource and its respective labels: ", creds)
+
+				res := make(map[creds]zebra.Resource)
+			*/
 		}
 
 	}
