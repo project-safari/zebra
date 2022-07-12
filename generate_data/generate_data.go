@@ -200,34 +200,34 @@ func CreateLabels() (string, map[string]string) {
 //put it all together
 func Generate_Data() {
 
-	// 100 resources
-	for each := 0; each < 100; each++ {
-		
-		//generate new user
-		
-		creds := new(auth.User)
+	// go through each resource type
+	for i := 0; i < len(resourceTypes); i++ {
 
-		// info to be used in the resources
-		
-		theType := RandData(resourceTypes)
-		keys, theLabels := CreateLabels()
-		start := Range()
-		base := zebra.NewBaseResource(theType, theLabels)
-		serial := Serials()
-		port := Ports()
-		model := Models()
-		sampleIP := "192.232.11.05"
-		named := new(zebra.NamedResource)
-		
-		// update info
-		
-		creds.zebra.NamedResource = CreateResource(theType, theLabels, start, base, net.IP(sampleIP), serial, model, port, named)
-		creds.PasswordHash = Password()
-		creds.Role = User()
-		creds.Key = keys
+		theType := resourceTypes[i]
 
-		// display info
-		fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", creds)
+		// 100 resources of each type
+		for each := 0; each < 100; each++ {
+
+			creds := new(auth.User)
+
+			keys, theLabels := CreateLabels()
+			start := Range()
+			base := zebra.NewBaseResource(theType, theLabels)
+			serial := Serials()
+			port := Ports()
+			model := Models()
+			sampleIP := "192.332.11.05"
+			named := new(zebra.NamedResource)
+
+			creds.zebra.NamedResource = CreateResource(theType, theLabels, start, base, net.IP(sampleIP), serial, model, port, named)
+			creds.PasswordHash = Password()
+			creds.Role = User()
+			creds.Key = keys
+
+			fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", creds)
+
+		}
 
 	}
+
 }
