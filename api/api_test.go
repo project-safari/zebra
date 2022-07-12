@@ -1,18 +1,18 @@
 package api_test
 
 import (
-	"context"
-	"fmt"
+	"bytes"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
-	"time"
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/api"
+	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
-	"gojini.dev/web"
 )
 
 //nolint:gochecknoglobals
@@ -52,35 +52,18 @@ func TestGetResources(t *testing.T) {
 	assert := assert.New(t)
 
 	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
-
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9999"),
-		TLS:     nil,
-	}
+	handler := http.HandlerFunc(myAPI.GetResources)
 
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResources))
-	assert.NotNil(server)
+	req := makeRequest(assert, "GET", "/resources", "")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	ctx := context.Background()
-
-	go func() {
-		assert.NotNil(server.Start(ctx))
-	}()
-	time.Sleep(time.Second)
-
-	resp, err := http.Get(fmt.Sprintf("http://%s/", cfg.Address))
-	assert.True(err == nil && resp != nil)
-
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.True(string(body) == resources || string(body) == otherResources)
-	assert.Nil(resp.Body.Close())
-
-	assert.Nil(server.Stop(ctx, nil))
+	resBody := rr.Body.String()
+	assert.True(resBody == resources || resBody == otherResources)
 }
 
 func TestGetResourcesByID(t *testing.T) {
@@ -91,52 +74,34 @@ func TestGetResourcesByID(t *testing.T) {
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9998"),
-		TLS:     nil,
-	}
-
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByID))
-	assert.NotNil(server)
-
-	ctx := context.Background()
-
-	go func() {
-		assert.NotNil(server.Start(ctx))
-	}()
-	time.Sleep(time.Second)
+	handler := http.HandlerFunc(myAPI.GetResourcesByID)
 
 	// GET resource1
-	resp, err := http.Get(fmt.Sprintf("http://%s?id=0100000001", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	req := makeRequest(assert, "GET", "/resources?id=0100000001", "")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(resource1, string(body))
-	assert.Nil(resp.Body.Close())
+	resBody := rr.Body.String()
+	assert.Equal(resource1, resBody)
 
 	// GET resource2
-	resp, err = http.Get(fmt.Sprintf("http://%s?id=0100000002", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	req = makeRequest(assert, "GET", "/resources?id=0100000002", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(resource2, string(body))
-	assert.Nil(resp.Body.Close())
+	resBody = rr.Body.String()
+	assert.Equal(resource2, resBody)
 
 	// GET resources
-	resp, err = http.Get(fmt.Sprintf("http://%s?id=0100000001,0100000002", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	req = makeRequest(assert, "GET", "/resources?id=0100000001,0100000002", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(resources, string(body))
-	assert.Nil(resp.Body.Close())
-
-	assert.Nil(server.Stop(ctx, nil))
+	resBody = rr.Body.String()
+	assert.True(resBody == resources || resBody == otherResources)
 }
 
 func TestGetResourcesByType(t *testing.T) {
@@ -147,45 +112,28 @@ func TestGetResourcesByType(t *testing.T) {
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9997"),
-		TLS:     nil,
-	}
-
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByType))
-	assert.NotNil(server)
-
-	ctx := context.Background()
-
-	go func() {
-		assert.NotNil(server.Start(ctx))
-	}()
-	time.Sleep(time.Second)
+	handler := http.HandlerFunc(myAPI.GetResourcesByType)
 
 	// GET resources
-	resp, err := http.Get(fmt.Sprintf("http://%s?type=VLANPool", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	req := makeRequest(assert, "GET", "/resources?type=VLANPool", "")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.True(string(body) == resources || string(body) == otherResources)
-	assert.Nil(resp.Body.Close())
+	resBody := rr.Body.String()
+	assert.True(resBody == resources || resBody == otherResources)
 
 	// GET no resources
-	resp, err = http.Get(fmt.Sprintf("http://%s?type=IPAddressPool", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	req = makeRequest(assert, "GET", "/resources?type=IPAddressPool", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(noResources, string(body))
-	assert.Nil(resp.Body.Close())
-
-	assert.Nil(server.Stop(ctx, nil))
+	resBody = rr.Body.String()
+	assert.Equal(noResources, resBody)
 }
 
-func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
+func TestGetResourcesByProperty(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -193,64 +141,62 @@ func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9996"),
-		TLS:     nil,
-	}
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByProperty))
+	handler := http.HandlerFunc(myAPI.GetResourcesByProperty)
 
-	assert.NotNil(server)
+	// GET resources
+	req := makeRequest(assert, "GET", "/resources?property=Type-in-VLANPool,IPAddressPool", "")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	ctx := context.Background()
+	resBody := rr.Body.String()
+	assert.True(resBody == resources || resBody == otherResources)
 
-	go func() {
-		assert.NotNil(server.Start(ctx))
-	}()
-	time.Sleep(time.Second)
+	// GET no resources
+	req = makeRequest(assert, "GET", "/resources?property=Type-notin-VLANPool,IPAddressPool", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	resp, err := http.Get(fmt.Sprintf("http://%s?property=Type-in-VLANPool,IPAddressPool", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	resBody = rr.Body.String()
+	assert.Equal(noResources, resBody)
 
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
+	// GET resources
+	req = makeRequest(assert, "GET", "/resources?property=Type-equal-VLANPool", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	assert.True(string(body) == resources || string(body) == otherResources)
-	assert.Nil(resp.Body.Close())
+	resBody = rr.Body.String()
+	assert.True(resBody == resources || resBody == otherResources)
 
-	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-notin-VLANPool,IPAddressPool", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	// GET no resources
+	req = makeRequest(assert, "GET", "/resources?property=Type-notequal-VLANPool", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
+	resBody = rr.Body.String()
+	assert.Equal(noResources, resBody)
 
-	assert.Equal(noResources, string(body))
-	assert.Nil(resp.Body.Close())
+	// Invalid request
+	req = makeRequest(assert, "GET", "/resources?property=Type-notequal", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
-	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-equal-VLANPool", cfg.Address))
-	assert.True(err == nil && resp != nil)
+	req = makeRequest(assert, "GET", "/resources?property=Type-notequal-VLANPool,Lab", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.True(string(body) == resources || string(body) == otherResources)
-	assert.Nil(resp.Body.Close())
-
-	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-notequal-VLANPool", cfg.Address))
-	assert.True(err == nil && resp != nil)
-
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(noResources, string(body))
-	assert.Nil(resp.Body.Close())
-
-	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-blahblah-test", cfg.Address))
-	assert.True(err == nil && resp != nil)
-	assert.True(resp.StatusCode == 400)
-	assert.Nil(server.Stop(ctx, nil))
+	req = makeRequest(assert, "GET", "/resources?property=Type-blahblah-VLANPool,Lab", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
-func TestGetResourcesByLabel(t *testing.T) { // nolint:funlen
+func TestGetResourcesByLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -258,59 +204,210 @@ func TestGetResourcesByLabel(t *testing.T) { // nolint:funlen
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9995"),
-		TLS:     nil,
+	handler := http.HandlerFunc(myAPI.GetResourcesByLabel)
+
+	// GET resources
+	req := makeRequest(assert, "GET", "/resources?label=owner-in-shravya,nandyala", "")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	resBody := rr.Body.String()
+	assert.True(resBody == resources || resBody == otherResources)
+
+	// GET no resources
+	req = makeRequest(assert, "GET", "/resources?label=owner-notin-shravya,nandyala", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	resBody = rr.Body.String()
+	assert.Equal(noResources, resBody)
+
+	// GET resource1
+	req = makeRequest(assert, "GET", "/resources?label=owner-equal-shravya", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	resBody = rr.Body.String()
+	assert.Equal(resource1, resBody)
+
+	// GET resource2
+	req = makeRequest(assert, "GET", "/resources?label=owner-notequal-shravya", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	resBody = rr.Body.String()
+	assert.Equal(resource2, resBody)
+
+	// Invalid requests
+	req = makeRequest(assert, "GET", "/resources?label=owner-equal", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	req = makeRequest(assert, "GET", "/resources?label=owner-equal-shravya,nandyala", "")
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+}
+
+func TestPutResource(t *testing.T) { //nolint:funlen
+	t.Parallel()
+	assert := assert.New(t)
+
+	t.Cleanup(func() { os.Remove("teststore/resources/01/00000003") })
+
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f.Add("Lab", func() zebra.Resource { return new(dc.Lab) })
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
+
+	handler := http.HandlerFunc(myAPI.PutResource)
+
+	body := `{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}`
+
+	// Test error handling
+	req, err := http.NewRequest("POST", "/resources", nil)
+	assert.Nil(err)
+
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	// Create new resource
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusCreated, rr.Code)
+
+	// Update existing resource
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	// Create resource without a type
+	body = `{"id":"0100000003","labels": {"owner": "shravya"},"name": "shravya's lab"}`
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	// Create resource with an invalid type
+	body = `{"id":"0100000003","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}`
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	// Create invalid resource
+	body = `{"id":"0100000003","type":"Lab"}`
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	// Trigger ioutil.ReadAll() panic
+	body = ""
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	// Create resource with no information
+	body = " "
+	req = makeRequest(assert, "POST", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+}
+
+func TestDeleteResource(t *testing.T) { //nolint:funlen
+	t.Parallel()
+	assert := assert.New(t)
+
+	root := "teststore1"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
+	f := zebra.Factory().Add("Lab", func() zebra.Resource { return new(network.VLANPool) })
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize(root))
+
+	handler := http.HandlerFunc(myAPI.DeleteResource)
+
+	lab1 := &dc.Lab{
+		NamedResource: zebra.NamedResource{
+			BaseResource: zebra.BaseResource{
+				ID:     "10000001",
+				Type:   "Lab",
+				Labels: nil,
+			},
+			Name: "Lab1",
+		},
 	}
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResourcesByLabel))
-	assert.NotNil(server)
 
-	ctx := context.Background()
+	lab2 := &dc.Lab{
+		NamedResource: zebra.NamedResource{
+			BaseResource: zebra.BaseResource{
+				ID:     "10000002",
+				Type:   "Lab",
+				Labels: nil,
+			},
+			Name: "Lab2",
+		},
+	}
 
-	go func() {
-		assert.NotNil(server.Start(ctx))
-	}()
-	time.Sleep(time.Second)
+	assert.Nil(myAPI.Store.Create(lab1))
+	assert.Nil(myAPI.Store.Create(lab2))
 
-	resp, err := http.Get(fmt.Sprintf("http://%s?label=owner-in-shravya,nandyala", cfg.Address))
+	// Invalid resources requested to be deleted
+	body := `["10000003", "10000004"]`
+	req := makeRequest(assert, "DELETE", "/resources", body)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	expected := "Invalid resource IDs: 10000003, 10000004\n"
+	resBody := rr.Body.String()
+	assert.Equal(expected, resBody)
+
+	// DELETE resources
+	body = `["10000001", "10000002"]`
+	req = makeRequest(assert, "DELETE", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
+
+	expected = "Deleted the following resources: 10000001, 10000002\n"
+	resBody = rr.Body.String()
+	assert.Equal(expected, resBody)
+
+	// Trigger ioutil.ReadAll() panic
+	body = ""
+	req = makeRequest(assert, "DELETE", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	// Bad request, type of list
+	body = `[1, 2]`
+	req = makeRequest(assert, "DELETE", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+}
+
+func makeRequest(assert *assert.Assertions, method string, url string, body string) *http.Request {
+	req, err := http.NewRequest(method, url, nil)
 	assert.Nil(err)
-	assert.NotNil(resp)
+	assert.NotNil(req)
 
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
+	if body != "" {
+		req.Body = ioutil.NopCloser(bytes.NewBufferString(body))
+	}
 
-	assert.True(string(body) == resources || string(body) == otherResources)
-	assert.Nil(resp.Body.Close())
-
-	resp, err = http.Get(fmt.Sprintf("http://%s?label=owner-notin-shravya,nandyala", cfg.Address))
-	assert.True(err == nil && resp != nil)
-
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(noResources, string(body))
-	assert.Nil(resp.Body.Close())
-
-	resp, err = http.Get(fmt.Sprintf("http://%s?label=owner-equal-shravya", cfg.Address))
-	assert.True(err == nil && resp != nil)
-
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(resource1, string(body))
-	assert.Nil(resp.Body.Close())
-
-	resp, err = http.Get(fmt.Sprintf("http://%s?label=owner-notequal-shravya", cfg.Address))
-	assert.True(err == nil && resp != nil)
-
-	body, err = ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.Equal(resource2, string(body))
-	assert.Nil(resp.Body.Close())
-
-	resp, err = http.Get(fmt.Sprintf("http://%s?label=owner-notequal", cfg.Address))
-	assert.True(err == nil && resp != nil)
-	assert.True(resp.StatusCode == 400)
-	assert.Nil(server.Stop(ctx, nil))
+	return req
 }

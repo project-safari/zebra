@@ -84,6 +84,7 @@ func (ids *IDStore) Delete(res zebra.Resource) error {
 }
 
 // Return all resources of given UUIDs in a ResourceMap.
+// If resource with id cannot be found, skip.
 func (ids *IDStore) Query(uuids []string) *zebra.ResourceMap {
 	retMap := zebra.NewResourceMap(ids.factory)
 
