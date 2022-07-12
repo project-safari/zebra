@@ -20,6 +20,7 @@ import (
 )
 
 var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
+var SampleIpAddr = []string{"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05", "192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08"}
 
 // create user roles
 
@@ -122,8 +123,11 @@ func Serials() string {
 
 //creating various resource types
 
-func CreateVlanPool(labels zebra.Labels, theRes zebra.BaseResource) *network.VLANPool {
+func CreateVlanPool(theType string) *network.VLANPool {
 	var start uint16 = Range()
+	theLabels := CreateLabels()
+
+	theRes := zebra.NewBaseResource(theType, theLabels)
 
 	return &network.VLANPool{
 
@@ -133,10 +137,12 @@ func CreateVlanPool(labels zebra.Labels, theRes zebra.BaseResource) *network.VLA
 	}
 }
 
-func CreateSwitch(theRes zebra.BaseResource, ip net.IP) *network.Switch {
+func CreateSwitch(theType string, ip net.IP) *network.Switch {
 	var serial string = Serials()
 	var model string = Models()
 	var ports uint32 = Ports()
+	theLabels := CreateLabels()
+	theRes := zebra.NewBaseResource(theType, theLabels)
 
 	return &network.Switch{
 
@@ -148,14 +154,18 @@ func CreateSwitch(theRes zebra.BaseResource, ip net.IP) *network.Switch {
 	}
 }
 
-func CreateIpAddressPool(theRes zebra.BaseResource, ip net.IP) *network.IPAddressPool {
+func CreateIpAddressPool(theType string, ip net.IP) *network.IPAddressPool {
+
+	theLabels := CreateLabels()
+	theRes := zebra.NewBaseResource(theType, theLabels)
+
 	return &network.IPAddressPool{
 		BaseResource: theRes,
 		//Subnets:      []net.IPNet,
 	}
 }
 
-func CreateDatacenter(theRes zebra.BaseResource) *dc.Datacenter {
+func CreateDatacenter() *dc.Datacenter {
 	namedRes := new(zebra.NamedResource)
 
 	return &dc.Datacenter{
@@ -164,7 +174,7 @@ func CreateDatacenter(theRes zebra.BaseResource) *dc.Datacenter {
 	}
 }
 
-func CreateLab(theRes zebra.BaseResource) *dc.Lab {
+func CreateLab() *dc.Lab {
 	namedRes := new(zebra.NamedResource)
 
 	return &dc.Lab{
@@ -172,7 +182,7 @@ func CreateLab(theRes zebra.BaseResource) *dc.Lab {
 	}
 }
 
-func CreateRack(theRes zebra.BaseResource) *dc.Rack {
+func CreateRack() *dc.Rack {
 
 	namedRes := new(zebra.NamedResource)
 
@@ -195,7 +205,7 @@ func CreateLabels() map[string]string {
 	let = RandData(letters)
 	codes[let] = col
 
-	// get the labels
+	// get the key
 
 	return codes
 }
@@ -216,45 +226,43 @@ func Generate_Data() {
 
 			creds := new(auth.User)
 
-			theLabels := CreateLabels()
-
-			base := zebra.NewBaseResource(theType, theLabels)
-
-			sampleIP := "192.332.11.05"
+			sampleIP := RandData(SampleIpAddr)
 
 			creds.PasswordHash = Password()
 
 			creds.Role.Name = User()
 
-			creds.Key = auth.Generate()
-
 			if theType == "VLANPool" {
 
-				creds.zebra.NamedResource = CreateVlanPool(theLabels, base)
+				Res := CreateVlanPool(theType)
+				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
 
 			} else if theType == "Switch" {
 
-				creds.zebra.NamedResource = CreateSwitch(base, net.IP(sampleIP))
+				Res := CreateSwitch(theType, net.IP(sampleIP))
+				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
 
 			} else if theType == "IPAddressPool" {
 
-				creds.zebra.NamedResource = CreateIpAddressPool(base, net.IP(sampleIP))
+				Res := CreateIpAddressPool(theType, net.IP(sampleIP))
+				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
 
 			} else if theType == "Datacenter" {
 
-				creds.zebra.NamedResource = CreateDatacenter(base)
+				Res := CreateDatacenter()
+				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
 
 			} else if theType == "Lab" {
 
-				creds.zebra.NamedResource = CreateLab(base)
+				Res := CreateLab()
+				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
 
 			} else if theType == "Rack" {
 
-				creds.zebra.NamedResource = CreateRack(base)
+				Res := CreateRack()
+				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
 
 			}
-
-			fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", creds)
 
 		}
 
