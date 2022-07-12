@@ -125,7 +125,7 @@ func Serials() string {
 
 //creating various resource types
 
-func CreateVlanPool(theType string) (*network.VLANPool, zebra.NamedResource) {
+func CreateVlanPool(theType string) *network.VLANPool {
 	var start uint16 = Range()
 	theLabels := CreateLabels()
 
@@ -137,10 +137,10 @@ func CreateVlanPool(theType string) (*network.VLANPool, zebra.NamedResource) {
 		RangeStart:   start,
 		RangeEnd:     (start + 100),
 	}
-	return ret, theRes
+	return ret
 }
 
-func CreateSwitch(theType string, ip net.IP) (*network.Switch, zebra.NamedResource) {
+func CreateSwitch(theType string, ip net.IP) *network.Switch {
 	var serial string = Serials()
 	var model string = Models()
 	var ports uint32 = Ports()
@@ -155,10 +155,10 @@ func CreateSwitch(theType string, ip net.IP) (*network.Switch, zebra.NamedResour
 		Model:        model,
 		NumPorts:     ports,
 	}
-	return ret, theRes
+	return ret
 }
 
-func CreateIpAddressPool(theType string, ip net.IP) (*network.IPAddressPool, zebra.NamedResource) {
+func CreateIpAddressPool(theType string, ip net.IP) *network.IPAddressPool {
 
 	theLabels := CreateLabels()
 	theRes := zebra.NewBaseResource(theType, theLabels)
@@ -167,10 +167,10 @@ func CreateIpAddressPool(theType string, ip net.IP) (*network.IPAddressPool, zeb
 		BaseResource: theRes,
 		//Subnets:      []net.IPNet,
 	}
-	return ret, theRes
+	return ret
 }
 
-func CreateDatacenter() (*dc.Datacenter, zebra.NamedResource) {
+func CreateDatacenter() *dc.Datacenter {
 	namedRes := new(zebra.NamedResource)
 
 	ret := &dc.Datacenter{
@@ -178,19 +178,19 @@ func CreateDatacenter() (*dc.Datacenter, zebra.NamedResource) {
 		Address:       "sample address",
 	}
 
-	return ret, *namedRes
+	return ret
 }
 
-func CreateLab() (*dc.Lab, zebra.NamedResource) {
+func CreateLab() *dc.Lab {
 	namedRes := new(zebra.NamedResource)
 
 	ret := &dc.Lab{
 		NamedResource: *namedRes,
 	}
-	return ret, *namedRes
+	return ret
 }
 
-func CreateRack() (*dc.Rack, zebra.NamedResource) {
+func CreateRack() *dc.Rack {
 
 	namedRes := new(zebra.NamedResource)
 
@@ -198,7 +198,7 @@ func CreateRack() (*dc.Rack, zebra.NamedResource) {
 		NamedResource: *namedRes,
 		Row:           "sample row",
 	}
-	return ret, *namedRes
+	return ret
 }
 
 //sample labels
@@ -243,38 +243,32 @@ func Generate_Data() {
 
 			if theType == "VLANPool" {
 
-				Res, base := CreateVlanPool(theType)
-				creds.NamedResource = base
+				Res := CreateVlanPool(theType)
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Switch" {
 
-				Res, base := CreateSwitch(theType, net.IP(sampleIP))
-				creds.NamedResource = base
+				Res := CreateSwitch(theType, net.IP(sampleIP))
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "IPAddressPool" {
 
-				Res, base := CreateIpAddressPool(theType, net.IP(sampleIP))
-				creds.NamedResource = base
+				Res := CreateIpAddressPool(theType, net.IP(sampleIP))
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Datacenter" {
 
-				Res, base := CreateDatacenter()
-				creds.NamedResource = base
+				Res := CreateDatacenter()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Lab" {
 
-				Res, base := CreateLab()
-				creds.NamedResource = base
+				Res := CreateLab()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Rack" {
 
-				Res, base := CreateRack()
-				creds.NamedResource = base
+				Res := CreateRack()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			}
