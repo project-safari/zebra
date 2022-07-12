@@ -13,7 +13,7 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " ", "BaseResource", "NamedResource", "Credentials"}
+var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
 
 func User() string {
 
