@@ -1,3 +1,10 @@
+
+/*
+
+create 100 of each resource for some users
+
+*/
+
 package generate_data
 
 import (
@@ -6,7 +13,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/project-safari/zebra"
+	"github.com`/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
