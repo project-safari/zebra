@@ -1,4 +1,7 @@
 package generate_data
+/*
+generate sample data and users
+*/
 
 import (
 	"fmt"
@@ -15,6 +18,7 @@ import (
 
 var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
 
+// create user roles
 func User() string {
 
 	// some usernames
@@ -29,6 +33,9 @@ func User() string {
 		" ",
 		"engineer1",
 		"designer",
+		"private_user",
+		"ceo",
+		"staff",
 	}
 
 	username := RandData(name_list)
@@ -37,8 +44,9 @@ func User() string {
 
 }
 
-//some passwords
+//create some passwords
 func Password() string {
+	
 	password_list := []string{
 		"pass123",
 		"pass222",
@@ -47,13 +55,17 @@ func Password() string {
 		"passthrough",
 		" ",
 		"another",
-		" ",
+		"no_pass",
 		"somepass",
 		"v)entry2",
+		"p%3eqr3",
+		"random_pass",
+		"validate000",
 	}
 	pwd := RandData(password_list)
 
 	return pwd
+	
 }
 
 //random selection from lists
@@ -62,6 +74,7 @@ func RandData(res []string) string {
 	var length = len(res)
 	var ind int = rand.Intn(length - 1)
 	typ := res[ind]
+	
 	return typ
 }
 
@@ -73,38 +86,42 @@ func Range() uint16 {
 	var length = len(nums)
 	var ind int = rand.Intn(length - 1)
 	num := nums[ind]
+	
 	return num
 }
 
 // creating random ports
-
 func Ports() uint32 {
+	
 	nums := []uint32{1, 2, 3, 4, 6, 8, 9, 16, 27, 32, 36, 54, 72, 64, 81, 128, 162, 216, 256, 512}
 	rand.Seed(time.Now().UnixNano())
 	var length = len(nums)
 	var ind int = rand.Intn(length - 1)
 	port := nums[ind]
+	
 	return port
-
+	
 }
 
-// random sample models
-
+// create random sample model names
 func Models() string {
+	
 	models := []string{"model A", "modelB", "modelC", "modelD", "modelA.1", "modelA.1.1", "modelE", "modelD.010", "modelF", "modelG", "modelG.1", "modelG.1.1"}
 	model := RandData(models)
+	
 	return model
+	
 }
 
-// random serial codes
-
+// create random serial codes
 func Serials() string {
+	
 	nums := []string{"00000", "00001", "00002", "00003", "00004", "00005", "00006", "00007", "00008", "00009", "00010", "00020", "00030", "00040", "00050", "00060", "00070", "00080", "00090", "00100", "00200", "00300", "00400", "00500", "01000", "02000", "03000"}
 	return RandData(nums)
+	
 }
 
 //creating various resource types
-
 func CreateResource(resType string, labels zebra.Labels, start uint16, theRes zebra.BaseResource, ip net.IP, serial string, model string, ports uint32, namedRes zebra.NamedResource) zebra.Resource {
 
 	id := uuid.New().String()
@@ -139,7 +156,7 @@ func CreateResource(resType string, labels zebra.Labels, start uint16, theRes ze
 	} else if resType == "Datacenter" {
 		return &dc.Datacenter{
 			NamedResource: namedRes,
-			Address:       " ",
+			Address:       "sample address",
 		}
 	} else if resType == "Lab" {
 		return &dc.Lab{
@@ -148,7 +165,7 @@ func CreateResource(resType string, labels zebra.Labels, start uint16, theRes ze
 	} else if resType == "Rack" {
 		return &dc.Rack{
 			NamedResource: namedRes,
-			Row:           " ",
+			Row:           "sample row",
 		}
 	}
 	// if none of those apply, just use base resource info
@@ -161,51 +178,56 @@ func CreateResource(resType string, labels zebra.Labels, start uint16, theRes ze
 }
 
 //sample labels
-func CreateLabels() map[string]string {
+func CreateLabels() (string, map[string]string) {
+	
 	codes := make(map[string]string)
 	col := " "
 	let := " "
 	colors := []string{"red", "yellow", "green", "blue", "white", "magenta", "black", "purple", "brown", "orange", "pink", "grey"}
 	letters := []string{"alpha", "beta", "gamma", "delta", "epsilon", "eta", "theta", "Iota", "Kappa", "Lambda", "Mu", "Nu"}
 
-	for i := 0; i < len(colors); i++ {
-		col = RandData(colors)
-		let = RandData(letters)
-		codes[let] = col
-	}
+	col = RandData(colors)
+	let = RandData(letters)
+	codes[let] = col
 
-	return codes
+	// get the key and the label pair
+
+	return codes[let], codes
+	
 }
+
 
 //put it all together
 func Generate_Data() {
 
-	creds := new(auth.User)
+	// 100 resources
 	for each := 0; each < 100; each++ {
+		
+		//generate new user
+		
+		creds := new(auth.User)
 
+		// info to be used in the resources
+		
 		theType := RandData(resourceTypes)
-		theLabels := CreateLabels()
+		theLabels, keys := CreateLabels()
 		start := Range()
 		base := zebra.NewBaseResource(theType, theLabels)
 		serial := Serials()
 		port := Ports()
 		model := Models()
-		sampleIP := "192.332.11.05"
+		sampleIP := "192.232.11.05"
 		named := new(zebra.NamedResource)
-
-		//named := zebra.NamedResource(base)
-
-		//theData := zebra.CreateBaseResource(theType, theLabels)
-
-		creds.zebra.BaseResource = CreateResource(theType, theLabels, start, base, net.IP(sampleIP), serial, model, port, named)
-
+		
+		// update info
+		
+		creds.zebra.NamedResource = CreateResource(theType, theLabels, start, base, net.IP(sampleIP), serial, model, port, named)
 		creds.PasswordHash = Password()
+		creds.Role = User()
+		creds.Key = keys
 
-		creds.Name = User()
-
-		creds.Key = CreateLabels()
-
-		fmt.Println("The updated data with username, password, corresponding resource and its respective labels: ", creds)
+		// display info
+		fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", creds)
 
 	}
 }
