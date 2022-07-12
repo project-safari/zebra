@@ -1,24 +1,23 @@
 package api_test
 
 import (
-<<<<<<< HEAD
 	"bytes"
-=======
 	"context"
 	"errors"
 	"fmt"
->>>>>>> d5c1edf (Created tests case for error statements and)
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/api"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
+	"gojini.dev/web"
 )
 
 //nolint:gochecknoglobals
@@ -112,6 +111,27 @@ func TestGetResourceError(t *testing.T) {
 	assert.Nil(server.Stop(ctx, nil))
 }
 
+func TestGetResourceError(t *testing.T) {
+	mockError := errors.New("uh oh")
+	marshal := api.Marshal
+	api.Marshal = func(v any) ([]byte, error) {
+		return nil, mockError
+	}
+	assert := assert.New(t)
+
+	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+
+	myAPI := api.NewResourceAPI(f)
+	assert.Nil(myAPI.Initialize("teststore"))
+
+	cfg := &web.Config{
+		Address: web.NewAddress("127.0.0.1:9999"),
+		TLS:     nil,
+	}
+	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResources))
+	assert.NotNil(server)
+	api.Marshal = marshal
+}
 func TestGetResourcesByID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

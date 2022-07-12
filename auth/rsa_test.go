@@ -52,11 +52,12 @@ func TestNewRsaIdentity(t *testing.T) {
 }
 
 func TestUnmarshalErrors(t *testing.T) {
-	t.Parallel()
 
 	assert := assert.New(t)
 
 	mockError := errors.New("test error")
+	Pprivkey := auth.ParsePKCS1PrivateKey
+	Ppublickey := auth.ParsePKCS1PublicKey
 	auth.ParsePKCS1PrivateKey = func(der []byte) (*rsa.PrivateKey, error) {
 		return nil, mockError
 	}
@@ -65,7 +66,7 @@ func TestUnmarshalErrors(t *testing.T) {
 		return nil, mockError
 	}
 
-	bad_text := pem.EncodeToMemory(&pem.Block{
+	badText := pem.EncodeToMemory(&pem.Block{
 		Type:    "NULL KEY",
 		Headers: nil,
 	})
@@ -97,7 +98,9 @@ func TestUnmarshalErrors(t *testing.T) {
 	assert.NotNil(b)
 	assert.NotNil(x.UnmarshalText(b))
 
-	assert.NotNil(x.UnmarshalText(bad_text))
+	assert.NotNil(x.UnmarshalText(badText))
+	auth.ParsePKCS1PublicKey = Ppublickey
+	auth.ParsePKCS1PrivateKey = Pprivkey
 
 }
 
