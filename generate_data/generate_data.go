@@ -2,7 +2,7 @@
 /*
 
 create 100 of each resource for some users
-sisplay results for each respective type
+display results for each respective type
 
 */
 
@@ -53,7 +53,7 @@ func User() string {
 //create some passwords
 
 func Password() string {
-	password_list := []string{
+	p_list := []string{
 		"pass123",
 		"pass222",
 		"pass321",
@@ -68,7 +68,7 @@ func Password() string {
 		"random_pass",
 		"validate000",
 	}
-	pwd := RandData(password_list)
+	pwd := RandData(p_list)
 
 	return pwd
 }
