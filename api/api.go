@@ -19,6 +19,9 @@ type ResourceAPI struct {
 }
 
 var ErrNumArgs = errors.New("wrong number of args")
+var Marshal = func(v any) ([]byte, error) {
+	return json.Marshal(v)
+}
 
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
@@ -37,7 +40,7 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 func (api *ResourceAPI) GetResources(w http.ResponseWriter, req *http.Request) {
 	results := api.Store.Query()
 
-	bytes, err := json.Marshal(results)
+	bytes, err := Marshal(results)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
