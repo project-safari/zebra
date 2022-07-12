@@ -50,7 +50,6 @@ func TestInitialize(t *testing.T) {
 func TestGetResources(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
-
 	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
