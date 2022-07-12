@@ -210,7 +210,7 @@ func Generate_Data() {
 		// info to be used in the resources
 		
 		theType := RandData(resourceTypes)
-		theLabels, keys := CreateLabels()
+		keys, theLabels := CreateLabels()
 		start := Range()
 		base := zebra.NewBaseResource(theType, theLabels)
 		serial := Serials()
