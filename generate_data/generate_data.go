@@ -2,6 +2,7 @@
 /*
 
 create 100 of each resource for some users
+sisplay results for each respective type
 
 */
 
@@ -123,28 +124,29 @@ func Serials() string {
 
 //creating various resource types
 
-func CreateVlanPool(theType string) *network.VLANPool {
+func CreateVlanPool(theType string) (*network.VLANPool, zebra.NamedResource) {
 	var start uint16 = Range()
 	theLabels := CreateLabels()
 
 	theRes := zebra.NewBaseResource(theType, theLabels)
 
-	return &network.VLANPool{
+	ret := &network.VLANPool{
 
 		BaseResource: theRes,
 		RangeStart:   start,
 		RangeEnd:     (start + 100),
 	}
+	return ret, theRes
 }
 
-func CreateSwitch(theType string, ip net.IP) *network.Switch {
+func CreateSwitch(theType string, ip net.IP) (*network.Switch, zebra.NamedResource) {
 	var serial string = Serials()
 	var model string = Models()
 	var ports uint32 = Ports()
 	theLabels := CreateLabels()
 	theRes := zebra.NewBaseResource(theType, theLabels)
 
-	return &network.Switch{
+	ret := &network.Switch{
 
 		BaseResource: theRes,
 		ManagementIP: ip,
@@ -152,44 +154,50 @@ func CreateSwitch(theType string, ip net.IP) *network.Switch {
 		Model:        model,
 		NumPorts:     ports,
 	}
+	return ret, theRes
 }
 
-func CreateIpAddressPool(theType string, ip net.IP) *network.IPAddressPool {
+func CreateIpAddressPool(theType string, ip net.IP) (*network.IPAddressPool, zebra.NamedResource) {
 
 	theLabels := CreateLabels()
 	theRes := zebra.NewBaseResource(theType, theLabels)
 
-	return &network.IPAddressPool{
+	ret := &network.IPAddressPool{
 		BaseResource: theRes,
 		//Subnets:      []net.IPNet,
 	}
+	return ret, theRes
 }
 
-func CreateDatacenter() *dc.Datacenter {
+func CreateDatacenter() (*dc.Datacenter, zebra.NamedResource) {
 	namedRes := new(zebra.NamedResource)
 
-	return &dc.Datacenter{
+	ret := &dc.Datacenter{
 		NamedResource: *namedRes,
 		Address:       "sample address",
 	}
+
+	return ret, *namedRes
 }
 
-func CreateLab() *dc.Lab {
+func CreateLab() (*dc.Lab, zebra.NamedResource) {
 	namedRes := new(zebra.NamedResource)
 
-	return &dc.Lab{
+	ret := &dc.Lab{
 		NamedResource: *namedRes,
 	}
+	return ret, *namedRes
 }
 
-func CreateRack() *dc.Rack {
+func CreateRack() (*dc.Rack, zebra.NamedResource) {
 
 	namedRes := new(zebra.NamedResource)
 
-	return &dc.Rack{
+	ret := &dc.Rack{
 		NamedResource: *namedRes,
 		Row:           "sample row",
 	}
+	return ret, *namedRes
 }
 
 //sample labels
@@ -234,33 +242,39 @@ func Generate_Data() {
 
 			if theType == "VLANPool" {
 
-				Res := CreateVlanPool(theType)
-				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
+				Res, base := CreateVlanPool(theType)
+				creds.NamedResource = base
+				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Switch" {
 
-				Res := CreateSwitch(theType, net.IP(sampleIP))
-				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
+				Res, base := CreateSwitch(theType, net.IP(sampleIP))
+				creds.NamedResource = base
+				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "IPAddressPool" {
 
-				Res := CreateIpAddressPool(theType, net.IP(sampleIP))
-				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
+				Res, base := CreateIpAddressPool(theType, net.IP(sampleIP))
+				creds.NamedResource = base
+				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Datacenter" {
 
-				Res := CreateDatacenter()
-				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
+				Res, base := CreateDatacenter()
+				creds.NamedResource = base
+				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Lab" {
 
-				Res := CreateLab()
-				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
+				Res, base := CreateLab()
+				creds.NamedResource = base
+				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Rack" {
 
-				Res := CreateRack()
-				fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", Res, creds)
+				Res, base := CreateRack()
+				creds.NamedResource = base
+				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			}
 
