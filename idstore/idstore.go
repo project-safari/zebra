@@ -90,7 +90,7 @@ func (ids *IDStore) Query(uuids []string) *zebra.ResourceMap {
 	for _, id := range uuids {
 		res, ok := ids.resources[id]
 		if !ok {
-			return nil
+			continue
 		}
 
 		retMap.Add(res, res.GetType())
