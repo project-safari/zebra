@@ -188,7 +188,7 @@ func CreateLabels() map[string]string {
 	let = RandData(letters)
 	codes[let] = col
 
-	// get the key
+	// get the labels
 
 	return codes
 }
@@ -209,18 +209,11 @@ func Generate_Data() {
 
 			creds := new(auth.User)
 
-			//theType := RandData(resourceTypes)
 			theLabels := CreateLabels()
 
 			base := zebra.NewBaseResource(theType, theLabels)
 
 			sampleIP := "192.332.11.05"
-
-			//named := zebra.NamedResource(base)
-
-			//theData := zebra.CreateBaseResource(theType, theLabels)
-
-			//creds.zebra.NamedResource = CreateResource(theType, theLabels, base, net.IP(sampleIP))
 
 			creds.PasswordHash = Password()
 
@@ -256,11 +249,6 @@ func Generate_Data() {
 
 			fmt.Println("Information: ", each, "\nThe data with username, password, corresponding resource and its respective labels: ", creds)
 
-			/*
-				fmt.Println("The updated data with username, password, corresponding resource and its respective labels: ", creds)
-
-				res := make(map[creds]zebra.Resource)
-			*/
 		}
 
 	}
