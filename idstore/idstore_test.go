@@ -167,6 +167,9 @@ func TestQuery(t *testing.T) {
 	resources = rs.Query([]string{vlan1.ID, vlan2.ID})
 	assert.Equal(1, len(resources.Resources))
 	assert.Equal(2, len(resources.Resources["VLANPool"].Resources))
+
+	resources = rs.Query([]string{"random id"})
+	assert.Empty(resources.Resources)
 }
 
 func getVLAN() *network.VLANPool {
