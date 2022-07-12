@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/project-safari/zebra"
@@ -258,7 +259,7 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			val := reflect.ValueOf(res).Elem().FieldByName(query.Key).String()
+			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
 			inList := isIn(val, query.Values)
 
 			if inVals && inList {
@@ -281,4 +282,110 @@ func isIn(val string, list []string) bool {
 	}
 
 	return false
+}
+
+// Filter given map by uuids.
+func FilterUUID(uuids []string, resMap *zebra.ResourceMap) error {
+	for t, l := range resMap.Resources {
+		for _, res := range l.Resources {
+			if !isIn(res.GetID(), uuids) {
+				resMap.Delete(res, t)
+			}
+		}
+	}
+
+	return nil
+}
+
+// Filter given map by types.
+func FilterType(types []string, resMap *zebra.ResourceMap) error {
+	for t := range resMap.Resources {
+		if !isIn(t, types) {
+			delete(resMap.Resources, t)
+		}
+	}
+
+	return nil
+}
+
+// Filter given map by label name and val.
+func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) error { //nolint:cyclop
+	for t, l := range resMap.Resources {
+		for _, res := range l.Resources {
+			labels := res.GetLabels()
+
+			switch query.Op {
+			case zebra.MatchEqual:
+				if len(query.Values) != 1 {
+					return zebra.ErrInvalidQuery
+				}
+
+				fallthrough
+			case zebra.MatchIn:
+				if !labels.MatchIn(query.Key, query.Values...) {
+					resMap.Delete(res, t)
+				}
+			case zebra.MatchNotEqual:
+				if len(query.Values) != 1 {
+					return zebra.ErrInvalidQuery
+				}
+
+				fallthrough
+			case zebra.MatchNotIn:
+				if !labels.MatchNotIn(query.Key, query.Values...) {
+					resMap.Delete(res, t)
+				}
+			default:
+				return zebra.ErrInvalidQuery
+			}
+		}
+	}
+
+	return nil
+}
+
+// Filter given map by property name (case insensitive) and val.
+func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) error { //nolint:cyclop
+	for t, l := range resMap.Resources {
+		for _, res := range l.Resources {
+			switch query.Op {
+			case zebra.MatchEqual:
+				if len(query.Values) != 1 {
+					return zebra.ErrInvalidQuery
+				}
+
+				fallthrough
+			case zebra.MatchIn:
+				val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
+				if !isIn(val, query.Values) {
+					resMap.Delete(res, t)
+				}
+			case zebra.MatchNotEqual:
+				if len(query.Values) != 1 {
+					return zebra.ErrInvalidQuery
+				}
+
+				fallthrough
+			case zebra.MatchNotIn:
+				val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
+				if isIn(val, query.Values) {
+					resMap.Delete(res, t)
+				}
+			default:
+				return zebra.ErrInvalidQuery
+			}
+		}
+	}
+
+	return nil
+}
+
+// Ignore case in returning value of given field.
+func FieldByName(v reflect.Value, field string) reflect.Value {
+	field = strings.ToLower(field)
+
+	return v.FieldByNameFunc(
+		func(found string) bool {
+			return strings.ToLower(found) == field
+		})
 }
