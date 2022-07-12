@@ -1,5 +1,7 @@
 package generate_data
+
 /*
+create resources and users 
 generate sample data and users
 */
 
