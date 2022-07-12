@@ -198,7 +198,8 @@ func TestQuery(t *testing.T) {
 	query2 := zebra.Query{Op: zebra.MatchIn, Key: "a", Values: []string{"i", "1"}}
 	query3 := zebra.Query{Op: zebra.MatchNotEqual, Key: "a", Values: []string{"i", "1"}}
 	query4 := zebra.Query{Op: zebra.MatchNotIn, Key: "a", Values: []string{"i"}}
-	invalid := zebra.Query{Op: 11, Key: "a", Values: []string{"i"}}
+	invalid1 := zebra.Query{Op: 11, Key: "a", Values: []string{"i"}}
+	invalid2 := zebra.Query{Op: zebra.MatchEqual, Key: "!exists", Values: []string{"i"}}
 
 	assert.Nil(ls.Query(query1))
 
@@ -225,7 +226,11 @@ func TestQuery(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal(1, len(resources.Resources))
 
-	assert.Nil(ls.Query(invalid))
+	assert.Nil(ls.Query(invalid1))
+
+	resources, err = ls.Query(invalid2)
+	assert.Nil(err)
+	assert.Equal(0, len(resources.Resources))
 }
 
 func getVLAN() *network.VLANPool {

@@ -162,6 +162,10 @@ func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.Resource
 
 	if inVals {
 		for _, val := range query.Values {
+			if ls.resources[query.Key] == nil || ls.resources[query.Key].Resources[val] == nil {
+				continue
+			}
+
 			for _, res := range ls.resources[query.Key].Resources[val].Resources {
 				results.Add(res, res.GetType())
 			}
