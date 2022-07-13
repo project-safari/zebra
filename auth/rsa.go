@@ -16,13 +16,9 @@ var (
 	ErrUnknownPEMBlock = errors.New("unknown PEM block")
 )
 
-var ParsePKCS1PrivateKey = func(der []byte) (*rsa.PrivateKey, error) {
-	return x509.ParsePKCS1PrivateKey(der)
-}
+var ParsePKCS1PrivateKey = x509.ParsePKCS1PrivateKey
 
-var ParsePKCS1PublicKey = func(der []byte) (*rsa.PublicKey, error) {
-	return x509.ParsePKCS1PublicKey(der)
-}
+var ParsePKCS1PublicKey = x509.ParsePKCS1PublicKey
 
 const RSAKeySize = 2048
 

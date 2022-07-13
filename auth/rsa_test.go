@@ -55,20 +55,20 @@ func TestUnmarshalErrors(t *testing.T) {
 
 	assert := assert.New(t)
 
-	mockError := errors.New("test error")
 	Pprivkey := auth.ParsePKCS1PrivateKey
 	Ppublickey := auth.ParsePKCS1PublicKey
 	auth.ParsePKCS1PrivateKey = func(der []byte) (*rsa.PrivateKey, error) {
-		return nil, mockError
+		return nil, errors.New("test error")
 	}
 
 	auth.ParsePKCS1PublicKey = func(der []byte) (*rsa.PublicKey, error) {
-		return nil, mockError
+		return nil, errors.New("test error")
 	}
 
 	badText := pem.EncodeToMemory(&pem.Block{
 		Type:    "NULL KEY",
 		Headers: nil,
+		Bytes:   nil,
 	})
 
 	henk, err := auth.Generate()
@@ -88,6 +88,7 @@ func TestUnmarshalErrors(t *testing.T) {
 	assert.Nil(e)
 	assert.NotNil(b)
 	assert.NotNil(x.UnmarshalText(b))
+
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	assert.Nil(err)
 
@@ -99,9 +100,9 @@ func TestUnmarshalErrors(t *testing.T) {
 	assert.NotNil(x.UnmarshalText(b))
 
 	assert.NotNil(x.UnmarshalText(badText))
+
 	auth.ParsePKCS1PublicKey = Ppublickey
 	auth.ParsePKCS1PrivateKey = Pprivkey
-
 }
 
 func TestEncrypt(t *testing.T) {

@@ -19,9 +19,7 @@ type ResourceAPI struct {
 }
 
 var ErrNumArgs = errors.New("wrong number of args")
-var Marshal = func(v any) ([]byte, error) {
-	return json.Marshal(v)
-}
+var Marshal = json.Marshal
 
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{

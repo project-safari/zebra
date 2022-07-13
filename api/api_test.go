@@ -112,10 +112,9 @@ func TestGetResourceError(t *testing.T) {
 }
 
 func TestGetResourceError(t *testing.T) {
-	mockError := errors.New("uh oh")
 	marshal := api.Marshal
 	api.Marshal = func(v any) ([]byte, error) {
-		return nil, mockError
+		return nil, errors.New("uh oh")
 	}
 	assert := assert.New(t)
 
@@ -130,6 +129,7 @@ func TestGetResourceError(t *testing.T) {
 	}
 	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResources))
 	assert.NotNil(server)
+
 	api.Marshal = marshal
 }
 func TestGetResourcesByID(t *testing.T) {
