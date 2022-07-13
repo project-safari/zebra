@@ -244,7 +244,7 @@ func TestGetResourcesByProperty(t *testing.T) { // nolint:funlen
 	assert.Equal(noResources, string(body))
 	assert.Nil(resp.Body.Close())
 
-	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-notequal", cfg.Address))
+	resp, err = http.Get(fmt.Sprintf("http://%s?property=Type-blahblah-test", cfg.Address))
 	assert.True(err == nil && resp != nil)
 	assert.True(resp.StatusCode == 400)
 	assert.Nil(server.Stop(ctx, nil))

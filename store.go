@@ -39,3 +39,15 @@ type Store interface {
 	QueryLabel(query Query) (*ResourceMap, error)
 	QueryProperty(query Query) (*ResourceMap, error)
 }
+
+func (q *Query) Validate() error {
+	if (q.Op == MatchEqual || q.Op == MatchNotEqual) && len(q.Values) != 1 {
+		return ErrInvalidQuery
+	}
+
+	if q.Op > MatchNotIn {
+		return ErrInvalidQuery
+	}
+
+	return nil
+}
