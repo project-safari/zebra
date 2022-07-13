@@ -154,6 +154,8 @@ func buildQuery(url string, isProperty bool) (zebra.Query, error) {
 		operator = zebra.MatchIn
 	case "notin":
 		operator = zebra.MatchNotIn
+	default:
+		return zebra.Query{}, zebra.ErrInvalidQuery
 	}
 
 	values := strings.Split(params[2], ",")

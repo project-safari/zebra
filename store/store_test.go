@@ -386,7 +386,8 @@ func TestFilterUUID(t *testing.T) {
 
 	resMap.Add(vlan, "VLANPool")
 
-	assert.Nil(store.FilterUUID([]string{id}, resMap))
+	resMap, err := store.FilterUUID([]string{id}, resMap)
+	assert.Nil(err)
 	assert.Equal(1, len(resMap.Resources))
 	assert.Equal(1, len(resMap.Resources["VLANPool"].Resources))
 	assert.Equal(id, resMap.Resources["VLANPool"].Resources[0].GetID())
@@ -403,10 +404,15 @@ func TestFilterType(t *testing.T) {
 
 	resMap.Add(lab, "Lab")
 
-	assert.Nil(store.FilterType([]string{"Lab"}, resMap))
+	resMap, err := store.FilterType([]string{"Lab"}, resMap)
+	assert.Nil(err)
 	assert.Equal(1, len(resMap.Resources))
 	assert.Equal(1, len(resMap.Resources["Lab"].Resources))
 	assert.Equal(id, resMap.Resources["Lab"].Resources[0].GetID())
+
+	resMap, err = store.FilterType([]string{"blah"}, resMap)
+	assert.Nil(err)
+	assert.Equal(0, len(resMap.Resources))
 }
 
 func TestFilterLabel(t *testing.T) {
@@ -422,22 +428,27 @@ func TestFilterLabel(t *testing.T) {
 	resMap.Add(lab, "Lab")
 
 	query := zebra.Query{Op: 10, Key: "owner", Values: []string{"shravya"}}
-	assert.NotNil(store.FilterLabel(query, resMap))
+	resMap, err := store.FilterLabel(query, resMap)
+	assert.NotNil(err)
 
 	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"shravya", "nandyala"}}
-	assert.NotNil(store.FilterLabel(query, resMap))
+	resMap, err = store.FilterLabel(query, resMap)
+	assert.NotNil(err)
 
 	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "owner", Values: []string{"shravya", "nandyala"}}
-	assert.NotNil(store.FilterLabel(query, resMap))
+	resMap, err = store.FilterLabel(query, resMap)
+	assert.NotNil(err)
 
 	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"shravya"}}
-	assert.Nil(store.FilterLabel(query, resMap))
+	resMap, err = store.FilterLabel(query, resMap)
+	assert.Nil(err)
 	assert.Equal(1, len(resMap.Resources))
 	assert.Equal(1, len(resMap.Resources["Lab"].Resources))
 	assert.Equal(id, resMap.Resources["Lab"].Resources[0].GetID())
 
 	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "owner", Values: []string{"shravya"}}
-	assert.Nil(store.FilterLabel(query, resMap))
+	resMap, err = store.FilterLabel(query, resMap)
+	assert.Nil(err)
 	assert.Equal(0, len(resMap.Resources))
 }
 
@@ -453,22 +464,27 @@ func TestFilterProperty(t *testing.T) {
 	resMap.Add(getVLAN(), "VLANPool")
 
 	query := zebra.Query{Op: 10, Key: "Type", Values: []string{"Lab"}}
-	assert.NotNil(store.FilterProperty(query, resMap))
+	resMap, err := store.FilterProperty(query, resMap)
+	assert.NotNil(err)
 
 	query = zebra.Query{Op: zebra.MatchEqual, Key: "Type", Values: []string{"Lab", "VLANPool"}}
-	assert.NotNil(store.FilterProperty(query, resMap))
+	resMap, err = store.FilterProperty(query, resMap)
+	assert.NotNil(err)
 
 	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "type", Values: []string{"Lab", "VLANPool"}}
-	assert.NotNil(store.FilterProperty(query, resMap))
+	resMap, err = store.FilterProperty(query, resMap)
+	assert.NotNil(err)
 
 	query = zebra.Query{Op: zebra.MatchEqual, Key: "Type", Values: []string{"Lab"}}
-	assert.Nil(store.FilterProperty(query, resMap))
+	resMap, err = store.FilterProperty(query, resMap)
+	assert.Nil(err)
 	assert.Equal(1, len(resMap.Resources))
 	assert.Equal(1, len(resMap.Resources["Lab"].Resources))
 	assert.Equal(lab.ID, resMap.Resources["Lab"].Resources[0].GetID())
 
 	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "type", Values: []string{"Lab"}}
-	assert.Nil(store.FilterProperty(query, resMap))
+	resMap, err = store.FilterProperty(query, resMap)
+	assert.Nil(err)
 	assert.Equal(0, len(resMap.Resources))
 }
 

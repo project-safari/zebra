@@ -206,14 +206,14 @@ func (rs *ResourceStore) QueryType(types []string) *zebra.ResourceMap {
 
 // Return resources with matching label.
 func (rs *ResourceStore) QueryLabel(query zebra.Query) (*zebra.ResourceMap, error) {
-	rs.lock.RLock()
-	defer rs.lock.RUnlock()
-
-	resMap, err := rs.ls.Query(query)
-	if err != nil {
+	if err := query.Validate(); err != nil {
 		return nil, err
 	}
 
+	rs.lock.RLock()
+	defer rs.lock.RUnlock()
+
+	resMap := rs.ls.Query(query)
 	retMap := zebra.NewResourceMap(resMap.GetFactory())
 
 	zebra.CopyResourceMap(retMap, resMap)
@@ -224,29 +224,18 @@ func (rs *ResourceStore) QueryLabel(query zebra.Query) (*zebra.ResourceMap, erro
 // Return resources which match given property/value(s).
 // Naive search implementation, >= O(n) for n resources.
 func (rs *ResourceStore) QueryProperty(query zebra.Query) (*zebra.ResourceMap, error) {
+	if err := query.Validate(); err != nil {
+		return nil, err
+	}
+
 	rs.lock.RLock()
 	defer rs.lock.RUnlock()
 
-	switch query.Op {
-	case zebra.MatchEqual:
-		if len(query.Values) != 1 {
-			return nil, zebra.ErrInvalidQuery
-		}
-
-		fallthrough
-	case zebra.MatchIn:
+	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
 		return rs.propertyMatch(query, true)
-	case zebra.MatchNotEqual:
-		if len(query.Values) != 1 {
-			return nil, zebra.ErrInvalidQuery
-		}
-
-		fallthrough
-	case zebra.MatchNotIn:
-		return rs.propertyMatch(query, false)
-	default:
-		return nil, zebra.ErrInvalidQuery
 	}
+
+	return rs.propertyMatch(query, false)
 }
 
 func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.ResourceMap, error) {
@@ -285,99 +274,94 @@ func isIn(val string, list []string) bool {
 }
 
 // Filter given map by uuids.
-func FilterUUID(uuids []string, resMap *zebra.ResourceMap) error {
+func FilterUUID(uuids []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			if !isIn(res.GetID(), uuids) {
-				resMap.Delete(res, t)
+			if isIn(res.GetID(), uuids) {
+				retMap.Add(res, t)
 			}
 		}
 	}
 
-	return nil
+	return retMap, nil
 }
 
 // Filter given map by types.
-func FilterType(types []string, resMap *zebra.ResourceMap) error {
-	for t := range resMap.Resources {
-		if !isIn(t, types) {
-			delete(resMap.Resources, t)
+func FilterType(types []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
+	f := resMap.GetFactory()
+	retMap := zebra.NewResourceMap(f)
+
+	for _, t := range types {
+		l, ok := resMap.Resources[t]
+		if !ok {
+			continue
 		}
+
+		copyL := zebra.NewResourceList(f)
+
+		zebra.CopyResourceList(copyL, l)
+		retMap.Resources[t] = copyL
 	}
 
-	return nil
+	return retMap, nil
 }
 
 // Filter given map by label name and val.
-func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) error { //nolint:cyclop
+func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
+	if err := query.Validate(); err != nil {
+		return resMap, err
+	}
+
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
+	inVals := false
+
+	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
+		inVals = true
+	}
+
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			labels := res.GetLabels()
+			matchIn := labels.MatchIn(query.Key, query.Values...)
 
-			switch query.Op {
-			case zebra.MatchEqual:
-				if len(query.Values) != 1 {
-					return zebra.ErrInvalidQuery
-				}
-
-				fallthrough
-			case zebra.MatchIn:
-				if !labels.MatchIn(query.Key, query.Values...) {
-					resMap.Delete(res, t)
-				}
-			case zebra.MatchNotEqual:
-				if len(query.Values) != 1 {
-					return zebra.ErrInvalidQuery
-				}
-
-				fallthrough
-			case zebra.MatchNotIn:
-				if !labels.MatchNotIn(query.Key, query.Values...) {
-					resMap.Delete(res, t)
-				}
-			default:
-				return zebra.ErrInvalidQuery
+			if (inVals && matchIn) || (!inVals && !matchIn) {
+				retMap.Add(res, t)
 			}
 		}
 	}
 
-	return nil
+	return retMap, nil
 }
 
 // Filter given map by property name (case insensitive) and val.
-func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) error { //nolint:cyclop
+func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
+	if err := query.Validate(); err != nil {
+		return resMap, err
+	}
+
+	retMap := zebra.NewResourceMap(resMap.GetFactory())
+
+	inVals := false
+
+	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
+		inVals = true
+	}
+
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			switch query.Op {
-			case zebra.MatchEqual:
-				if len(query.Values) != 1 {
-					return zebra.ErrInvalidQuery
-				}
+			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
+			matchIn := isIn(val, query.Values)
 
-				fallthrough
-			case zebra.MatchIn:
-				val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-				if !isIn(val, query.Values) {
-					resMap.Delete(res, t)
-				}
-			case zebra.MatchNotEqual:
-				if len(query.Values) != 1 {
-					return zebra.ErrInvalidQuery
-				}
-
-				fallthrough
-			case zebra.MatchNotIn:
-				val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-				if isIn(val, query.Values) {
-					resMap.Delete(res, t)
-				}
-			default:
-				return zebra.ErrInvalidQuery
+			if (inVals && matchIn) || (!inVals && !matchIn) {
+				retMap.Add(res, t)
 			}
 		}
 	}
 
-	return nil
+	return retMap, nil
 }
 
 // Ignore case in returning value of given field.
