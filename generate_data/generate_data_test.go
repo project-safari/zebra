@@ -148,5 +148,11 @@ func TestGenerateData(t *testing.T) {
 
 	errRes := generate_data.GenerateData(0)
 	assert.True(errRes)
+}
 
+func TestPrinting(t *testing.T) {
+	num := 10
+	result := generate_data.GenerateData(num)
+
+	generate_data.Printing(result, num)
 }

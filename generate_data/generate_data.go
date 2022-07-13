@@ -38,7 +38,7 @@ func User() string {
 		"staff",
 	} // some usernames.
 
-	username := RandData(nameList) //nolint // select random username
+	username := RandData(nameList)
 
 	return username
 }
@@ -60,7 +60,7 @@ func Password() string {
 		"random_pass",
 		"validate000",
 	}
-	pwd := RandData(Plist) //nolint // select random pwd
+	pwd := RandData(Plist)
 
 	return pwd
 }
@@ -73,6 +73,7 @@ func RandData(res []string) string {
 
 	var ind int = rand.Intn(length - 1) //nolint // random selection for data sampling
 	typ := res[ind]
+
 	return typ
 }
 
@@ -119,7 +120,7 @@ func Models() string {
 func Serials() string {
 	nums := []string{"00000", "00001", "00002", "00003", "00004", "00005", "00006", "00007", "00008", "00009", "00010", "00020", "00030", "00040", "00050", "00060", "00070", "00080", "00090", "00100", "00200", "00300", "00400", "00500", "01000", "02000", "03000"}
 
-	ser := RandData(nums) //nolint // sample serial numbers to use in resources
+	ser := RandData(nums)
 
 	return ser
 }
@@ -134,7 +135,6 @@ func CreateIPArr(ipNum int) []net.IPNet {
 		ip := RandData(SampleIpAddr)
 		nets.IP = net.IP(ip)
 		netArr = append(netArr, nets)
-
 	}
 
 	return netArr
@@ -255,11 +255,16 @@ func CreateLabels() map[string]string {
 // put it all together.
 func GenerateData(manyRes int) bool {
 	err := false
-	var ipNum = 10 // number of ip's to have in the []net.IPNet array.
 
 	if len(resourceTypes) == 0 || manyRes == 0 {
 		err = true
 	}
+
+	return err
+}
+
+func Printing(good bool, manyRes int) {
+	var ipNum = 10 // number of ip's to have in the []net.IPNet array.
 
 	// go through each resource type.
 	for i := 0; i < len(resourceTypes); i++ {
@@ -301,5 +306,4 @@ func GenerateData(manyRes int) bool {
 			}
 		}
 	}
-	return err
 }
