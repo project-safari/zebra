@@ -33,6 +33,15 @@ func TestRange(t *testing.T) {
 	assert.NotNil(num)
 }
 
+func TestCreateLabels(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := generate_data.CreateLabels()
+
+	assert.NotNil(labels)
+}
+
 func TestPorts(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
