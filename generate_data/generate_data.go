@@ -13,7 +13,7 @@ import (
 	"math/rand"
 	"net"
 	"time"
-
+	"github.com/google/uuid"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/dc"
