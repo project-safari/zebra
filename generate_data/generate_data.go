@@ -48,7 +48,7 @@ func User() string {
 	return username
 }
 
-//create some passwords
+// create some passwords
 
 func Password() string {
 	Plist := []string{
@@ -71,7 +71,7 @@ func Password() string {
 	return pwd
 }
 
-//random selection from lists
+// random selection from lists
 
 func RandData(res []string) string {
 	var length = len(res)
@@ -132,7 +132,7 @@ func Serials() string {
 // create IP arr
 
 func CreateIPArr(ipNum int) []net.IPNet {
-	nets := *new(net.IPNet)
+	nets := net.IPNet{}
 	netArr := []net.IPNet{}
 
 	for i := 0; i < ipNum; i++ {
@@ -145,23 +145,19 @@ func CreateIPArr(ipNum int) []net.IPNet {
 	return netArr
 }
 
-//creating various resource types
+// creating various resource types
 
 func CreateVlanPool(theType string) *network.VLANPool {
-	var one uint16 = Range()
-	var two uint16 = Range()
+	var start uint16 = Range()
+	var end uint16 = Range()
 	theLabels := CreateLabels()
 	theRes := zebra.NewBaseResource(theType, theLabels)
-	var start uint16
-	var end uint16
 
-	if one < two {
-		start = one
-		end = two
+	if start > end {
+		temp := end
+		end = start
+		start = temp
 
-	} else {
-		start = two
-		end = one
 	}
 
 	ret := &network.VLANPool{
@@ -241,7 +237,7 @@ func CreateRack() *dc.Rack {
 	return ret
 }
 
-//sample labels
+// sample labels
 
 func CreateLabels() map[string]string {
 	codes := make(map[string]string)
@@ -258,7 +254,7 @@ func CreateLabels() map[string]string {
 	return codes
 }
 
-//put it all together
+// put it all together
 
 func GenerateData() {
 	// go through each resource type
@@ -284,32 +280,33 @@ func GenerateData() {
 
 			creds.Role.Name = User()
 
-			if theType == "VLANPool" {
+			switch theType {
+			case "VLANPool":
 
 				Res := CreateVlanPool(theType)
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
-			} else if theType == "Switch" {
+			case "Switch":
 
 				Res := CreateSwitch(theType, net.IP(sampleIP))
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
-			} else if theType == "IPAddressPool" {
+			case "IPAddressPool":
 
 				Res := CreateIPAddressPool(theType, IPArr)
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
-			} else if theType == "Datacenter" {
+			case "Datacenter":
 
 				Res := CreateDatacenter()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
-			} else if theType == "Lab" {
+			case "Lab":
 
 				Res := CreateLab()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
-			} else if theType == "Rack" {
+			case "Rack":
 
 				Res := CreateRack()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
