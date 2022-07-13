@@ -194,38 +194,19 @@ func TestQuery(t *testing.T) {
 	assert.NotNil(ls)
 	assert.Nil(ls.Initialize())
 
-	query1 := zebra.Query{Op: zebra.MatchEqual, Key: "a", Values: []string{"i", "1"}}
-	query2 := zebra.Query{Op: zebra.MatchIn, Key: "a", Values: []string{"i", "1"}}
-	query3 := zebra.Query{Op: zebra.MatchNotEqual, Key: "a", Values: []string{"i", "1"}}
-	query4 := zebra.Query{Op: zebra.MatchNotIn, Key: "a", Values: []string{"i"}}
-	invalid := zebra.Query{Op: 11, Key: "a", Values: []string{"i"}}
+	query1 := zebra.Query{Op: zebra.MatchIn, Key: "a", Values: []string{"i", "1"}}
+	query2 := zebra.Query{Op: zebra.MatchNotIn, Key: "a", Values: []string{"i"}}
 
-	assert.Nil(ls.Query(query1))
-
-	query1.Values = []string{"i"}
-	resources, err := ls.Query(query1)
-	assert.Nil(err)
-	assert.Equal(1, len(resources.Resources))
-	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
-
-	resources, err = ls.Query(query2)
-	assert.Nil(err)
+	resources := ls.Query(query1)
 	assert.Equal(1, len(resources.Resources))
 	assert.Equal(2, len(resources.Resources["VLANPool"].Resources))
 
-	assert.Nil(ls.Query(query3))
+	query1.Key = "b"
+	resources = ls.Query(query1)
+	assert.Equal(0, len(resources.Resources))
 
-	query3.Values = []string{"i"}
-
-	resources, err = ls.Query(query3)
-	assert.Nil(err)
+	resources = ls.Query(query2)
 	assert.Equal(1, len(resources.Resources))
-
-	resources, err = ls.Query(query4)
-	assert.Nil(err)
-	assert.Equal(1, len(resources.Resources))
-
-	assert.Nil(ls.Query(invalid))
 }
 
 func getVLAN() *network.VLANPool {

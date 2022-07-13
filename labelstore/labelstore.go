@@ -134,27 +134,12 @@ func (ls *LabelStore) Delete(res zebra.Resource) error {
 }
 
 // Return all resources of given label - label value pairs in a ResourceMap.
-func (ls *LabelStore) Query(query zebra.Query) (*zebra.ResourceMap, error) {
-	switch query.Op {
-	case zebra.MatchEqual:
-		if len(query.Values) != 1 {
-			return nil, zebra.ErrInvalidQuery
-		}
-
-		fallthrough
-	case zebra.MatchIn:
-		return ls.labelMatch(query, true), nil
-	case zebra.MatchNotEqual:
-		if len(query.Values) != 1 {
-			return nil, zebra.ErrInvalidQuery
-		}
-
-		fallthrough
-	case zebra.MatchNotIn:
-		return ls.labelMatch(query, false), nil
-	default:
-		return nil, zebra.ErrInvalidQuery
+func (ls *LabelStore) Query(query zebra.Query) *zebra.ResourceMap {
+	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
+		return ls.labelMatch(query, true)
 	}
+
+	return ls.labelMatch(query, false)
 }
 
 func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.ResourceMap {
@@ -162,6 +147,10 @@ func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.Resource
 
 	if inVals {
 		for _, val := range query.Values {
+			if ls.resources[query.Key] == nil || ls.resources[query.Key].Resources[val] == nil {
+				continue
+			}
+
 			for _, res := range ls.resources[query.Key].Resources[val].Resources {
 				results.Add(res, res.GetType())
 			}
