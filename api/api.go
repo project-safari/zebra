@@ -268,13 +268,11 @@ func createDeleteResponse(ids []string, status map[string]int) (int, string) {
 	if len(successID) > 0 {
 		response = fmt.Sprintf("Deleted the following resources: %s\n", strings.Join(successID, ", "))
 	}
-
 	if len(failedID) > 0 {
 		httpStatus = http.StatusMultiStatus
 
 		response += fmt.Sprintf("Failed to delete the following resources: %s\n", strings.Join(failedID, ", "))
 	}
-
 	if len(invalidID) > 0 {
 		response += fmt.Sprintf("Invalid resource IDs: %s\n", strings.Join(invalidID, ", "))
 	}
@@ -287,12 +285,10 @@ func (api *ResourceAPI) unpackResource(w http.ResponseWriter, body []byte) zebra
 	if err := json.Unmarshal(body, &object); err != nil {
 		return nil
 	}
-
 	resType, ok := object["type"].(string)
 	if !ok {
 		return nil
 	}
-
 	res := api.factory.New(resType)
 	if err := json.Unmarshal(body, res); err != nil {
 		return nil
