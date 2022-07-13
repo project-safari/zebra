@@ -70,7 +70,6 @@ func TestSerials(t *testing.T) {
 
 	assert.NotNil(ser)
 	assert.NotEqual(ser, " ")
-
 }
 
 func TestCreateIPArr(t *testing.T) {
@@ -88,15 +87,6 @@ func TestCreateVlanPool(t *testing.T) {
 	VlanPool := generate_data.CreateVlanPool("VlanPool")
 
 	assert.NotNil(VlanPool)
-
-	if VlanPool.RangeStart > VlanPool.RangeEnd {
-		assert.True(VlanPool.RangeStart > VlanPool.RangeEnd)
-	} else if VlanPool.RangeStart < VlanPool.RangeEnd {
-		assert.True(VlanPool.RangeStart < VlanPool.RangeEnd)
-	} else if VlanPool.RangeStart == VlanPool.RangeEnd {
-		assert.Equal(VlanPool.RangeStart, VlanPool.RangeEnd)
-	}
-
 }
 
 func TestCreateSwitch(t *testing.T) {
@@ -106,7 +96,6 @@ func TestCreateSwitch(t *testing.T) {
 	Switch := generate_data.CreateSwitch("Switch", net.IP("192.222.004"))
 
 	assert.NotNil(Switch)
-
 }
 
 func TestCreateIPAddressPool(t *testing.T) {
@@ -147,4 +136,17 @@ func TestCreateRack(t *testing.T) {
 	assert.NotNil(Rack)
 
 	assert.NotNil(Rack.BaseResource)
+}
+
+func TestGenerateData(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+	result := generate_data.GenerateData(100)
+
+	assert.NotNil(result)
+	assert.False(result)
+
+	errRes := generate_data.GenerateData(0)
+	assert.True(errRes)
+
 }
