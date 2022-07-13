@@ -23,15 +23,11 @@ import (
 var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
 var SampleIpAddr = []string{"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05", "192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08"}
 
-// number of ip's to have in the []net.IPNet array
-var ipNum = 10
-
 // create user roles
 
 func User() string {
-
 	// some usernames
-	name_list := []string{
+	nameList := []string{
 		"user1",
 		"user2",
 		"user3",
@@ -47,16 +43,15 @@ func User() string {
 		"staff",
 	}
 
-	username := RandData(name_list)
+	username := RandData(nameList)
 
 	return username
-
 }
 
 //create some passwords
 
 func Password() string {
-	p_list := []string{
+	Plist := []string{
 		"pass123",
 		"pass222",
 		"pass321",
@@ -71,7 +66,7 @@ func Password() string {
 		"random_pass",
 		"validate000",
 	}
-	pwd := RandData(p_list)
+	pwd := RandData(Plist)
 
 	return pwd
 }
@@ -79,24 +74,27 @@ func Password() string {
 //random selection from lists
 
 func RandData(res []string) string {
-	rand.Seed(time.Now().UnixNano())
 	var length = len(res)
+
+	rand.Seed(time.Now().UnixNano())
+
 	var ind int = rand.Intn(length - 1)
 	typ := res[ind]
-	
+
 	return typ
 }
 
 // creating random starting and end points
 
 func Range() uint16 {
-
 	nums := []uint16{0, 11, 121, 44, 32, 234, 9, 64, 33, 2, 5, 8, 16, 200, 14, 77}
+
 	rand.Seed(time.Now().UnixNano())
+
 	var length = len(nums)
 	var ind int = rand.Intn(length - 1)
 	num := nums[ind]
-	
+
 	return num
 }
 
@@ -104,13 +102,14 @@ func Range() uint16 {
 
 func Ports() uint32 {
 	nums := []uint32{1, 2, 3, 4, 6, 8, 9, 16, 27, 32, 36, 54, 72, 64, 81, 128, 162, 216, 256, 512}
+
 	rand.Seed(time.Now().UnixNano())
+
 	var length = len(nums)
 	var ind int = rand.Intn(length - 1)
 	port := nums[ind]
-	
-	return port
 
+	return port
 }
 
 // create random sample model names
@@ -118,7 +117,7 @@ func Ports() uint32 {
 func Models() string {
 	models := []string{"model A", "modelB", "modelC", "modelD", "modelA.1", "modelA.1.1", "modelE", "modelD.010", "modelF", "modelG", "modelG.1", "modelG.1.1"}
 	model := RandData(models)
-	
+
 	return model
 }
 
@@ -126,53 +125,62 @@ func Models() string {
 
 func Serials() string {
 	nums := []string{"00000", "00001", "00002", "00003", "00004", "00005", "00006", "00007", "00008", "00009", "00010", "00020", "00030", "00040", "00050", "00060", "00070", "00080", "00090", "00100", "00200", "00300", "00400", "00500", "01000", "02000", "03000"}
-	
+
 	return RandData(nums)
 }
 
 // create IP arr
 
-func CreateIpArr(ipNum int) []net.IPNet {
-	
+func CreateIPArr(ipNum int) []net.IPNet {
 	nets := *new(net.IPNet)
 	netArr := []net.IPNet{}
+
 	for i := 0; i < ipNum; i++ {
 		ip := RandData(SampleIpAddr)
 		nets.IP = net.IP(ip)
 		netArr = append(netArr, nets)
 
 	}
-	
+
 	return netArr
-	
 }
 
 //creating various resource types
 
 func CreateVlanPool(theType string) *network.VLANPool {
-	var start uint16 = Range()
+	var one uint16 = Range()
+	var two uint16 = Range()
 	theLabels := CreateLabels()
-
 	theRes := zebra.NewBaseResource(theType, theLabels)
+	var start uint16
+	var end uint16
+
+	if one < two {
+		start = one
+		end = two
+
+	} else {
+		start = two
+		end = one
+	}
 
 	ret := &network.VLANPool{
 
 		BaseResource: *theRes,
 		RangeStart:   start,
-		RangeEnd:     (start + 100),
+		RangeEnd:     end,
 	}
-	
+
 	return ret
 }
 
 func CreateSwitch(theType string, ip net.IP) *network.Switch {
-	
 	var serial string = Serials()
 	var model string = Models()
 	var ports uint32 = Ports()
 	theLabels := CreateLabels()
 	theRes := zebra.NewBaseResource(theType, theLabels)
-
+	cred := new(zebra.Credentials)
 	ret := &network.Switch{
 
 		BaseResource: *theRes,
@@ -180,14 +188,13 @@ func CreateSwitch(theType string, ip net.IP) *network.Switch {
 		SerialNumber: serial,
 		Model:        model,
 		NumPorts:     ports,
+		Credentials:  *cred,
 	}
-	
+
 	return ret
-	
 }
 
-func CreateIpAddressPool(theType string, netArr []net.IPNet) *network.IPAddressPool {
-
+func CreateIPAddressPool(theType string, netArr []net.IPNet) *network.IPAddressPool {
 	theLabels := CreateLabels()
 	theRes := zebra.NewBaseResource(theType, theLabels)
 
@@ -195,12 +202,11 @@ func CreateIpAddressPool(theType string, netArr []net.IPNet) *network.IPAddressP
 		BaseResource: *theRes,
 		Subnets:      netArr,
 	}
-	
+
 	return ret
 }
 
 func CreateDatacenter() *dc.Datacenter {
-	
 	namedRes := new(zebra.NamedResource)
 
 	ret := &dc.Datacenter{
@@ -210,23 +216,20 @@ func CreateDatacenter() *dc.Datacenter {
 	}
 
 	return ret
-	
 }
 
 func CreateLab() *dc.Lab {
-	
 	namedRes := new(zebra.NamedResource)
 
 	ret := &dc.Lab{
 		NamedResource: *namedRes,
 	}
-	
+
 	return ret
-	
+
 }
 
 func CreateRack() *dc.Rack {
-
 	namedRes := new(zebra.NamedResource)
 
 	ret := &dc.Rack{
@@ -234,18 +237,16 @@ func CreateRack() *dc.Rack {
 		// some row
 		Row: "sample row",
 	}
-	
+
 	return ret
-	
 }
 
 //sample labels
 
 func CreateLabels() map[string]string {
-	
 	codes := make(map[string]string)
-	col := " "
-	let := " "
+	var col string
+	var let string
 	colors := []string{"red", "yellow", "green", "blue", "white", "magenta", "black", "purple", "brown", "orange", "pink", "grey"}
 	letters := []string{"alpha", "beta", "gamma", "delta", "epsilon", "eta", "theta", "Iota", "Kappa", "Lambda", "Mu", "Nu"}
 
@@ -259,9 +260,11 @@ func CreateLabels() map[string]string {
 
 //put it all together
 
-func Generate_Data() {
-
+func GenerateData() {
 	// go through each resource type
+
+	// number of ip's to have in the []net.IPNet array
+	var ipNum = 10
 
 	for i := 0; i < len(resourceTypes); i++ {
 
@@ -275,7 +278,7 @@ func Generate_Data() {
 
 			sampleIP := RandData(SampleIpAddr)
 
-			IpArr := CreateIpArr(ipNum)
+			IPArr := CreateIPArr(ipNum)
 
 			creds.PasswordHash = Password()
 
@@ -293,7 +296,7 @@ func Generate_Data() {
 
 			} else if theType == "IPAddressPool" {
 
-				Res := CreateIpAddressPool(theType, IpArr)
+				Res := CreateIPAddressPool(theType, IPArr)
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
 
 			} else if theType == "Datacenter" {
@@ -310,11 +313,7 @@ func Generate_Data() {
 
 				Res := CreateRack()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
-
 			}
-
 		}
-
 	}
-
 }
