@@ -17,11 +17,19 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
+// get all types that could exist
+func SetTypes() []string {
+	resourceTypes := []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
+	return resourceTypes
+}
 
-var SampleIPAddr = []string{
-	"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05",
-	"192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08",
+// get all possible sample IP addresses
+func SetIPsamples() []string {
+	SampleIPAddr := []string{
+		"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05",
+		"192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08",
+	}
+	return SampleIPAddr
 }
 
 // create user roles.
@@ -146,6 +154,7 @@ func CreateIPArr(ipNum int) []net.IPNet {
 	nets := net.IPNet{} //nolint // just for sample data
 
 	netArr := []net.IPNet{}
+	SampleIPAddr := SetIPsamples()
 
 	for i := 0; i < ipNum; i++ {
 		ip := RandData(SampleIPAddr)
@@ -280,6 +289,7 @@ func CreateLabels() map[string]string {
 // put it all together.
 func IsGood(manyRes int) bool {
 	err := false
+	resourceTypes := SetTypes()
 
 	if len(resourceTypes) == 0 || manyRes == 0 {
 		err = true
@@ -293,6 +303,9 @@ func GenerateData(isGood bool, manyRes int) *auth.User {
 
 	mes1 := "\nThe data with user info and named resource "
 	mes2 := "\nThe data with complete resource info: "
+
+	resourceTypes := SetTypes()
+	SampleIPAddr := SetIPsamples()
 
 	creds := new(auth.User)
 
