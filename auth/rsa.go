@@ -16,10 +16,6 @@ var (
 	ErrUnknownPEMBlock = errors.New("unknown PEM block")
 )
 
-var ParsePKCS1PrivateKey = x509.ParsePKCS1PrivateKey
-
-var ParsePKCS1PublicKey = x509.ParsePKCS1PublicKey
-
 const RSAKeySize = 2048
 
 // RsaIdentity is just a small struct that clearly differentiates between the
@@ -70,7 +66,7 @@ func (r *RsaIdentity) UnmarshalText(text []byte) error {
 	}
 
 	if b.Type == "RSA PRIVATE KEY" {
-		p, e := ParsePKCS1PrivateKey(b.Bytes)
+		p, e := x509.ParsePKCS1PrivateKey(b.Bytes)
 		if e != nil {
 			return e
 		}
@@ -80,7 +76,7 @@ func (r *RsaIdentity) UnmarshalText(text []byte) error {
 
 		return nil
 	} else if b.Type == "RSA PUBLIC KEY" {
-		p, e := ParsePKCS1PublicKey(b.Bytes)
+		p, e := x509.ParsePKCS1PublicKey(b.Bytes)
 		if e != nil {
 			return e
 		}
