@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/pem"
-	"errors"
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
@@ -52,21 +51,20 @@ func TestNewRsaIdentity(t *testing.T) {
 }
 
 func TestUnmarshalErrors(t *testing.T) {
-
+	t.Parallel()
 	assert := assert.New(t)
-
-	Pprivkey := auth.ParsePKCS1PrivateKey
-	Ppublickey := auth.ParsePKCS1PublicKey
-	auth.ParsePKCS1PrivateKey = func(der []byte) (*rsa.PrivateKey, error) {
-		return nil, errors.New("test error")
-	}
-
-	auth.ParsePKCS1PublicKey = func(der []byte) (*rsa.PublicKey, error) {
-		return nil, errors.New("test error")
-	}
-
-	badText := pem.EncodeToMemory(&pem.Block{
+	badType := pem.EncodeToMemory(&pem.Block{
 		Type:    "NULL KEY",
+		Headers: nil,
+		Bytes:   nil,
+	})
+	badPriv := pem.EncodeToMemory(&pem.Block{
+		Type:    "RSA PRIVATE KEY",
+		Headers: nil,
+		Bytes:   nil,
+	})
+	badPub := pem.EncodeToMemory(&pem.Block{
+		Type:    "RSA PUBLIC KEY",
 		Headers: nil,
 		Bytes:   nil,
 	})
@@ -87,7 +85,7 @@ func TestUnmarshalErrors(t *testing.T) {
 	b, e = henkPub.MarshalText()
 	assert.Nil(e)
 	assert.NotNil(b)
-	assert.NotNil(x.UnmarshalText(b))
+	assert.NotNil(x.UnmarshalText(badPub))
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	assert.Nil(err)
@@ -97,12 +95,9 @@ func TestUnmarshalErrors(t *testing.T) {
 	b, e = henkPriv.MarshalText()
 	assert.Nil(e)
 	assert.NotNil(b)
-	assert.NotNil(x.UnmarshalText(b))
+	assert.NotNil(x.UnmarshalText(badPriv))
 
-	assert.NotNil(x.UnmarshalText(badText))
-
-	auth.ParsePKCS1PublicKey = Ppublickey
-	auth.ParsePKCS1PrivateKey = Pprivkey
+	assert.NotNil(x.UnmarshalText(badType))
 }
 
 func TestEncrypt(t *testing.T) {

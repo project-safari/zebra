@@ -3,7 +3,6 @@ package api_test
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -55,7 +54,6 @@ func TestInitialize(t *testing.T) {
 func TestGetResources(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
-
 	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
@@ -111,27 +109,6 @@ func TestGetResourceError(t *testing.T) {
 	assert.Nil(server.Stop(ctx, nil))
 }
 
-func TestGetResourceError(t *testing.T) {
-	marshal := api.Marshal
-	api.Marshal = func(v any) ([]byte, error) {
-		return nil, errors.New("uh oh")
-	}
-	assert := assert.New(t)
-
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
-
-	myAPI := api.NewResourceAPI(f)
-	assert.Nil(myAPI.Initialize("teststore"))
-
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9999"),
-		TLS:     nil,
-	}
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResources))
-	assert.NotNil(server)
-
-	api.Marshal = marshal
-}
 func TestGetResourcesByID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
