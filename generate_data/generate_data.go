@@ -17,11 +17,12 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab",
-	"Rack", "Server", "ESX", "VM", " "}
+var resourceTypes = []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
 
-var SampleIpAddr = []string{"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05",
-	"192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08"}
+var SampleIPAddr = []string{
+	"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05",
+	"192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08",
+}
 
 // create user roles.
 func User() string {
@@ -97,12 +98,11 @@ func Range() uint16 {
 
 // creating random ports.
 func Ports() uint32 {
-	nums := []uint32{1, 2, 3, 4, 6, 8, 9, 16, 27, 32, 36, 54,
-		72, 64, 81, 128, 162, 216, 256, 512}
+	nums := []uint32{1, 2, 3, 4, 6, 8, 9, 16, 27, 32, 36, 54, 72, 64, 81, 128, 162, 216, 256, 512}
 
 	rand.Seed(time.Now().UnixNano())
 
-	var length = len(nums)
+	length := len(nums)
 
 	var ind int = rand.Intn(length - 1) //nolint // sample port numbers
 
@@ -113,9 +113,11 @@ func Ports() uint32 {
 
 // create random sample model names.
 func Models() string {
-	models := []string{"model A", "modelB", "modelC", "modelD",
+	models := []string{
+		"model A", "modelB", "modelC", "modelD",
 		"modelA.1", "modelA.1.1", "modelE", "modelD.010",
-		"modelF", "modelG", "modelG.1", "modelG.1.1"}
+		"modelF", "modelG", "modelG.1", "modelG.1.1",
+	}
 
 	model := RandData(models)
 
@@ -124,13 +126,15 @@ func Models() string {
 
 // create random serial codes.
 func Serials() string {
-	nums := []string{"00000", "00001", "00002", "00003",
+	nums := []string{
+		"00000", "00001", "00002", "00003",
 		"00004", "00005", "00006", "00007",
 		"00008", "00009", "00010", "00020",
 		"00030", "00040", "00050", "00060",
 		"00070", "00080", "00090", "00100",
 		"00200", "00300", "00400", "00500",
-		"01000", "02000", "03000", "04000"}
+		"01000", "02000", "03000", "04000",
+	}
 
 	ser := RandData(nums)
 
@@ -144,7 +148,7 @@ func CreateIPArr(ipNum int) []net.IPNet {
 	netArr := []net.IPNet{}
 
 	for i := 0; i < ipNum; i++ {
-		ip := RandData(SampleIpAddr)
+		ip := RandData(SampleIPAddr)
 		nets.IP = net.IP(ip)
 		netArr = append(netArr, nets)
 	}
@@ -154,9 +158,9 @@ func CreateIPArr(ipNum int) []net.IPNet {
 
 // creating various resource types.
 func CreateVlanPool(theType string) *network.VLANPool {
-	var start = Range()
+	start := Range()
 
-	var end = Range()
+	end := Range()
 
 	theLabels := CreateLabels()
 
@@ -167,7 +171,6 @@ func CreateVlanPool(theType string) *network.VLANPool {
 	}
 
 	ret := &network.VLANPool{
-
 		BaseResource: *theRes,
 		RangeStart:   start,
 		RangeEnd:     end,
@@ -177,11 +180,11 @@ func CreateVlanPool(theType string) *network.VLANPool {
 }
 
 func CreateSwitch(theType string, ip net.IP) *network.Switch {
-	var serial = Serials()
+	serial := Serials()
 
-	var model = Models()
+	model := Models()
 
-	var ports = Ports()
+	ports := Ports()
 
 	theLabels := CreateLabels()
 
@@ -190,7 +193,6 @@ func CreateSwitch(theType string, ip net.IP) *network.Switch {
 	cred := new(zebra.Credentials)
 
 	ret := &network.Switch{
-
 		BaseResource: *theRes,
 		ManagementIP: ip,
 		SerialNumber: serial,
@@ -253,15 +255,19 @@ func CreateRack() *dc.Rack {
 func CreateLabels() map[string]string {
 	codes := make(map[string]string)
 
-	colors := []string{"red", "yellow", "green",
+	colors := []string{
+		"red", "yellow", "green",
 		"blue", "white", "magenta",
 		"black", "purple", "brown",
-		"orange", "pink", "grey"}
+		"orange", "pink", "grey",
+	}
 
-	letters := []string{"alpha", "beta", "gamma",
+	letters := []string{
+		"alpha", "beta", "gamma",
 		"delta", "epsilon", "eta",
 		"theta", "Iota", "Kappa",
-		"Lambda", "Mu", "Nu"}
+		"Lambda", "Mu", "Nu",
+	}
 
 	col := RandData(colors)
 	let := RandData(letters)
@@ -283,9 +289,11 @@ func IsGood(manyRes int) bool {
 }
 
 func GenerateData(isGood bool, manyRes int) *auth.User {
-	var ipNum = 10 // number of ip's to have in the []net.IPNet array.
+	ipNum := 10 // number of ip's to have in the []net.IPNet array.
+
 	mes1 := "\nThe data with user info and named resource "
 	mes2 := "\nThe data with complete resource info: "
+
 	creds := new(auth.User)
 
 	// go through each resource type.
@@ -295,7 +303,7 @@ func GenerateData(isGood bool, manyRes int) *auth.User {
 		// 100 resources of each type.
 		for each := 0; each < manyRes; each++ {
 			creds = new(auth.User)
-			sampleIP := RandData(SampleIpAddr)
+			sampleIP := RandData(SampleIPAddr)
 			IPArr := CreateIPArr(ipNum)
 			creds.PasswordHash = Password()
 			creds.Role = new(auth.Role)
