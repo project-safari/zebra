@@ -1,3 +1,8 @@
+/*
+create 100 instances of each resource for some users
+program to execute tests
+*/
+
 package generate_data_test
 
 import (
