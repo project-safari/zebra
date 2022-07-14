@@ -253,7 +253,7 @@ func CreateLabels() map[string]string {
 }
 
 // put it all together.
-func GenerateData(manyRes int) bool {
+func IsGood(manyRes int) bool {
 	err := false
 
 	if len(resourceTypes) == 0 || manyRes == 0 {
@@ -263,8 +263,9 @@ func GenerateData(manyRes int) bool {
 	return err
 }
 
-func Printing(good bool, manyRes int) {
+func GenerateData(isGood bool, manyRes int) *auth.User {
 	var ipNum = 10 // number of ip's to have in the []net.IPNet array.
+	creds := new(auth.User)
 
 	// go through each resource type.
 	for i := 0; i < len(resourceTypes); i++ {
@@ -272,7 +273,7 @@ func Printing(good bool, manyRes int) {
 
 		// 100 resources of each type.
 		for each := 0; each < manyRes; each++ {
-			creds := new(auth.User)
+			creds = new(auth.User)
 			sampleIP := RandData(SampleIpAddr)
 			IPArr := CreateIPArr(ipNum)
 			creds.PasswordHash = Password()
@@ -303,7 +304,9 @@ func Printing(good bool, manyRes int) {
 			case "Rack":
 				Res := CreateRack()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
+
 			}
 		}
 	}
+	return creds
 }

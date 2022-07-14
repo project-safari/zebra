@@ -138,21 +138,24 @@ func TestCreateRack(t *testing.T) {
 	assert.NotNil(Rack.BaseResource)
 }
 
-func TestGenerateData(t *testing.T) {
+func TestIsGood(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
-	result := generate_data.GenerateData(100)
+	result := generate_data.IsGood(100)
 
 	assert.NotNil(result)
 	assert.False(result)
 
-	errRes := generate_data.GenerateData(0)
+	errRes := generate_data.IsGood(0)
 	assert.True(errRes)
 }
 
 func TestPrinting(t *testing.T) {
-	num := 10
-	result := generate_data.GenerateData(num)
+	t.Parallel()
+	assert := assert.New(t)
 
-	generate_data.Printing(result, num)
+	num := 10
+	result := generate_data.IsGood(num)
+
+	assert.NotNil(generate_data.GenerateData(result, num))
 }
