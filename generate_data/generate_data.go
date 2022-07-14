@@ -1,5 +1,5 @@
 /*
-create 100 of each resource for some users
+create 100 instances of each resource for some users
 program to display results for each respective type
 */
 
