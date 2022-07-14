@@ -265,6 +265,7 @@ func IsGood(manyRes int) bool {
 
 func GenerateData(isGood bool, manyRes int) *auth.User {
 	var ipNum = 10 // number of ip's to have in the []net.IPNet array.
+
 	creds := new(auth.User)
 
 	// go through each resource type.
@@ -304,9 +305,9 @@ func GenerateData(isGood bool, manyRes int) *auth.User {
 			case "Rack":
 				Res := CreateRack()
 				fmt.Println("Information: ", each, "\nThe data with user info and named resource ", creds, "\nThe data with complete resource info: ", Res)
-
 			}
 		}
 	}
+
 	return creds
 }
