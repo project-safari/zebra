@@ -17,18 +17,23 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-// get all types that could exist
+// get all types that could exist.
 func SetTypes() []string {
-	resourceTypes := []string{"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab", "Rack", "Server", "ESX", "VM", " "}
+	resourceTypes := []string{
+		"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab",
+		"Rack", "Server", "ESX", "VM", " ",
+	}
+
 	return resourceTypes
 }
 
-// get all possible sample IP addresses
+// get all possible sample IP addresses.
 func SetIPsamples() []string {
 	SampleIPAddr := []string{
 		"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05",
 		"192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08",
 	}
+
 	return SampleIPAddr
 }
 
