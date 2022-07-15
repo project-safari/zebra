@@ -100,9 +100,7 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 		panic(e)
 	}
 
-	authKey := struct {
-		Key string `json:"authKey"`
-	}{Key: ""}
+	authKey := "key"
 
 	if e := cfgStore.Get("authKey", &authKey); e != nil {
 		log.Error(e, "auth key missing")
@@ -119,7 +117,7 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 
 	router := httprouter.New()
 	router.GET("/api/v1/resources", handleQuery(resAPI))
-	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey.Key))
+	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey))
 
 	return router
 }
