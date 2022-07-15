@@ -126,3 +126,14 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 
 	return v.BaseResource.Validate(ctx)
 }
+
+func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
+	theRes := zebra.NewBaseResource("VlanPool", labels)
+	ret := &VLANPool{
+		BaseResource: *theRes,
+		RangeStart:   start,
+		RangeEnd:     end,
+	}
+
+	return ret
+}
