@@ -13,6 +13,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSetTypes(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	types := generate_data.AllResourceTypes()
+	assert.NotNil(types)
+}
+
+func TestSetIP(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	samples := generate_data.IPsamples()
+	assert.NotNil(samples)
+}
+
 func TestUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -29,6 +45,15 @@ func TestPass(t *testing.T) {
 	assert.NotNil(pwd)
 }
 
+func TestName(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	name := generate_data.Name()
+
+	assert.NotNil(name)
+}
+
 func TestRange(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -36,15 +61,6 @@ func TestRange(t *testing.T) {
 	num := generate_data.Range()
 
 	assert.NotNil(num)
-}
-
-func TestCreateLabels(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	labels := generate_data.CreateLabels()
-
-	assert.NotNil(labels)
 }
 
 func TestPorts(t *testing.T) {
@@ -77,6 +93,37 @@ func TestSerials(t *testing.T) {
 	assert.NotEqual(ser, " ")
 }
 
+func TestRows(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	row := generate_data.Rows()
+
+	assert.NotNil(row)
+	assert.NotEqual(row, " ")
+}
+
+func TestAddresses(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	adr := generate_data.Addresses()
+
+	assert.NotNil(adr)
+	assert.NotEqual(adr, " ")
+}
+
+func TestOrder(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	var a uint16 = 20
+	var b uint16 = 5
+
+	one, two := generate_data.Order(a, b)
+	assert.True(one < two)
+}
+
 func TestCreateIPArr(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -89,16 +136,26 @@ func TestCreateVlanPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	VlanPool := generate_data.CreateVlanPool("VlanPool")
+	VlanPool := generate_data.NewVlanPool("VlanPool")
 
 	assert.NotNil(VlanPool)
+	assert.NotEmpty(VlanPool)
+}
+
+func TestCreateVcenter(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	Vcenter := generate_data.NewVCenter("VlanPool", net.IP("192.222.004"))
+
+	assert.NotNil(Vcenter)
 }
 
 func TestCreateSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	Switch := generate_data.CreateSwitch("Switch", net.IP("192.222.004"))
+	Switch := generate_data.NewSwitch("Switch", net.IP("192.222.004"))
 
 	assert.NotNil(Switch)
 }
@@ -107,7 +164,7 @@ func TestCreateIPAddressPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	IPs := generate_data.CreateIPAddressPool("IPAddressPool", generate_data.CreateIPArr(2))
+	IPs := generate_data.NewIPAddressPool("IPAddressPool", generate_data.CreateIPArr(2))
 
 	assert.NotNil(IPs)
 
@@ -118,16 +175,25 @@ func TestCreateDatacenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	DataCenter := generate_data.CreateDatacenter()
+	DataCenter := generate_data.NewDatacenter("Datacenter")
 
 	assert.NotNil(DataCenter)
+}
+
+func TestCreateLabels(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := generate_data.CreateLabels()
+
+	assert.NotNil(labels)
 }
 
 func TestCreateLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	Lab := generate_data.CreateLab()
+	Lab := generate_data.NewLab("Lab")
 
 	assert.NotNil(Lab)
 }
@@ -136,7 +202,7 @@ func TestCreateRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	Rack := generate_data.CreateRack()
+	Rack := generate_data.NewRack("Rack")
 
 	assert.NotNil(Rack)
 
@@ -155,12 +221,17 @@ func TestIsGood(t *testing.T) {
 	assert.True(errRes)
 }
 
-func TestPrinting(t *testing.T) {
+func TestGeneration(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	num := 10
+	num := 100
 	result := generate_data.IsGood(num)
 
 	assert.NotNil(generate_data.GenerateData(result, num))
+	user, arr := generate_data.GenerateData(result, num)
+
+	assert.NotNil(user)
+
+	assert.NotEmpty(arr)
 }

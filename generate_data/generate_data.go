@@ -13,22 +13,23 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/compute"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 )
 
-// get all types that could exist.
-func SetTypes() []string {
+// this array wil help set the type for each iteration.
+func AllResourceTypes() []string {
 	resourceTypes := []string{
 		"VLANPool", "Switch", "IPAddressPool", "Datacenter", "Lab",
-		"Rack", "Server", "ESX", "VM", " ",
+		"Rack", "Server", "ESX", "VM", "VCenter", " ",
 	}
 
 	return resourceTypes
 }
 
-// get all possible sample IP addresses.
-func SetIPsamples() []string {
+// this array will help set possible sample IP addresses for each iteration.
+func IPsamples() []string {
 	SampleIPAddr := []string{
 		"192.332.11.05", "192.232.11.37", "192.232.22.05", "192.225.11.05",
 		"192.0.0.0", "192.192.192.192", "225.225.225.225", "192.192.64.08",
@@ -58,6 +59,20 @@ func User() string {
 	username := RandData(nameList)
 
 	return username
+}
+
+// create names.
+func Name() string {
+	nameList := []string{
+		"Marie", "Jack", "Clare",
+		"James", "Erika", "Frank",
+		"Donna", "John", "Jane",
+		"Louis", "Eliza", "Phelippe",
+	}
+
+	theName := RandData(nameList)
+
+	return theName
 }
 
 // create some passwords.
@@ -154,12 +169,25 @@ func Serials() string {
 	return ser
 }
 
+// some random rows.
+func Rows() string {
+	theRows := []string{
+		"00A", "00B", "00C", "00D", "00E",
+		"0A0", "0B0", "0C0", "0D0", "0E0",
+		"A00", "B00", "C00", "D00", "E00",
+	}
+
+	oneRow := RandData(theRows)
+
+	return oneRow
+}
+
 // create IP arr.
 func CreateIPArr(ipNum int) []net.IPNet {
 	nets := net.IPNet{} //nolint // just for sample data
 
 	netArr := []net.IPNet{}
-	SampleIPAddr := SetIPsamples()
+	SampleIPAddr := IPsamples()
 
 	for i := 0; i < ipNum; i++ {
 		ip := RandData(SampleIPAddr)
@@ -170,19 +198,37 @@ func CreateIPArr(ipNum int) []net.IPNet {
 	return netArr
 }
 
-// creating various resource types.
-func CreateVlanPool(theType string) *network.VLANPool {
-	start := Range()
+// some random address.
+func Addresses() string {
+	possibleAdr := []string{
+		"NYC", "Dallas", "Seattle", "Ottawa", "Paris",
+		"London", "Athens", "Milan", "Philadelphia", "Ann Arbor",
+		"DC", "Ankara", "Cape Verde", "LA", "Perth",
+	}
 
-	end := Range()
+	theAdr := RandData(possibleAdr)
 
-	theLabels := CreateLabels()
+	return theAdr
+}
 
-	theRes := zebra.NewBaseResource(theType, theLabels)
-
+func Order(start uint16, end uint16) (uint16, uint16) {
 	if start > end {
 		end, start = start, end
 	}
+	return start, end
+}
+
+// creating new instances of various resource types.
+func NewVlanPool(theType string) *network.VLANPool {
+	start := Range() // this is the range's start point
+
+	end := Range() // this is the range's end point
+
+	theLabels := CreateLabels() // these are the labels to be used here, in this iteration
+
+	theRes := zebra.NewBaseResource(theType, theLabels) // this is the result of a new base resource creation
+
+	start, end = Order(start, end)
 
 	ret := &network.VLANPool{
 		BaseResource: *theRes,
@@ -193,7 +239,7 @@ func CreateVlanPool(theType string) *network.VLANPool {
 	return ret
 }
 
-func CreateSwitch(theType string, ip net.IP) *network.Switch {
+func NewSwitch(theType string, ip net.IP) *network.Switch {
 	serial := Serials()
 
 	model := Models()
@@ -205,6 +251,17 @@ func CreateSwitch(theType string, ip net.IP) *network.Switch {
 	theRes := zebra.NewBaseResource(theType, theLabels)
 
 	cred := new(zebra.Credentials)
+
+	// add some info to these sample credentials
+	named := new(zebra.NamedResource)
+
+	named.BaseResource = *theRes
+
+	named.Name = Name()
+
+	cred.NamedResource = *named
+
+	cred.Keys = CreateLabels()
 
 	ret := &network.Switch{
 		BaseResource: *theRes,
@@ -218,7 +275,7 @@ func CreateSwitch(theType string, ip net.IP) *network.Switch {
 	return ret
 }
 
-func CreateIPAddressPool(theType string, netArr []net.IPNet) *network.IPAddressPool {
+func NewIPAddressPool(theType string, netArr []net.IPNet) *network.IPAddressPool {
 	theLabels := CreateLabels()
 
 	theRes := zebra.NewBaseResource(theType, theLabels)
@@ -231,20 +288,48 @@ func CreateIPAddressPool(theType string, netArr []net.IPNet) *network.IPAddressP
 	return ret
 }
 
-func CreateDatacenter() *dc.Datacenter {
+func NewDatacenter(theType string) *dc.Datacenter {
 	namedRes := new(zebra.NamedResource)
+
+	theLabels := CreateLabels()
+
+	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
+
+	namedRes.Name = Name()
 
 	ret := &dc.Datacenter{
 		NamedResource: *namedRes,
 		// some addr.
-		Address: "sample address",
+		Address: Addresses(),
 	}
 
 	return ret
 }
 
-func CreateLab() *dc.Lab {
+func NewVCenter(theType string, ip net.IP) *compute.VCenter {
 	namedRes := new(zebra.NamedResource)
+
+	theLabels := CreateLabels()
+
+	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
+
+	namedRes.Name = Name()
+
+	ret := &compute.VCenter{
+		NamedResource: *namedRes,
+		IP:            ip,
+	}
+	return ret
+}
+
+func NewLab(theType string) *dc.Lab {
+	namedRes := new(zebra.NamedResource)
+
+	theLabels := CreateLabels()
+
+	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
+
+	namedRes.Name = Name()
 
 	ret := &dc.Lab{
 		NamedResource: *namedRes,
@@ -253,13 +338,19 @@ func CreateLab() *dc.Lab {
 	return ret
 }
 
-func CreateRack() *dc.Rack {
+func NewRack(theType string) *dc.Rack {
 	namedRes := new(zebra.NamedResource)
+
+	theLabels := CreateLabels()
+
+	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
+
+	namedRes.Name = Name()
 
 	ret := &dc.Rack{
 		NamedResource: *namedRes,
 		// some row.
-		Row: "sample row",
+		Row: Rows(),
 	}
 
 	return ret
@@ -268,6 +359,8 @@ func CreateRack() *dc.Rack {
 // sample labels.
 func CreateLabels() map[string]string {
 	codes := make(map[string]string)
+
+	many := rand.Int() //nolint
 
 	colors := []string{
 		"red", "yellow", "green",
@@ -283,10 +376,12 @@ func CreateLabels() map[string]string {
 		"Lambda", "Mu", "Nu",
 	}
 
-	col := RandData(colors)
-	let := RandData(letters)
+	for let := 0; let < many; let++ {
+		col := RandData(colors)
+		let := RandData(letters)
 
-	codes[let] = col
+		codes[let] = col
+	}
 
 	return codes
 }
@@ -294,7 +389,7 @@ func CreateLabels() map[string]string {
 // put it all together.
 func IsGood(manyRes int) bool {
 	err := false
-	resourceTypes := SetTypes()
+	resourceTypes := AllResourceTypes()
 
 	if len(resourceTypes) == 0 || manyRes == 0 {
 		err = true
@@ -303,16 +398,18 @@ func IsGood(manyRes int) bool {
 	return err
 }
 
-func GenerateData(isGood bool, manyRes int) *auth.User {
+func GenerateData(isGood bool, manyRes int) (*auth.User, []zebra.Resource) {
 	ipNum := 10 // number of ip's to have in the []net.IPNet array.
 
 	mes1 := "\nThe data with user info and named resource "
 	mes2 := "\nThe data with complete resource info: "
 
-	resourceTypes := SetTypes()
-	SampleIPAddr := SetIPsamples()
+	resourceTypes := AllResourceTypes()
+	SampleIPAddr := IPsamples()
 
 	creds := new(auth.User)
+
+	allResources := make([]zebra.Resource, manyRes)
 
 	// go through each resource type.
 	for i := 0; i < len(resourceTypes); i++ {
@@ -321,39 +418,53 @@ func GenerateData(isGood bool, manyRes int) *auth.User {
 		// 100 resources of each type.
 		for each := 0; each < manyRes; each++ {
 			creds = new(auth.User)
+			rsa := new(auth.RsaIdentity)
+
 			sampleIP := RandData(SampleIPAddr)
 			IPArr := CreateIPArr(ipNum)
+
 			creds.PasswordHash = Password()
 			creds.Role = new(auth.Role)
 			creds.Role.Name = User()
+			creds.Key = rsa
 
 			switch theType {
 			case "VLANPool":
-				Res := CreateVlanPool(theType)
+				Res := NewVlanPool(theType)
+				allResources[each] = Res
 				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "Switch":
-				Res := CreateSwitch(theType, net.IP(sampleIP))
-				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
+				Res := NewSwitch(theType, net.IP(sampleIP))
+				allResources[each] = Res
+				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "IPAddressPool":
-				Res := CreateIPAddressPool(theType, IPArr)
-				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
+				Res := NewIPAddressPool(theType, IPArr)
+				allResources[each] = Res
+				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "Datacenter":
-				Res := CreateDatacenter()
-				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
+				Res := NewDatacenter(theType)
+				allResources[each] = Res
+				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
+
+			case "VCenter":
+				Res := NewVCenter(theType, net.IP(sampleIP))
+				allResources[each] = Res
 
 			case "Lab":
-				Res := CreateLab()
-				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
+				Res := NewLab(theType)
+				allResources[each] = Res
+				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "Rack":
-				Res := CreateRack()
-				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
+				Res := NewRack(theType)
+				allResources[each] = Res
+				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 			}
 		}
 	}
 
-	return creds
+	return creds, allResources
 }
