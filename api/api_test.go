@@ -2,21 +2,17 @@ package api_test
 
 import (
 	"bytes"
-	"context"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/api"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
-	"gojini.dev/web"
 )
 
 //nolint:gochecknoglobals
@@ -67,46 +63,6 @@ func TestGetResources(t *testing.T) {
 
 	resBody := rr.Body.String()
 	assert.True(resBody == resources || resBody == otherResources)
-}
-
-func TestGetResourceError(t *testing.T) {
-	t.Parallel()
-	mockError := errors.New("uh oh")
-	api.Marshal = func(v any) ([]byte, error) {
-		return nil, mockError
-	}
-	assert := assert.New(t)
-
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
-
-	myAPI := api.NewResourceAPI(f)
-	assert.Nil(myAPI.Initialize("teststore"))
-
-	cfg := &web.Config{
-		Address: web.NewAddress("127.0.0.1:9999"),
-		TLS:     nil,
-	}
-
-	server := web.NewServer(cfg, http.HandlerFunc(myAPI.GetResources))
-	assert.NotNil(server)
-
-	ctx := context.Background()
-
-	go func() {
-		assert.NotNil(server.Start(ctx))
-	}()
-	time.Sleep(time.Second)
-
-	resp, err := http.Get(fmt.Sprintf("http://%s/", cfg.Address))
-	assert.True(err == nil && resp != nil)
-
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Nil(err)
-
-	assert.True(string(body) == resources || string(body) == otherResources)
-	assert.Nil(resp.Body.Close())
-
-	assert.Nil(server.Stop(ctx, nil))
 }
 
 func TestGetResourcesByID(t *testing.T) {
