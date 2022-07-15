@@ -6,7 +6,6 @@ program to display results for each respective type
 package generate_data //nolint // just don't lint the package name.
 
 import (
-	"fmt"
 	"math/rand"
 	"net"
 	"time"
@@ -215,6 +214,7 @@ func Order(start uint16, end uint16) (uint16, uint16) {
 	if start > end {
 		end, start = start, end
 	}
+
 	return start, end
 }
 
@@ -289,16 +289,14 @@ func NewIPAddressPool(theType string, netArr []net.IPNet) *network.IPAddressPool
 }
 
 func NewDatacenter(theType string) *dc.Datacenter {
-	namedRes := new(zebra.NamedResource)
+	named := new(zebra.NamedResource)
 
-	theLabels := CreateLabels()
+	named.BaseResource = *zebra.NewBaseResource(theType, CreateLabels())
 
-	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
-
-	namedRes.Name = Name()
+	named.Name = Name()
 
 	ret := &dc.Datacenter{
-		NamedResource: *namedRes,
+		NamedResource: *named,
 		// some addr.
 		Address: Addresses(),
 	}
@@ -309,39 +307,47 @@ func NewDatacenter(theType string) *dc.Datacenter {
 func NewVCenter(theType string, ip net.IP) *compute.VCenter {
 	namedRes := new(zebra.NamedResource)
 
-	theLabels := CreateLabels()
-
-	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
+	namedRes.BaseResource = *zebra.NewBaseResource(theType, CreateLabels())
 
 	namedRes.Name = Name()
+
+	cred := new(zebra.Credentials)
+
+	namedRes.Name = Name()
+
+	cred.NamedResource = *namedRes
+
+	cred.Keys = CreateLabels()
 
 	ret := &compute.VCenter{
 		NamedResource: *namedRes,
 		IP:            ip,
+		Credentials:   *cred,
 	}
+
 	return ret
 }
 
 func NewLab(theType string) *dc.Lab {
-	namedRes := new(zebra.NamedResource)
+	namedR := new(zebra.NamedResource)
 
 	theLabels := CreateLabels()
 
-	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
+	namedR.BaseResource = *zebra.NewBaseResource(theType, theLabels)
 
-	namedRes.Name = Name()
+	namedR.Name = Name()
 
 	ret := &dc.Lab{
-		NamedResource: *namedRes,
+		NamedResource: *namedR,
 	}
 
 	return ret
 }
 
 func NewRack(theType string) *dc.Rack {
-	namedRes := new(zebra.NamedResource)
-
 	theLabels := CreateLabels()
+
+	namedRes := new(zebra.NamedResource)
 
 	namedRes.BaseResource = *zebra.NewBaseResource(theType, theLabels)
 
@@ -401,9 +407,6 @@ func IsGood(manyRes int) bool {
 func GenerateData(isGood bool, manyRes int) (*auth.User, []zebra.Resource) {
 	ipNum := 10 // number of ip's to have in the []net.IPNet array.
 
-	mes1 := "\nThe data with user info and named resource "
-	mes2 := "\nThe data with complete resource info: "
-
 	resourceTypes := AllResourceTypes()
 	SampleIPAddr := IPsamples()
 
@@ -432,22 +435,18 @@ func GenerateData(isGood bool, manyRes int) (*auth.User, []zebra.Resource) {
 			case "VLANPool":
 				Res := NewVlanPool(theType)
 				allResources[each] = Res
-				fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "Switch":
 				Res := NewSwitch(theType, net.IP(sampleIP))
 				allResources[each] = Res
-				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "IPAddressPool":
 				Res := NewIPAddressPool(theType, IPArr)
 				allResources[each] = Res
-				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "Datacenter":
 				Res := NewDatacenter(theType)
 				allResources[each] = Res
-				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "VCenter":
 				Res := NewVCenter(theType, net.IP(sampleIP))
@@ -456,12 +455,10 @@ func GenerateData(isGood bool, manyRes int) (*auth.User, []zebra.Resource) {
 			case "Lab":
 				Res := NewLab(theType)
 				allResources[each] = Res
-				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 
 			case "Rack":
 				Res := NewRack(theType)
 				allResources[each] = Res
-				// fmt.Println("Information: ", each, mes1, creds, mes2, Res)
 			}
 		}
 	}

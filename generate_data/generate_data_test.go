@@ -118,6 +118,7 @@ func TestOrder(t *testing.T) {
 	assert := assert.New(t)
 
 	var a uint16 = 20
+
 	var b uint16 = 5
 
 	one, two := generate_data.Order(a, b)
