@@ -1,6 +1,8 @@
 package zebra
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 func NewBaseResource(resType string, labels Labels) *BaseResource {
 	id := uuid.New().String()

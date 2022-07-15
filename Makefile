@@ -6,6 +6,7 @@ BUILD_TAGS = osusergo netgo static_build
 
 build_zebra = go build -tags "$(BUILD_TAGS)" -buildmode=pie -ldflags "-X main.version=$(VERSION_FULL) -extldflags '-static'" -o zebra ./cmd/client
 build_zebra_server = go build -tags "$(BUILD_TAGS)" -buildmode=pie -ldflags "-X main.version=$(VERSION_FULL) -extldflags '-static'" -o zebra-server ./cmd/server
+build_herd = go build -tags "$(BUILD_TAGS)" -buildmode=pie -ldflags "-X main.version=$(VERSION_FULL) -extldflags '-static'" -o herd ./cmd/herd
 
 zebra: $(GO_SRC) go.mod go.sum
 	$(call build_zebra)
@@ -13,7 +14,10 @@ zebra: $(GO_SRC) go.mod go.sum
 zebra-server: $(GO_SRC) go.mod go.sum
 	$(call build_zebra_server)
 
-bin: zebra zebra-server
+herd: $(GO_SRC) go.mod go.sum
+	$(call build_herd)
+
+bin: zebra zebra-server herd
 
 lint: ./.golangcilint.yaml
 	./bin/golangci-lint --version || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.46.2 
