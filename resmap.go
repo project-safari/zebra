@@ -4,28 +4,55 @@ import (
 	"encoding/json"
 )
 
-type ResourceFactory interface {
-	New(resourceType string) Resource
-	Add(resourceType string, factory func() Resource) ResourceFactory
+type Type struct {
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Constructor func() Resource `json:"-"`
 }
 
-type typeMap map[string]func() Resource
+func (t *Type) New() Resource {
+	return t.Constructor()
+}
+
+type ResourceFactory interface {
+	New(string) Resource
+	Add(Type) ResourceFactory
+	Types() []Type
+	Type(string) (Type, bool)
+}
+
+type typeMap map[string]Type
 
 func (t typeMap) New(resourceType string) Resource {
-	factory, ok := t[resourceType]
+	aType, ok := t[resourceType]
 	if !ok {
 		return nil
 	}
 
-	return factory()
+	return aType.New()
 }
 
 // Add adds a type and its factory method to the resource factory and returns the resource factory.
 // The returned resource factory object can be used to add more types in a chained fashion.
-func (t typeMap) Add(resourceType string, factory func() Resource) ResourceFactory {
-	t[resourceType] = factory
+func (t typeMap) Add(aType Type) ResourceFactory {
+	t[aType.Name] = aType
 
 	return t
+}
+
+func (t typeMap) Types() []Type {
+	types := make([]Type, 0, len(t))
+	for _, aType := range t {
+		types = append(types, aType)
+	}
+
+	return types
+}
+
+func (t typeMap) Type(name string) (Type, bool) {
+	aType, ok := t[name]
+
+	return aType, ok
 }
 
 func Factory() ResourceFactory {

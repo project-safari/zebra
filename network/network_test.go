@@ -18,7 +18,9 @@ func TestSwitch(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	switch1 := new(network.Switch)
+	switchType := network.SwitchType()
+	switch1, ok := switchType.New().(*network.Switch)
+	assert.True(ok)
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.ID = "aaaa"
@@ -62,7 +64,9 @@ func TestIPAddressPool(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	pool := new(network.IPAddressPool)
+	ipPoolType := network.IPAddressPoolType()
+	pool, ok := ipPoolType.New().(*network.IPAddressPool)
+	assert.True(ok)
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "aaaa"
@@ -93,7 +97,9 @@ func TestVLANPool(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	pool := new(network.VLANPool)
+	vlanPoolType := network.VLANPoolType()
+	pool, ok := vlanPoolType.New().(*network.VLANPool)
+	assert.True(ok)
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "cccc"

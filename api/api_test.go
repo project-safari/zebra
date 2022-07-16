@@ -41,7 +41,7 @@ func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(network.VLANPoolType())
 
 	api := api.NewResourceAPI(f)
 	assert.Nil(api.Initialize("teststore"))
@@ -49,8 +49,9 @@ func TestInitialize(t *testing.T) {
 
 func TestGetResources(t *testing.T) {
 	t.Parallel()
+
 	assert := assert.New(t)
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(network.VLANPoolType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -69,7 +70,7 @@ func TestGetResourcesByID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(network.VLANPoolType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -107,7 +108,7 @@ func TestGetResourcesByType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(network.VLANPoolType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -136,7 +137,7 @@ func TestGetResourcesByProperty(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(network.VLANPoolType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -199,7 +200,7 @@ func TestGetResourcesByLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(network.VLANPoolType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -259,8 +260,7 @@ func TestPutResource(t *testing.T) { //nolint:funlen
 
 	t.Cleanup(func() { os.Remove("teststore/resources/01/00000003") })
 
-	f := zebra.Factory().Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
-	f.Add("Lab", func() zebra.Resource { return new(dc.Lab) })
+	f := zebra.Factory().Add(network.VLANPoolType()).Add(dc.LabType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize("teststore"))
 
@@ -331,7 +331,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	f := zebra.Factory().Add("Lab", func() zebra.Resource { return new(network.VLANPool) })
+	f := zebra.Factory().Add(dc.LabType())
 	myAPI := api.NewResourceAPI(f)
 	assert.Nil(myAPI.Initialize(root))
 

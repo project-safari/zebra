@@ -21,6 +21,14 @@ var ErrMaskEmpty = errors.New("mask is nil")
 
 var ErrInvalidRange = errors.New("range bounds are invalid, start is greater than end")
 
+func SwitchType() zebra.Type {
+	return zebra.Type{
+		Name:        "Switch",
+		Description: "network server",
+		Constructor: func() zebra.Resource { return new(Switch) },
+	}
+}
+
 // A Switch represents a switching device which has an ID, an associated IP
 // address, a serial number, model, and ports.
 type Switch struct {
@@ -53,6 +61,14 @@ func (s *Switch) Validate(ctx context.Context) error {
 	return s.BaseResource.Validate(ctx)
 }
 
+func IPAddressPoolType() zebra.Type {
+	return zebra.Type{
+		Name:        "IPAddressPool",
+		Description: "ip address pool",
+		Constructor: func() zebra.Resource { return new(IPAddressPool) },
+	}
+}
+
 // An IPAddressPool represents a range of consecutive IP addresses belonging
 // to the same network.
 type IPAddressPool struct {
@@ -72,6 +88,14 @@ func (p *IPAddressPool) Validate(ctx context.Context) error {
 	}
 
 	return p.BaseResource.Validate(ctx)
+}
+
+func VLANPoolType() zebra.Type {
+	return zebra.Type{
+		Name:        "VLANPool",
+		Description: "vlan pool",
+		Constructor: func() zebra.Resource { return new(VLANPool) },
+	}
 }
 
 // A VLANPool represents a pool of VLANs belonging to the same network.

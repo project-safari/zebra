@@ -19,7 +19,12 @@ func TestServer(t *testing.T) {
 
 	ctx := context.Background()
 
-	server := new(compute.Server)
+	serverType := compute.ServerType()
+	assert.NotNil(serverType)
+
+	server, ok := serverType.New().(*compute.Server)
+	assert.True(ok)
+	assert.NotNil(server)
 	assert.NotNil(server.Validate(ctx))
 
 	server.ID = "hello"
@@ -53,7 +58,9 @@ func TestESX(t *testing.T) {
 
 	ctx := context.Background()
 
-	esx := new(compute.ESX)
+	esxType := compute.ESXType()
+	esx, ok := esxType.New().(*compute.ESX)
+	assert.True(ok)
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.ID = "rolling in the deep"
@@ -84,7 +91,9 @@ func TestVCenter(t *testing.T) {
 
 	ctx := context.Background()
 
-	vcenter := new(compute.VCenter)
+	vcType := compute.VCenterType()
+	vcenter, ok := vcType.New().(*compute.VCenter)
+	assert.True(ok)
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.ID = "blah"
@@ -112,7 +121,9 @@ func TestVM(t *testing.T) {
 
 	ctx := context.Background()
 
-	machine := new(compute.VM)
+	vmType := compute.VMType()
+	machine, ok := vmType.New().(*compute.VM)
+	assert.True(ok)
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.ID = "can you hear me"

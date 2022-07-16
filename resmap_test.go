@@ -15,7 +15,7 @@ func TestAddNew(t *testing.T) {
 	f := zebra.Factory()
 	assert.NotNil(f)
 
-	f.Add("Switch", func() zebra.Resource { return new(network.Switch) })
+	f.Add(network.SwitchType())
 	assert.NotNil(f.New("Switch"))
 	assert.Nil(f.New("random"))
 }
@@ -49,7 +49,7 @@ func TestListMarshalUnmarshal(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	funMap.Add(network.VLANPoolType())
 
 	resA := zebra.NewResourceList(funMap)
 	assert.NotNil(resA)
@@ -96,7 +96,7 @@ func TestErrorMarshalUnmarshal(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	funMap.Add(network.VLANPoolType())
 	resList := zebra.NewResourceList(funMap)
 	assert.NotNil(resList.UnmarshalJSON(nil))
 	assert.NotNil(resList.UnmarshalJSON([]byte(`[{"id":"0100000001"}]`)))
@@ -138,7 +138,11 @@ func TestGetFactory(t *testing.T) {
 	assert := assert.New(t)
 
 	f := zebra.Factory()
-	f.Add("Switch", func() zebra.Resource { return new(network.Switch) })
+	f.Add(network.SwitchType())
+	assert.NotEmpty(f.Types())
+	aType, ok := f.Type("Switch")
+	assert.True(ok)
+	assert.NotNil(aType)
 
 	resA := zebra.NewResourceMap(f)
 	assert.NotNil(resA)
@@ -151,7 +155,7 @@ func TestAdd(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add("Switch", func() zebra.Resource { return new(network.Switch) })
+	funMap.Add(network.SwitchType())
 
 	resA := zebra.NewResourceMap(funMap)
 	assert.NotNil(resA)
@@ -167,7 +171,7 @@ func TestDelete(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add("Switch", func() zebra.Resource { return new(network.Switch) })
+	funMap.Add(network.SwitchType())
 
 	resA := zebra.NewResourceMap(funMap)
 	assert.NotNil(resA)
@@ -190,7 +194,7 @@ func TestMapMarshalUnMarshal(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	funMap.Add(network.VLANPoolType())
 
 	resA := zebra.NewResourceMap(funMap)
 	assert.NotNil(resA)

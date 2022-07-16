@@ -61,7 +61,7 @@ func makeUser(assert *assert.Assertions) *auth.User {
 }
 
 func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zebra.Store {
-	factory := initTypes()
+	factory := store.AllTypes()
 	assert.NotNil(factory)
 
 	store := store.NewResourceStore(root, factory)

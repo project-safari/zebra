@@ -58,7 +58,7 @@ func TestClear(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -88,7 +88,7 @@ func TestLoad(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -121,7 +121,7 @@ func TestCreate(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -152,7 +152,7 @@ func TestDelete(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -186,7 +186,7 @@ func TestQuery(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -213,7 +213,7 @@ func TestQueryUUID(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -247,8 +247,8 @@ func TestQueryType(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
-	factory.Add("Lab", func() zebra.Resource { return new(dc.Lab) })
+	factory.Add(network.VLANPoolType())
+	factory.Add(dc.LabType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -284,7 +284,7 @@ func TestQueryLabel(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	factory := zebra.Factory()
-	factory.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	factory.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
@@ -325,7 +325,7 @@ func TestQueryProperty(t *testing.T) {
 	res1, res2 := getVLAN(), getLab()
 
 	f := zebra.Factory()
-	f.Add("VLANPool", func() zebra.Resource { return new(network.VLANPool) })
+	f.Add(network.VLANPoolType())
 
 	rs := store.NewResourceStore(root, f)
 	assert.Nil(rs.Initialize())
