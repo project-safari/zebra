@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const vlan string = "VLANPool"
+const vlan = "VLANPool"
 
 func TestInitialize(t *testing.T) {
 	t.Parallel()
@@ -36,7 +36,7 @@ func TestCreate(t *testing.T) {
 	resource.Labels = zebra.Labels{"key": "value"}
 
 	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	types.Add(network.VLANPoolType())
 
 	fs := filestore.NewFileStore(root, types)
 
@@ -67,7 +67,7 @@ func TestLoad(t *testing.T) {
 	resource := getVLAN()
 
 	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	types.Add(network.VLANPoolType())
 
 	fs := filestore.NewFileStore(root, types)
 
@@ -102,7 +102,7 @@ func TestDelete(t *testing.T) {
 	resource := getVLAN()
 
 	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	types.Add(network.VLANPoolType())
 
 	fs := filestore.NewFileStore(root, types)
 
@@ -138,7 +138,7 @@ func TestClearStore(t *testing.T) {
 	resource2 := getVLAN()
 
 	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
+	types.Add(network.VLANPoolType())
 
 	fs := filestore.NewFileStore(root, types)
 
@@ -219,8 +219,8 @@ func TestBadLoad2(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	types := zebra.Factory()
-	types.Add(vlan, func() zebra.Resource { return new(network.VLANPool) })
-	types.Add("Switch", func() zebra.Resource { return new(network.Switch) })
+	types.Add(network.VLANPoolType())
+	types.Add(network.SwitchType())
 
 	fs := filestore.NewFileStore(root, types)
 

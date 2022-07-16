@@ -17,7 +17,11 @@ func TestDatacenter(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	datacenter := new(dc.Datacenter)
+	dcType := dc.DataCenterType()
+	assert.NotNil(dcType)
+
+	datacenter, ok := dcType.New().(*dc.Datacenter)
+	assert.True(ok)
 	assert.NotNil(datacenter.Validate(ctx))
 
 	datacenter.ID = "abracadabra"
@@ -25,6 +29,9 @@ func TestDatacenter(t *testing.T) {
 	datacenter.Name = "jasmine"
 	datacenter.Address = "1 palace st, agrabah"
 	assert.Nil(datacenter.Validate(ctx))
+
+	labType := dc.LabType()
+	assert.NotNil(labType)
 }
 
 // TestRack tests the *Rack Validate function with a pass and a fail case.
@@ -33,7 +40,9 @@ func TestRack(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	rack := new(dc.Rack)
+	rackType := dc.RackType()
+	rack, ok := rackType.New().(*dc.Rack)
+	assert.True(ok)
 	assert.NotNil(rack.Validate(ctx))
 
 	rack.ID = "abracadabra"

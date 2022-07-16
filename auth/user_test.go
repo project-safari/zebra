@@ -41,9 +41,9 @@ func TestUser(t *testing.T) {
 
 	ctx := context.Background()
 
-	god := new(auth.User)
-
-	assert.NotNil(god.Validate(ctx))
+	uType := auth.UserType()
+	god, ok := uType.New().(*auth.User)
+	assert.True(ok)
 
 	god.Name = "almighty"
 	god.ID = "00000000000001"
@@ -116,6 +116,10 @@ func TestUser(t *testing.T) {
 	assert.False(eve.Create("universe"))
 	assert.False(eve.Delete("universe"))
 	assert.True(adam.Create("eden"))
+	assert.True(eve.Write("eden"))
+	assert.True(eve.Update("eden"))
+	assert.False(eve.Update("universe"))
+
 	assert.True(eve.Write("eden"))
 	assert.True(eve.Update("eden"))
 	assert.False(eve.Update("universe"))

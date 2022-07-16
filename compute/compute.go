@@ -21,6 +21,14 @@ var ErrVCenterEmpty = errors.New("VCenter id is empty")
 
 var ErrServerIDEmtpy = errors.New("server id is empty")
 
+func ServerType() zebra.Type {
+	return zebra.Type{
+		Name:        "Server",
+		Description: "compute server",
+		Constructor: func() zebra.Resource { return new(Server) },
+	}
+}
+
 // A Server represents a server with credentials, a serial number, board IP, and
 // model information.
 type Server struct {
@@ -48,6 +56,14 @@ func (s *Server) Validate(ctx context.Context) error {
 	return s.NamedResource.Validate(ctx)
 }
 
+func ESXType() zebra.Type {
+	return zebra.Type{
+		Name:        "ESX",
+		Description: "VMWare ESX server",
+		Constructor: func() zebra.Resource { return new(ESX) },
+	}
+}
+
 // An ESX represents an ESX server with credentials, an associated server, and IP.
 type ESX struct {
 	zebra.NamedResource
@@ -72,6 +88,14 @@ func (e *ESX) Validate(ctx context.Context) error {
 	return e.NamedResource.Validate(ctx)
 }
 
+func VCenterType() zebra.Type {
+	return zebra.Type{
+		Name:        "VCenter",
+		Description: "VMWare vcenter",
+		Constructor: func() zebra.Resource { return new(VCenter) },
+	}
+}
+
 // A VCenter has credentials and an IP.
 type VCenter struct {
 	zebra.NamedResource
@@ -89,6 +113,14 @@ func (v *VCenter) Validate(ctx context.Context) error {
 	}
 
 	return v.NamedResource.Validate(ctx)
+}
+
+func VMType() zebra.Type {
+	return zebra.Type{
+		Name:        "VM",
+		Description: "virtual machine",
+		Constructor: func() zebra.Resource { return new(VM) },
+	}
 }
 
 // A VM is represented by a set of credentials, associated ESX ID, management IP,

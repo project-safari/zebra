@@ -15,6 +15,14 @@ var (
 	ErrRoleEmpty     = errors.New("role is empty")
 )
 
+func UserType() zebra.Type {
+	return zebra.Type{
+		Name:        "User",
+		Description: "zebra user",
+		Constructor: func() zebra.Resource { return new(User) },
+	}
+}
+
 type User struct {
 	zebra.NamedResource
 	Key          *RsaIdentity `json:"key"`
