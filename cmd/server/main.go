@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -103,7 +104,7 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 		panic(e)
 	}
 
-	factory := store.AllTypes()
+	factory := store.DefaultFactory()
 
 	resAPI := api.NewResourceAPI(factory)
 	if e := resAPI.Initialize(storeCfg.Root); e != nil {
@@ -113,6 +114,7 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 
 	router := httprouter.New()
 	router.GET("/api/v1/resources", handleQuery(resAPI))
+	router.GET("/api/v1/types", handleTypes(ctx))
 	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey))
 
 	return router
@@ -136,5 +138,22 @@ func handleQuery(resAPI *api.ResourceAPI) httprouter.Handle {
 		default:
 			resAPI.GetResources(res, req)
 		}
+	}
+}
+
+func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
+	log := logr.FromContextOrDiscard(ctx)
+
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	if _, err := res.Write(bytes); err != nil {
+		log.Error(err, "error writing response")
 	}
 }
