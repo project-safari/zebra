@@ -115,6 +115,7 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 	router := httprouter.New()
 	router.GET("/api/v1/resources", handleQuery(resAPI))
 	router.GET("/api/v1/types", handleTypes(ctx))
+	router.GET("/api/v1/labels", handleLabels(ctx, resAPI.Store))
 	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey))
 
 	return router
@@ -153,6 +154,7 @@ func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
 
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
+
 	if _, err := res.Write(bytes); err != nil {
 		log.Error(err, "error writing response")
 	}
