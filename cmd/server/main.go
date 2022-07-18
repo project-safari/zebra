@@ -115,6 +115,8 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 	router.GET("/api/v1/types", handleTypes(ctx))
 	router.GET("/api/v1/labels", handleLabels(ctx, resAPI.Store))
 	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey))
+	router.POST("/api/v1/resources", handlePost(ctx, resAPI))
+	router.DELETE("/api/v1/resources", handleDelete(ctx, resAPI))
 
 	return router
 }
