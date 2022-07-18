@@ -2,13 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"html"
-	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
@@ -143,6 +138,44 @@ func handlePut(ctx context.Context, api *ResourceAPI) httprouter.Handle {
 	}
 }
 
+func handleDelete(ctx context.Context, api *ResourceAPI) httprouter.Handle {
+	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		resMap := zebra.NewResourceMap(store.DefaultFactory())
+
+		// Read request, return error if applicable
+		if err := readReq(ctx, req, resMap); err != nil {
+			res.WriteHeader(http.StatusBadRequest)
+
+			return
+		}
+
+		// Check all resources to make sure they are valid
+		for _, l := range resMap.Resources {
+			for _, r := range l.Resources {
+				if r.Validate(ctx) != nil {
+					res.WriteHeader(http.StatusBadRequest)
+
+					return
+				}
+			}
+		}
+
+		// Delete all resources from store
+		for _, l := range resMap.Resources {
+			for _, r := range l.Resources {
+				if api.Store.Delete(r) != nil {
+					res.WriteHeader(http.StatusBadRequest)
+
+					return
+				}
+			}
+		}
+
+		// Return 200
+		res.WriteHeader(http.StatusOK)
+	}
+}
+
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
 		factory: factory,
@@ -155,83 +188,4 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 	api.Store = store.NewResourceStore(storageRoot, api.factory)
 
 	return api.Store.Initialize()
-}
-
-func (api *ResourceAPI) DeleteResource(w http.ResponseWriter, req *http.Request) {
-	if req.Body == nil {
-		w.WriteHeader(http.StatusBadRequest)
-
-		return
-	}
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
-
-	var ids []string
-
-	err = json.Unmarshal(body, &ids)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-
-		return
-	}
-
-	resources := api.Store.QueryUUID(ids)
-	status := make(map[string]int, len(ids))
-
-	for _, l := range resources.Resources {
-		for _, res := range l.Resources {
-			if api.Store.Delete(res) != nil {
-				status[res.GetID()] = -1
-			} else {
-				status[res.GetID()] = 1
-			}
-		}
-	}
-
-	httpStatus, response := createDeleteResponse(ids, status)
-
-	w.WriteHeader(httpStatus)
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(html.EscapeString(response))) //nolint:errcheck
-}
-
-func createDeleteResponse(ids []string, status map[string]int) (int, string) {
-	httpStatus := http.StatusOK
-	successID := make([]string, 0)
-	failedID := make([]string, 0)
-	invalidID := make([]string, 0)
-
-	for _, id := range ids {
-		switch status[id] {
-		case -1:
-			failedID = append(failedID, id)
-		case 1:
-			successID = append(successID, id)
-		default:
-			invalidID = append(invalidID, id)
-		}
-	}
-
-	var response string
-
-	if len(successID) > 0 {
-		response = fmt.Sprintf("Deleted the following resources: %s\n", strings.Join(successID, ", "))
-	}
-
-	if len(failedID) > 0 {
-		httpStatus = http.StatusMultiStatus
-
-		response += fmt.Sprintf("Failed to delete the following resources: %s\n", strings.Join(failedID, ", "))
-	}
-
-	if len(invalidID) > 0 {
-		response += fmt.Sprintf("Invalid resource IDs: %s\n", strings.Join(invalidID, ", "))
-	}
-
-	return httpStatus, response
 }

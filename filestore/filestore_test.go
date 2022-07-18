@@ -121,6 +121,9 @@ func TestDelete(t *testing.T) {
 
 	_, err = os.Stat(getPath(root, resource))
 	assert.True(os.IsNotExist(err))
+
+	// Try to delete res that doesn't exist, should fail
+	assert.NotNil(fs.Delete(resource))
 }
 
 func TestClearStore(t *testing.T) {

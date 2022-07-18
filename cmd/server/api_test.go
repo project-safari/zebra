@@ -233,11 +233,13 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	f := zebra.Factory().Add(dc.LabType())
-	myAPI := NewResourceAPI(f)
+	myAPI := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(myAPI.Initialize(root))
 
-	handler := http.HandlerFunc(myAPI.DeleteResource)
+	h := handleDelete(context.Background(), myAPI)
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, nil)
+	})
 
 	lab1 := &dc.Lab{
 		NamedResource: zebra.NamedResource{
@@ -265,40 +267,33 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	assert.Nil(myAPI.Store.Create(lab2))
 
 	// Invalid resources requested to be deleted
-	body := `["10000003", "10000004"]`
+	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
 	req := createRequest(assert, "DELETE", "/resources", body)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusOK, rr.Code)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
-	expected := "Invalid resource IDs: 10000003, 10000004\n"
-	resBody := rr.Body.String()
-	assert.Equal(expected, resBody)
+	body = `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
+	req = createRequest(assert, "DELETE", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
+
+	body = `{"lab":[{"id":"0","type":"Lab","name": "shravya's lab"}]}`
+	req = createRequest(assert, "DELETE", "/resources", body)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// DELETE resources
-	body = `["10000001", "10000002"]`
-	req = createRequest(assert, "DELETE", "/resources", body)
+	bytes, err := json.Marshal(myAPI.Store.Query())
+	assert.Nil(err)
+	req = createRequest(assert, "DELETE", "/resources", string(bytes))
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
 
-	expected = "Deleted the following resources: 10000001, 10000002\n"
-	resBody = rr.Body.String()
-	assert.Equal(expected, resBody)
-
-	// Trigger ioutil.ReadAll() panic
-	body = ""
-	req = createRequest(assert, "DELETE", "/resources", body)
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
-
-	// Bad request, type of list
-	body = `[1, 2]`
-	req = createRequest(assert, "DELETE", "/resources", body)
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
+	assert.Empty(myAPI.Store.Query().Resources)
 }
 
 func createRequest(assert *assert.Assertions, method string, url string, body string) *http.Request {

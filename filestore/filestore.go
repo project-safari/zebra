@@ -186,7 +186,7 @@ func (f *FileStore) update(res zebra.Resource) error {
 }
 
 // Delete object given storage root path and UUID.
-// If object does not exist, do nothing.
+// If object does not exist, return error.
 func (f *FileStore) Delete(res zebra.Resource) error {
 	path := f.resourcesFilePath(res)
 
