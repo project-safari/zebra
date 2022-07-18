@@ -77,7 +77,7 @@ func (qr *QueryRequest) Validate(ctx context.Context) error {
 	p := len(qr.Properties) != 0
 
 	// Make sure only id (and labels), types (and labels), or labels are present
-	if (id && t) || (id && p) || (t && p) || (l && p) {
+	if (id && (t || p)) || (p && (t || l)) {
 		return ErrQueryRequest
 	}
 
