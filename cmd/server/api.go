@@ -164,7 +164,7 @@ func handleDelete(ctx context.Context, api *ResourceAPI) httprouter.Handle {
 		for _, l := range resMap.Resources {
 			for _, r := range l.Resources {
 				if api.Store.Delete(r) != nil {
-					res.WriteHeader(http.StatusBadRequest)
+					res.WriteHeader(http.StatusInternalServerError)
 
 					return
 				}

@@ -174,7 +174,7 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(rs.Delete(nil))
 
 	// Delete uncreated resource, should pass anyways
-	assert.NotNil(rs.Delete(getLab()))
+	assert.Nil(rs.Delete(getLab()))
 }
 
 func TestQuery(t *testing.T) {

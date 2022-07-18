@@ -271,7 +271,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	req := createRequest(assert, "DELETE", "/resources", body)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
+	assert.Equal(http.StatusOK, rr.Code)
 
 	body = `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
 	req = createRequest(assert, "DELETE", "/resources", body)
