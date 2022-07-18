@@ -50,7 +50,7 @@ func readReq(ctx context.Context, req *http.Request, data interface{}) error {
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	log.Info("request", "body", string(body))
