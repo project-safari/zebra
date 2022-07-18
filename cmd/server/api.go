@@ -105,6 +105,44 @@ func checkQueries(queries []zebra.Query) error {
 	return nil
 }
 
+func handlePut(ctx context.Context, api *ResourceAPI) httprouter.Handle {
+	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		resMap := zebra.NewResourceMap(store.DefaultFactory())
+
+		// Read request, return error if applicable
+		if err := readReq(ctx, req, resMap); err != nil {
+			res.WriteHeader(http.StatusBadRequest)
+
+			return
+		}
+
+		// Check all resources to make sure they are valid
+		for _, l := range resMap.Resources {
+			for _, r := range l.Resources {
+				if r.Validate(ctx) != nil {
+					res.WriteHeader(http.StatusBadRequest)
+
+					return
+				}
+			}
+		}
+
+		// Add all resources to store
+		for _, l := range resMap.Resources {
+			for _, r := range l.Resources {
+				if api.Store.Create(r) != nil {
+					res.WriteHeader(http.StatusInternalServerError)
+
+					return
+				}
+			}
+		}
+
+		// Return 200
+		res.WriteHeader(http.StatusOK)
+	}
+}
+
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
 		factory: factory,
@@ -117,43 +155,6 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 	api.Store = store.NewResourceStore(storageRoot, api.factory)
 
 	return api.Store.Initialize()
-}
-
-func (api *ResourceAPI) PutResource(w http.ResponseWriter, req *http.Request) {
-	if req.Body == nil {
-		w.WriteHeader(http.StatusBadRequest)
-
-		return
-	}
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
-
-	res := api.unpackResource(w, body)
-	if res == nil {
-		w.WriteHeader(http.StatusBadRequest)
-
-		return
-	}
-
-	// Check if this is a create or an update.
-	exists := len(api.Store.QueryUUID([]string{res.GetID()}).Resources) != 0
-
-	if err := api.Store.Create(res); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-
-		return
-	}
-
-	if exists {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusCreated)
-	}
 }
 
 func (api *ResourceAPI) DeleteResource(w http.ResponseWriter, req *http.Request) {
@@ -233,23 +234,4 @@ func createDeleteResponse(ids []string, status map[string]int) (int, string) {
 	}
 
 	return httpStatus, response
-}
-
-func (api *ResourceAPI) unpackResource(w http.ResponseWriter, body []byte) zebra.Resource {
-	object := make(map[string]interface{})
-	if err := json.Unmarshal(body, &object); err != nil {
-		return nil
-	}
-
-	resType, ok := object["type"].(string)
-	if !ok {
-		return nil
-	}
-
-	res := api.factory.New(resType)
-	if err := json.Unmarshal(body, res); err != nil {
-		return nil
-	}
-
-	return res
 }

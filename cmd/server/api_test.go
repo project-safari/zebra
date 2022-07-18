@@ -180,7 +180,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(api.Initialize(root))
 }
 
-func TestPutResource(t *testing.T) { //nolint:funlen
+func TestPutResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -188,26 +188,21 @@ func TestPutResource(t *testing.T) { //nolint:funlen
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	f := zebra.Factory().Add(network.VLANPoolType()).Add(dc.LabType())
-	myAPI := NewResourceAPI(f)
+	myAPI := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(myAPI.Initialize(root))
 
-	handler := http.HandlerFunc(myAPI.PutResource)
+	h := handlePut(context.Background(), myAPI)
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, nil)
+	})
 
-	body := `{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}`
-
-	// Test error handling
-	req, err := http.NewRequest("PUT", "/resources", nil)
-	assert.Nil(err)
-
-	rr := httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
+	body := `{"lab":[{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 
 	// Create new resource
-	req = createRequest(assert, "PUT", "/resources", body)
-	rr = httptest.NewRecorder()
+	req := createRequest(assert, "PUT", "/resources", body)
+	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusCreated, rr.Code)
+	assert.Equal(http.StatusOK, rr.Code)
 
 	// Update existing resource
 	req = createRequest(assert, "PUT", "/resources", body)
@@ -215,36 +210,15 @@ func TestPutResource(t *testing.T) { //nolint:funlen
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
 
-	// Create resource without a type
-	body = `{"id":"0100000003","labels": {"owner": "shravya"},"name": "shravya's lab"}`
+	// Create resource with an invalid type, won't read properly
+	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 	req = createRequest(assert, "PUT", "/resources", body)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
-	// Create resource with an invalid type
-	body = `{"id":"0100000003","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}`
-	req = createRequest(assert, "PUT", "/resources", body)
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
-
-	// Create invalid resource
-	body = `{"id":"0100000003","type":"Lab"}`
-	req = createRequest(assert, "PUT", "/resources", body)
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
-
-	// Trigger ioutil.ReadAll() panic
-	body = ""
-	req = createRequest(assert, "PUT", "/resources", body)
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
-
-	// Create resource with no information
-	body = " "
+	// Create resource with an invalid ID
+	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 	req = createRequest(assert, "PUT", "/resources", body)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
