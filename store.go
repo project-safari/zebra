@@ -1,6 +1,8 @@
 package zebra
 
-import "errors"
+import (
+	"errors"
+)
 
 type Operator uint8
 
@@ -14,9 +16,9 @@ const (
 
 // Command struct for label queries.
 type Query struct {
-	Op     Operator
-	Key    string
-	Values []string
+	Key    string   `json:"key"`
+	Op     Operator `json:"op"`
+	Values []string `json:"values"`
 }
 
 var (
@@ -48,6 +50,40 @@ func (q *Query) Validate() error {
 	if q.Op > MatchNotIn {
 		return ErrInvalidQuery
 	}
+
+	return nil
+}
+
+func (o *Operator) MarshalText() ([]byte, error) {
+	opMap := map[Operator]string{
+		MatchEqual:    "==",
+		MatchNotEqual: "!=",
+		MatchIn:       "in",
+		MatchNotIn:    "notin",
+	}
+
+	opVal, ok := opMap[*o]
+	if !ok {
+		return []byte(""), ErrInvalidQuery
+	}
+
+	return []byte(opVal), nil
+}
+
+func (o *Operator) UnmarshalText(data []byte) error {
+	opMap := map[string]Operator{
+		"==":    MatchEqual,
+		"!=":    MatchNotEqual,
+		"in":    MatchIn,
+		"notin": MatchNotIn,
+	}
+
+	op, ok := opMap[string(data)]
+	if !ok {
+		return ErrInvalidQuery
+	}
+
+	*o = op
 
 	return nil
 }

@@ -8,12 +8,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zerologr"
 	"github.com/julienschmidt/httprouter"
-	"github.com/project-safari/zebra/api"
 	"github.com/project-safari/zebra/store"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
@@ -106,40 +104,19 @@ func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
 
 	factory := store.DefaultFactory()
 
-	resAPI := api.NewResourceAPI(factory)
+	resAPI := NewResourceAPI(factory)
 	if e := resAPI.Initialize(storeCfg.Root); e != nil {
 		log.Error(e, "api initialization failed")
 		panic(e)
 	}
 
 	router := httprouter.New()
-	router.GET("/api/v1/resources", handleQuery(resAPI))
+	router.GET("/api/v1/resources", handleQuery(ctx, resAPI))
 	router.GET("/api/v1/types", handleTypes(ctx))
 	router.GET("/api/v1/labels", handleLabels(ctx, resAPI.Store))
 	router.GET("/login", handleLogin(ctx, resAPI.Store, authKey))
 
 	return router
-}
-
-func handleQuery(resAPI *api.ResourceAPI) httprouter.Handle {
-	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		switch {
-		case strings.HasPrefix(req.URL.RawQuery, "id"):
-			resAPI.GetResourcesByID(res, req)
-
-		case strings.HasPrefix(req.URL.RawQuery, "type"):
-			resAPI.GetResourcesByType(res, req)
-
-		case strings.HasPrefix(req.URL.RawQuery, "property"):
-			resAPI.GetResourcesByProperty(res, req)
-
-		case strings.HasPrefix(req.URL.RawQuery, "label"):
-			resAPI.GetResourcesByLabel(res, req)
-
-		default:
-			resAPI.GetResources(res, req)
-		}
-	}
 }
 
 func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
