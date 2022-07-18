@@ -50,6 +50,9 @@ func TestServer(t *testing.T) {
 
 	server.Credentials.Keys["password"] = "actualPassw0rd%9"
 	assert.Nil(server.Validate(ctx))
+
+	server.Type = "test"
+	assert.NotNil(server.Validate(ctx))
 }
 
 func TestESX(t *testing.T) {
@@ -83,6 +86,9 @@ func TestESX(t *testing.T) {
 
 	esx.Credentials.Keys["password"] = "actualPassw0rd%2"
 	assert.Nil(esx.Validate(ctx))
+
+	esx.Type = "notesx"
+	assert.NotNil(esx.Validate(ctx))
 }
 
 func TestVCenter(t *testing.T) {
@@ -113,6 +119,9 @@ func TestVCenter(t *testing.T) {
 
 	vcenter.Credentials.Keys["password"] = "actualPassw0rd%4"
 	assert.Nil(vcenter.Validate(ctx))
+
+	vcenter.Type = "test"
+	assert.NotNil(vcenter.Validate(ctx))
 }
 
 func TestVM(t *testing.T) {
@@ -149,4 +158,7 @@ func TestVM(t *testing.T) {
 
 	machine.Credentials.Keys["password"] = "actualPassw0rd%1"
 	assert.Nil(machine.Validate(ctx))
+
+	machine.Type = "machine"
+	assert.NotNil(machine.Validate(ctx))
 }

@@ -34,6 +34,10 @@ func (dc *Datacenter) Validate(ctx context.Context) error {
 		return ErrAddressEmpty
 	}
 
+	if dc.Type != "Datacenter" {
+		return zebra.ErrWrongType
+	}
+
 	return dc.NamedResource.Validate(ctx)
 }
 
@@ -48,6 +52,14 @@ func LabType() zebra.Type {
 // A Lab represents the lab consisting of a name and an ID.
 type Lab struct {
 	zebra.NamedResource
+}
+
+func (l *Lab) Validate(ctx context.Context) error {
+	if l.Type != "Lab" {
+		return zebra.ErrWrongType
+	}
+
+	return l.NamedResource.Validate(ctx)
 }
 
 func RackType() zebra.Type {
@@ -70,6 +82,10 @@ type Rack struct {
 func (r *Rack) Validate(ctx context.Context) error {
 	if r.Row == "" {
 		return ErrRowEmpty
+	}
+
+	if r.Type != "Rack" {
+		return zebra.ErrWrongType
 	}
 
 	return r.NamedResource.Validate(ctx)

@@ -49,6 +49,10 @@ func (s *Server) Validate(ctx context.Context) error {
 		return ErrModelEmpty
 	}
 
+	if s.Type != "Server" {
+		return zebra.ErrWrongType
+	}
+
 	if err := s.Credentials.Validate(ctx); err != nil {
 		return err
 	}
@@ -81,6 +85,10 @@ func (e *ESX) Validate(ctx context.Context) error {
 		return ErrServerIDEmtpy
 	}
 
+	if e.Type != "ESX" {
+		return zebra.ErrWrongType
+	}
+
 	if credentialsErr := e.Credentials.Validate(ctx); credentialsErr != nil {
 		return credentialsErr
 	}
@@ -106,6 +114,10 @@ type VCenter struct {
 func (v *VCenter) Validate(ctx context.Context) error {
 	if v.IP == nil {
 		return ErrIPEmpty
+	}
+
+	if v.Type != "VCenter" {
+		return zebra.ErrWrongType
 	}
 
 	if err := v.Credentials.Validate(ctx); err != nil {
@@ -141,6 +153,10 @@ func (v *VM) Validate(ctx context.Context) error {
 		return ErrIPEmpty
 	case v.VCenterID == "":
 		return ErrVCenterEmpty
+	}
+
+	if v.Type != "VM" {
+		return zebra.ErrWrongType
 	}
 
 	if err := v.Credentials.Validate(ctx); err != nil {

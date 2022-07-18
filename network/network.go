@@ -54,6 +54,10 @@ func (s *Switch) Validate(ctx context.Context) error {
 		return ErrNumPortsEmpty
 	}
 
+	if s.Type != "Switch" {
+		return zebra.ErrWrongType
+	}
+
 	if err := s.Credentials.Validate(ctx); err != nil {
 		return err
 	}
@@ -87,6 +91,10 @@ func (p *IPAddressPool) Validate(ctx context.Context) error {
 		}
 	}
 
+	if p.Type != "IPAddressPool" {
+		return zebra.ErrWrongType
+	}
+
 	return p.BaseResource.Validate(ctx)
 }
 
@@ -110,6 +118,10 @@ type VLANPool struct {
 func (v *VLANPool) Validate(ctx context.Context) error {
 	if v.RangeStart > v.RangeEnd {
 		return ErrInvalidRange
+	}
+
+	if v.Type != "VLANPool" {
+		return zebra.ErrWrongType
 	}
 
 	return v.BaseResource.Validate(ctx)
