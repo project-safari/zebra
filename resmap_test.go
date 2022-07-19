@@ -42,6 +42,8 @@ func TestCopyResourceList(t *testing.T) {
 
 	zebra.CopyResourceList(resB, resA)
 	assert.Equal(1, len(resB.Resources))
+
+	zebra.CopyResourceList(nil, nil)
 }
 
 func TestListMarshalUnmarshal(t *testing.T) {

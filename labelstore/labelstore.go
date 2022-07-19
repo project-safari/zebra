@@ -160,7 +160,7 @@ func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.Resource
 	}
 
 	for val, valMap := range ls.resources[query.Key].Resources {
-		if !isIn(val, query.Values) {
+		if !zebra.IsIn(val, query.Values) {
 			for _, res := range valMap.Resources {
 				results.Add(res, res.GetType())
 			}
@@ -179,15 +179,4 @@ func (ls *LabelStore) find(resID string) (zebra.Resource, error) {
 	}
 
 	return val, nil
-}
-
-// Return if val is in string list.
-func isIn(val string, list []string) bool {
-	for _, v := range list {
-		if val == v {
-			return true
-		}
-	}
-
-	return false
 }

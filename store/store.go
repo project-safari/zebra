@@ -249,7 +249,7 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-			inList := isIn(val, query.Values)
+			inList := zebra.IsIn(val, query.Values)
 
 			if inVals && inList {
 				retMap.Add(res, t)
@@ -262,24 +262,13 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 	return retMap, nil
 }
 
-// Return if val is in string list.
-func isIn(val string, list []string) bool {
-	for _, v := range list {
-		if val == v {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Filter given map by uuids.
 func FilterUUID(uuids []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
 	retMap := zebra.NewResourceMap(resMap.GetFactory())
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			if isIn(res.GetID(), uuids) {
+			if zebra.IsIn(res.GetID(), uuids) {
 				retMap.Add(res, t)
 			}
 		}
@@ -353,7 +342,7 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-			matchIn := isIn(val, query.Values)
+			matchIn := zebra.IsIn(val, query.Values)
 
 			if (inVals && matchIn) || (!inVals && !matchIn) {
 				retMap.Add(res, t)
