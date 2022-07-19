@@ -8,12 +8,38 @@ import (
 )
 
 type Status struct {
-	Fault       string    `json:"fault"`
-	Lease       string    `json:"lease"`
+	Fault       Fault     `json:"fault"`
+	Lease       Lease     `json:"lease"`
 	UsedBy      string    `json:"usedBy"`
-	State       string    `json:"state"`
+	State       State     `json:"state"`
 	CreatedTime time.Time `json:"createdTime"`
 }
+
+type (
+	Fault uint8
+	Lease uint8
+	State uint8
+)
+
+const (
+	None Fault = iota
+	Minor
+	Major
+	Critical
+)
+
+const (
+	Leased Lease = iota
+	Free
+	Setup
+)
+
+const (
+	Active State = iota
+	Inactive
+)
+
+const Unknown = "unknown"
 
 var (
 	ErrFault       = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
@@ -22,16 +48,112 @@ var (
 	ErrCreatedTime = errors.New(`createdTime is incorrect, must be before current time`)
 )
 
-func (s *Status) Validate(ctx context.Context) error {
-	if !IsIn(strings.ToLower(s.Fault), []string{"none", "minor", "major", "critical"}) {
+func (f *Fault) String() string {
+	strs := map[Fault]string{None: "none", Minor: "minor", Major: "major", Critical: "critical"}
+	fstr, ok := strs[*f]
+
+	if !ok {
+		return Unknown
+	}
+
+	return fstr
+}
+
+func (f *Fault) MarshalText() ([]byte, error) {
+	return []byte(f.String()), nil
+}
+
+func (f *Fault) UnmarshalText(data []byte) error {
+	fmap := map[string]Fault{
+		"none":     None,
+		"minor":    Minor,
+		"major":    Major,
+		"critical": Critical,
+	}
+
+	fval, ok := fmap[strings.ToLower(string(data))]
+	if !ok {
 		return ErrFault
 	}
 
-	if !IsIn(strings.ToLower(s.Lease), []string{"leased", "free", "setup"}) {
+	*f = fval
+
+	return nil
+}
+
+func (l Lease) String() string {
+	strs := map[Lease]string{Leased: "leased", Free: "free", Setup: "setup"}
+	lstr, ok := strs[l]
+
+	if !ok {
+		return Unknown
+	}
+
+	return lstr
+}
+
+func (l *Lease) MarshalText() ([]byte, error) {
+	return []byte(l.String()), nil
+}
+
+func (l *Lease) UnmarshalText(data []byte) error {
+	lmap := map[string]Lease{
+		"leased": Leased,
+		"free":   Free,
+		"setup":  Setup,
+	}
+
+	lval, ok := lmap[strings.ToLower(string(data))]
+	if !ok {
+		return ErrFault
+	}
+
+	*l = lval
+
+	return nil
+}
+
+func (s State) String() string {
+	strs := map[State]string{Active: "active", Inactive: "inactive"}
+	sstr, ok := strs[s]
+
+	if !ok {
+		return Unknown
+	}
+
+	return sstr
+}
+
+func (s *State) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}
+
+func (s *State) UnmarshalText(data []byte) error {
+	smap := map[string]State{
+		"active":   Active,
+		"inactive": Inactive,
+	}
+
+	sval, ok := smap[strings.ToLower(string(data))]
+	if !ok {
+		return ErrFault
+	}
+
+	*s = sval
+
+	return nil
+}
+
+func (s *Status) Validate(ctx context.Context) error {
+	if s.Fault > Critical {
+		return ErrFault
+	}
+
+	if s.Lease > Setup {
 		return ErrLease
 	}
 
-	if !IsIn(strings.ToLower(s.State), []string{"active", "inactive"}) {
+	if s.State > Inactive {
 		return ErrState
 	}
 
@@ -46,10 +168,10 @@ func (s *Status) Validate(ctx context.Context) error {
 // resource in a free state, active, no user, and create time as right now).
 func DefaultStatus() Status {
 	return Status{
-		Fault:       "none",
-		Lease:       "free",
+		Fault:       None,
+		Lease:       Free,
 		UsedBy:      "",
-		State:       "active",
+		State:       Active,
 		CreatedTime: time.Now(),
 	}
 }
