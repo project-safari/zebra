@@ -13,6 +13,7 @@ func NewBaseResource(resType string, labels Labels) *BaseResource {
 		ID:     id,
 		Type:   resType,
 		Labels: labels,
+		Status: DefaultStatus(),
 	}
 }
 

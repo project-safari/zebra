@@ -42,6 +42,7 @@ type BaseResource struct {
 	ID     string `json:"id"`
 	Type   string `json:"type"`
 	Labels Labels `json:"labels,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.

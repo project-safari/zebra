@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidate(t *testing.T) {
+func TestValidateStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
