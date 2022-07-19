@@ -8,16 +8,24 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/auth"
 )
 
-func handleRegister(ctx context.Context) httprouter.Handle {
+type NewUser struct {
+	auth.User
+	Email  string `json:"email"`
+	Active bool   `json:"active"`
+}
+
+func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		log := logr.FromContextOrDiscard(ctx)
 		registryData := &struct {
-			Name     string `json:"user"`
-			Password string `json:"password"`
-			Email    string `json:"email"`
-			Key      string `json:"key"`
+			Name     string            `json:"user"`
+			Password string            `json:"password"`
+			Email    string            `json:"email"`
+			Key      *auth.RsaIdentity `json:"key"`
 		}{}
 
 		body, err := ioutil.ReadAll(req.Body)
@@ -34,17 +42,37 @@ func handleRegister(ctx context.Context) httprouter.Handle {
 
 			return
 		}
+		user := findUser(store, registryData.Name)
+		if user != nil {
+			log.Error(err, "user already exist", "user", registryData.Name)
+			res.WriteHeader(http.StatusForbidden)
 
+			return
+		}
+
+		newuser := createNewUser(registryData.Email, registryData.Name, registryData.Key, registryData.Password)
+
+		if store.Initialize() != nil || store.Create(newuser) != nil {
+			log.Error(err, "user cant be stored", "user", registryData.Name)
+			return
+		}
+
+		responseRegister(log, res, newuser)
 	}
 }
 
-func responseRegister(log logr.Logger, res http.ResponseWriter) {
+func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *NewUser) {
 	regData := &struct {
-		Name   string `json:"user"`
-		Email  string `json:"email"`
-		Active bool   `json:"active"`
-		Role   string `json:"role"`
-	}{}
+		Name   string     `json:"user"`
+		Email  string     `json:"email"`
+		Active bool       `json:"active"`
+		Role   *auth.Role `json:"role"`
+	}{
+		Name:   newuser.Name,
+		Email:  newuser.Email,
+		Active: false,
+		Role:   newuser.Role,
+	}
 
 	bytes, err := json.Marshal(regData)
 	if err != nil {
@@ -55,9 +83,57 @@ func responseRegister(log logr.Logger, res http.ResponseWriter) {
 	}
 
 	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
+	res.WriteHeader(http.StatusCreated)
 
 	if _, err := res.Write(bytes); err != nil {
 		log.Error(err, "error writing response")
 	}
+}
+
+func createNewUser(email string, name string, key *auth.RsaIdentity, passward string) *NewUser {
+	newuser := &NewUser{
+		Email:  email,
+		Active: false,
+	}
+	newuser.Key = key
+	newuser.PasswordHash = auth.HashPassword(passward)
+	newuser.NamedResource.Name = name
+	newuser.Role = nil
+	newuser.BaseResource = *zebra.NewBaseResource("User", nil)
+
+	return newuser
+}
+
+func (nw *NewUser) createRole(role *auth.Role) {
+	nw.Role = role
+	return
+}
+
+func (nw *NewUser) changeActiveStatus(status bool) {
+	if !status {
+
+	}
+	nw.Active = status
+	return
+}
+
+func (nw *NewUser) deleteUser(store zebra.Store) error {
+	err := store.Delete(nw)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (nw *NewUser) changePassword(newpass string) {
+	nw.PasswordHash = auth.HashPassword(newpass)
+}
+
+func (nw *NewUser) changePubKey() error {
+	rsa, err := auth.Generate()
+	if err != nil {
+		return err
+	}
+	nw.Key = rsa
+	return nil
 }

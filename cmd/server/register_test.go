@@ -1,0 +1,1 @@
+package main //nolint:testpackage
