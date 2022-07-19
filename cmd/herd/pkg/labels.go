@@ -1,17 +1,15 @@
 /*
 create 100 instances of each resource for some users
 program to display results for each respective type
+labels file
 */
 
 package pkg
 
-import (
-	"math/rand"
-)
+import "math/rand"
 
 func CreateLabels() map[string]string {
 	many := rand.Int()%10 + 1 //nolint
-
 	codes := make(map[string]string, many)
 
 	colors := []string{

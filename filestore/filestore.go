@@ -186,9 +186,14 @@ func (f *FileStore) update(res zebra.Resource) error {
 }
 
 // Delete object given storage root path and UUID.
-// If object does not exist, do nothing.
+// If object does not exist, return error.
 func (f *FileStore) Delete(res zebra.Resource) error {
 	path := f.resourcesFilePath(res)
+
+	// attempt to delete resource that does not exist, just return nil
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
 
 	if err := syscall.Unlink(path); err != nil {
 		return err

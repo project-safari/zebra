@@ -19,7 +19,12 @@ func TestServer(t *testing.T) {
 
 	ctx := context.Background()
 
-	server := new(compute.Server)
+	serverType := compute.ServerType()
+	assert.NotNil(serverType)
+
+	server, ok := serverType.New().(*compute.Server)
+	assert.True(ok)
+	assert.NotNil(server)
 	assert.NotNil(server.Validate(ctx))
 
 	server.ID = "hello"
@@ -45,6 +50,9 @@ func TestServer(t *testing.T) {
 
 	server.Credentials.Keys["password"] = "actualPassw0rd%9"
 	assert.Nil(server.Validate(ctx))
+
+	server.Type = "test"
+	assert.NotNil(server.Validate(ctx))
 }
 
 func TestESX(t *testing.T) {
@@ -53,7 +61,9 @@ func TestESX(t *testing.T) {
 
 	ctx := context.Background()
 
-	esx := new(compute.ESX)
+	esxType := compute.ESXType()
+	esx, ok := esxType.New().(*compute.ESX)
+	assert.True(ok)
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.ID = "rolling in the deep"
@@ -76,6 +86,9 @@ func TestESX(t *testing.T) {
 
 	esx.Credentials.Keys["password"] = "actualPassw0rd%2"
 	assert.Nil(esx.Validate(ctx))
+
+	esx.Type = "notesx"
+	assert.NotNil(esx.Validate(ctx))
 }
 
 func TestVCenter(t *testing.T) {
@@ -84,7 +97,9 @@ func TestVCenter(t *testing.T) {
 
 	ctx := context.Background()
 
-	vcenter := new(compute.VCenter)
+	vcType := compute.VCenterType()
+	vcenter, ok := vcType.New().(*compute.VCenter)
+	assert.True(ok)
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.ID = "blah"
@@ -104,6 +119,9 @@ func TestVCenter(t *testing.T) {
 
 	vcenter.Credentials.Keys["password"] = "actualPassw0rd%4"
 	assert.Nil(vcenter.Validate(ctx))
+
+	vcenter.Type = "test"
+	assert.NotNil(vcenter.Validate(ctx))
 }
 
 func TestVM(t *testing.T) {
@@ -112,7 +130,9 @@ func TestVM(t *testing.T) {
 
 	ctx := context.Background()
 
-	machine := new(compute.VM)
+	vmType := compute.VMType()
+	machine, ok := vmType.New().(*compute.VM)
+	assert.True(ok)
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.ID = "can you hear me"
@@ -138,4 +158,7 @@ func TestVM(t *testing.T) {
 
 	machine.Credentials.Keys["password"] = "actualPassw0rd%1"
 	assert.Nil(machine.Validate(ctx))
+
+	machine.Type = "machine"
+	assert.NotNil(machine.Validate(ctx))
 }

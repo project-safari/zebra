@@ -15,6 +15,14 @@ var (
 	ErrRoleEmpty     = errors.New("role is empty")
 )
 
+func UserType() zebra.Type {
+	return zebra.Type{
+		Name:        "User",
+		Description: "zebra user",
+		Constructor: func() zebra.Resource { return new(User) },
+	}
+}
+
 type User struct {
 	zebra.NamedResource
 	Key          *RsaIdentity `json:"key"`
@@ -78,4 +86,26 @@ func HashPassword(password string) string {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	return string(hash)
+}
+
+// create new user data.
+func NewUser(role string, name string, pwd string, labels zebra.Labels) *User {
+	creds := new(User)
+
+	namedRes := new(zebra.NamedResource)
+	rsa := new(RsaIdentity)
+	creds.Role = new(Role)
+
+	namedRes.BaseResource = *zebra.NewBaseResource("Credentials", labels)
+	namedRes.Name = name
+
+	creds.NamedResource = *namedRes
+	creds.Key = rsa
+
+	creds.PasswordHash = pwd
+	creds.Role.Name = role
+
+	ret := creds
+
+	return ret
 }

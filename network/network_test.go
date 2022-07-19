@@ -18,7 +18,9 @@ func TestSwitch(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	switch1 := new(network.Switch)
+	switchType := network.SwitchType()
+	switch1, ok := switchType.New().(*network.Switch)
+	assert.True(ok)
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.ID = "aaaa"
@@ -54,6 +56,9 @@ func TestSwitch(t *testing.T) {
 
 	switch1.Credentials.Keys = make(map[string]string)
 	assert.Nil(switch1.Validate(ctx))
+
+	switch1.Type = "test"
+	assert.NotNil(switch1.Validate(ctx))
 }
 
 // TestIPAddressPool tests the *IPAddressPool Validate function with a pass and a fail case.
@@ -62,7 +67,9 @@ func TestIPAddressPool(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	pool := new(network.IPAddressPool)
+	ipPoolType := network.IPAddressPoolType()
+	pool, ok := ipPoolType.New().(*network.IPAddressPool)
+	assert.True(ok)
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "aaaa"
@@ -85,6 +92,9 @@ func TestIPAddressPool(t *testing.T) {
 	ipnet2 := net.IPNet{IP: nil, Mask: nil}
 	pool.Subnets = append(pool.Subnets, ipnet2)
 	assert.NotNil(pool.Validate(ctx))
+
+	pool.Type = "test"
+	assert.NotNil(pool.Validate(ctx))
 }
 
 // TestVLANPool tests the *VLANPool Validate function with a pass and a fail case.
@@ -93,7 +103,9 @@ func TestVLANPool(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	pool := new(network.VLANPool)
+	vlanPoolType := network.VLANPoolType()
+	pool, ok := vlanPoolType.New().(*network.VLANPool)
+	assert.True(ok)
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "cccc"
@@ -104,4 +116,7 @@ func TestVLANPool(t *testing.T) {
 
 	pool.RangeEnd = 11
 	assert.Nil(pool.Validate(ctx))
+
+	pool.Type = "test123"
+	assert.NotNil(pool.Validate(ctx))
 }

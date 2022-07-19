@@ -1,9 +1,0 @@
-{
-     "id":"0100000002",
-     "type":"VLANPool",
-     "rangeStart":1,
-     "rangeEnd":5,
-     "labels": {
-         "owner": "nandyala"
-     }
- }

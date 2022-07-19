@@ -24,6 +24,8 @@ var ErrIDShort = errors.New("id must be at least 3 characters long")
 
 var ErrTypeEmpty = errors.New("type is empty")
 
+var ErrWrongType = errors.New("type value is incorrect")
+
 var ErrPassLen = errors.New("password is less than 12 characters long")
 
 var ErrPassCase = errors.New("password does not contain both upper and lowercase")
@@ -163,4 +165,20 @@ func ValidatePassword(password string) error { //nolint:cyclop
 // Check to make sure SSH key follows specified rules.
 func ValidateSSHKey(key string) error {
 	return nil
+}
+
+func NewCredential(name string, labels Labels) *Credentials {
+	namedRes := new(NamedResource)
+
+	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
+
+	namedRes.Name = name
+
+	ret := &Credentials{
+		NamedResource: *namedRes,
+		// some labels.
+		Keys: labels,
+	}
+
+	return ret
 }

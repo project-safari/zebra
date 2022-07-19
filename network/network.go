@@ -21,6 +21,14 @@ var ErrMaskEmpty = errors.New("mask is nil")
 
 var ErrInvalidRange = errors.New("range bounds are invalid, start is greater than end")
 
+func SwitchType() zebra.Type {
+	return zebra.Type{
+		Name:        "Switch",
+		Description: "network server",
+		Constructor: func() zebra.Resource { return new(Switch) },
+	}
+}
+
 // A Switch represents a switching device which has an ID, an associated IP
 // address, a serial number, model, and ports.
 type Switch struct {
@@ -46,11 +54,23 @@ func (s *Switch) Validate(ctx context.Context) error {
 		return ErrNumPortsEmpty
 	}
 
+	if s.Type != "Switch" {
+		return zebra.ErrWrongType
+	}
+
 	if err := s.Credentials.Validate(ctx); err != nil {
 		return err
 	}
 
 	return s.BaseResource.Validate(ctx)
+}
+
+func IPAddressPoolType() zebra.Type {
+	return zebra.Type{
+		Name:        "IPAddressPool",
+		Description: "ip address pool",
+		Constructor: func() zebra.Resource { return new(IPAddressPool) },
+	}
 }
 
 // An IPAddressPool represents a range of consecutive IP addresses belonging
@@ -71,7 +91,19 @@ func (p *IPAddressPool) Validate(ctx context.Context) error {
 		}
 	}
 
+	if p.Type != "IPAddressPool" {
+		return zebra.ErrWrongType
+	}
+
 	return p.BaseResource.Validate(ctx)
+}
+
+func VLANPoolType() zebra.Type {
+	return zebra.Type{
+		Name:        "VLANPool",
+		Description: "vlan pool",
+		Constructor: func() zebra.Resource { return new(VLANPool) },
+	}
 }
 
 // A VLANPool represents a pool of VLANs belonging to the same network.
@@ -88,15 +120,59 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 		return ErrInvalidRange
 	}
 
+	if v.Type != "VLANPool" {
+		return zebra.ErrWrongType
+	}
+
 	return v.BaseResource.Validate(ctx)
 }
 
+// create new network resources.
 func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
 	theRes := zebra.NewBaseResource("VlanPool", labels)
 	ret := &VLANPool{
 		BaseResource: *theRes,
 		RangeStart:   start,
 		RangeEnd:     end,
+	}
+
+	return ret
+}
+
+func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switch {
+	theRes := zebra.NewBaseResource("Switch", labels)
+
+	cred := new(zebra.Credentials)
+
+	// add some info to these sample credentials
+	named := new(zebra.NamedResource)
+
+	named.BaseResource = *theRes
+
+	named.Name = arr[2]
+
+	cred.NamedResource = *named
+
+	cred.Keys = labels
+
+	ret := &Switch{
+		BaseResource: *theRes,
+		ManagementIP: ip,
+		SerialNumber: arr[0],
+		Model:        arr[1],
+		NumPorts:     port,
+		Credentials:  *cred,
+	}
+
+	return ret
+}
+
+func NewIPAddressPool(netArr []net.IPNet, labels zebra.Labels) *IPAddressPool {
+	theRes := zebra.NewBaseResource("IPAddressPool", labels)
+
+	ret := &IPAddressPool{
+		BaseResource: *theRes,
+		Subnets:      netArr,
 	}
 
 	return ret

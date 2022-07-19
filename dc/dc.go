@@ -12,6 +12,14 @@ var ErrAddressEmpty = errors.New("address is empty")
 
 var ErrRowEmpty = errors.New("row is empty")
 
+func DataCenterType() zebra.Type {
+	return zebra.Type{
+		Name:        "Datacenter",
+		Description: "data center",
+		Constructor: func() zebra.Resource { return new(Datacenter) },
+	}
+}
+
 // A Datacenter represents the physical building. It is a named resource also
 // with a building address.
 type Datacenter struct {
@@ -26,12 +34,40 @@ func (dc *Datacenter) Validate(ctx context.Context) error {
 		return ErrAddressEmpty
 	}
 
+	if dc.Type != "Datacenter" {
+		return zebra.ErrWrongType
+	}
+
 	return dc.NamedResource.Validate(ctx)
+}
+
+func LabType() zebra.Type {
+	return zebra.Type{
+		Name:        "Lab",
+		Description: "data center lab",
+		Constructor: func() zebra.Resource { return new(Lab) },
+	}
 }
 
 // A Lab represents the lab consisting of a name and an ID.
 type Lab struct {
 	zebra.NamedResource
+}
+
+func (l *Lab) Validate(ctx context.Context) error {
+	if l.Type != "Lab" {
+		return zebra.ErrWrongType
+	}
+
+	return l.NamedResource.Validate(ctx)
+}
+
+func RackType() zebra.Type {
+	return zebra.Type{
+		Name:        "Rack",
+		Description: "server rack",
+		Constructor: func() zebra.Resource { return new(Rack) },
+	}
 }
 
 // A Rack represents a datacenter rack. It consists of a name, ID, and associated
@@ -48,5 +84,56 @@ func (r *Rack) Validate(ctx context.Context) error {
 		return ErrRowEmpty
 	}
 
+	if r.Type != "Rack" {
+		return zebra.ErrWrongType
+	}
+
 	return r.NamedResource.Validate(ctx)
+}
+
+// create new dc resources.
+func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter {
+	named := new(zebra.NamedResource)
+
+	named.BaseResource = *zebra.NewBaseResource(address, labels)
+
+	named.Name = name
+
+	ret := &Datacenter{
+		NamedResource: *named,
+
+		Address: address,
+	}
+
+	return ret
+}
+
+func NewLab(name string, labels zebra.Labels) *Lab {
+	namedR := new(zebra.NamedResource)
+
+	namedR.BaseResource = *zebra.NewBaseResource("Lab", labels)
+
+	namedR.Name = name
+
+	ret := &Lab{
+		NamedResource: *namedR,
+	}
+
+	return ret
+}
+
+func NewRack(name string, rows string, labels zebra.Labels) *Rack {
+	namedRes := new(zebra.NamedResource)
+
+	namedRes.BaseResource = *zebra.NewBaseResource("Rack", labels)
+
+	namedRes.Name = name
+
+	ret := &Rack{
+		NamedResource: *namedRes,
+		// some random row.
+		Row: rows,
+	}
+
+	return ret
 }
