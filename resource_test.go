@@ -20,6 +20,7 @@ func TestBaseResource(t *testing.T) {
 		ID:     "",
 		Type:   "",
 		Labels: zebra.Labels{"key": "value"},
+		Status: zebra.DefaultStatus(),
 	}
 	assert.NotNil(res.Validate(ctx))
 
@@ -49,6 +50,7 @@ func TestNamedResource(t *testing.T) {
 			ID:     "",
 			Type:   "",
 			Labels: zebra.Labels{"key": "value"},
+			Status: zebra.DefaultStatus(),
 		},
 		Name: "",
 	}
@@ -80,6 +82,7 @@ func TestCredentials(t *testing.T) {
 				ID:     "",
 				Type:   "Credentials",
 				Labels: zebra.Labels{},
+				Status: zebra.DefaultStatus(),
 			},
 			Name: "",
 		},

@@ -47,6 +47,7 @@ func TestSwitch(t *testing.T) {
 				ID:     "blahblah",
 				Type:   "Credentials",
 				Labels: nil,
+				Status: zebra.DefaultStatus(),
 			},
 			Name: "blah",
 		},
