@@ -10,8 +10,11 @@ import (
 	"path"
 	"syscall"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/project-safari/zebra"
 )
+
+const RWRR = os.FileMode(0o644)
 
 // FileStore implements Store.
 type FileStore struct {
@@ -152,25 +155,35 @@ func (f *FileStore) Create(res zebra.Resource) error {
 		return err
 	}
 
+	cleanup := func(f *os.File, err error) error {
+		errs := multierror.Append(nil, err)
+
+		if e := f.Close(); e != nil {
+			errs = multierror.Append(errs, e)
+		}
+
+		if e := os.Remove(f.Name()); e != nil {
+			errs = multierror.Append(errs, e)
+		}
+
+		return errs
+	}
+
 	file, err := ioutil.TempFile(dir, "temp_")
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		if _, err := os.Stat(file.Name()); err != nil {
-			os.Remove(file.Name())
-		}
-	}()
-
-	defer file.Close()
-
 	if _, err := file.Write(object); err != nil {
-		return err
+		return cleanup(file, err)
 	}
 
-	if err := file.Chmod(0o644); err != nil { //nolint:gomnd
-		return err
+	if err := file.Chmod(RWRR); err != nil {
+		return cleanup(file, err)
+	}
+
+	if err := file.Close(); err != nil {
+		return cleanup(file, err)
 	}
 
 	return os.Rename(file.Name(), f.resourcesFilePath(res))

@@ -90,3 +90,50 @@ func (r *Rack) Validate(ctx context.Context) error {
 
 	return r.NamedResource.Validate(ctx)
 }
+
+// create new dc resources.
+func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter {
+	named := new(zebra.NamedResource)
+
+	named.BaseResource = *zebra.NewBaseResource(address, labels)
+
+	named.Name = name
+
+	ret := &Datacenter{
+		NamedResource: *named,
+
+		Address: address,
+	}
+
+	return ret
+}
+
+func NewLab(name string, labels zebra.Labels) *Lab {
+	namedR := new(zebra.NamedResource)
+
+	namedR.BaseResource = *zebra.NewBaseResource("Lab", labels)
+
+	namedR.Name = name
+
+	ret := &Lab{
+		NamedResource: *namedR,
+	}
+
+	return ret
+}
+
+func NewRack(name string, rows string, labels zebra.Labels) *Rack {
+	namedRes := new(zebra.NamedResource)
+
+	namedRes.BaseResource = *zebra.NewBaseResource("Rack", labels)
+
+	namedRes.Name = name
+
+	ret := &Rack{
+		NamedResource: *namedRes,
+		// some random row.
+		Row: rows,
+	}
+
+	return ret
+}

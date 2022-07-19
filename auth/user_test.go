@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/stretchr/testify/assert"
 )
@@ -123,4 +124,8 @@ func TestUser(t *testing.T) {
 	assert.True(eve.Write("eden"))
 	assert.True(eve.Update("eden"))
 	assert.False(eve.Update("universe"))
+
+	newUser := auth.NewUser("eve", "eve123", eveKey, zebra.Labels{})
+	assert.NotNil(newUser)
+	assert.Nil(newUser.Validate(context.Background()))
 }

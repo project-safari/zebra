@@ -1,18 +1,20 @@
 /*
 create 100 instances of each resource for some users
 program to display results for each respective type
+labels file
 */
 
 package pkg
 
 import (
-	"math/rand"
+	"github.com/project-safari/zebra"
 )
 
-func CreateLabels() map[string]string {
-	many := rand.Int()%10 + 1 //nolint
+const NumLabels = 10
 
-	codes := make(map[string]string, many)
+func CreateLabels() zebra.Labels {
+	many := RandNum(NumLabels)
+	codes := make(zebra.Labels, many)
 
 	colors := []string{
 		"red", "yellow", "green",
@@ -28,7 +30,7 @@ func CreateLabels() map[string]string {
 		"Lambda", "Mu", "Nu",
 	}
 
-	for let := 0; let < many; let++ {
+	for let := uint32(0); let < many; let++ {
 		col := RandData(colors)
 		let := RandData(letters)
 

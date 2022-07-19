@@ -87,3 +87,17 @@ func HashPassword(password string) string {
 
 	return string(hash)
 }
+
+// create new user data.
+func NewUser(name string, pwd string, key *RsaIdentity, labels zebra.Labels) *User {
+	priv, _ := NewPriv("", false, true, false, false)
+	user := new(User)
+
+	user.BaseResource = *zebra.NewBaseResource("User", labels)
+	user.Name = name
+	user.Role = &Role{Name: "user", Privileges: []*Priv{priv}}
+	user.PasswordHash = HashPassword(pwd)
+	user.Key = key
+
+	return user
+}
