@@ -167,3 +167,19 @@ func ValidatePassword(password string) error { //nolint:cyclop
 func ValidateSSHKey(key string) error {
 	return nil
 }
+
+func NewCredential(name string, labels Labels) *Credentials {
+	namedRes := new(NamedResource)
+
+	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
+
+	namedRes.Name = name
+
+	ret := &Credentials{
+		NamedResource: *namedRes,
+		// some labels.
+		Keys: labels,
+	}
+
+	return ret
+}

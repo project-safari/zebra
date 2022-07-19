@@ -165,3 +165,100 @@ func (v *VM) Validate(ctx context.Context) error {
 
 	return v.NamedResource.Validate(ctx)
 }
+
+// create new resources.
+func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
+	namedRes := new(zebra.NamedResource)
+
+	namedRes.BaseResource = *zebra.NewBaseResource("VCenter", labels)
+
+	namedRes.Name = name
+
+	cred := new(zebra.Credentials)
+
+	namedRes.Name = name
+
+	cred.NamedResource = *namedRes
+
+	cred.Keys = labels
+
+	ret := &VCenter{
+		NamedResource: *namedRes,
+		IP:            ip,
+		Credentials:   *cred,
+	}
+
+	return ret
+}
+
+func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
+	named := new(zebra.NamedResource)
+
+	named.BaseResource = *zebra.NewBaseResource("Server", labels)
+
+	named.Name = arr[2]
+
+	cred := new(zebra.Credentials)
+
+	cred.NamedResource = *named
+
+	cred.Keys = labels
+
+	ret := &Server{
+		NamedResource: *named,
+		Credentials:   *cred,
+		SerialNumber:  arr[0],
+		BoardIP:       ip,
+		Model:         arr[1],
+	}
+
+	return ret
+}
+
+func NewESX(name string, serverID string, ip net.IP, labels zebra.Labels) *ESX {
+	namedRes := new(zebra.NamedResource)
+
+	namedRes.BaseResource = *zebra.NewBaseResource("ESX", labels)
+
+	namedRes.Name = name
+
+	cred := new(zebra.Credentials)
+
+	namedRes.Name = name
+
+	cred.NamedResource = *namedRes
+
+	cred.Keys = labels
+
+	ret := &ESX{
+		NamedResource: *namedRes,
+		Credentials:   *cred,
+		ServerID:      serverID,
+		IP:            ip,
+	}
+
+	return ret
+}
+
+func NewVM(arr []string, ip net.IP, labels zebra.Labels) *VM {
+	namedRes := new(zebra.NamedResource)
+	cred := new(zebra.Credentials)
+
+	namedRes.BaseResource = *zebra.NewBaseResource("VM", labels)
+
+	namedRes.Name = arr[0]
+
+	cred.NamedResource = *namedRes
+
+	cred.Keys = labels
+
+	ret := &VM{
+		NamedResource: *namedRes,
+		Credentials:   *cred,
+		ESXID:         arr[1],
+		ManagementIP:  ip,
+		VCenterID:     arr[2],
+	}
+
+	return ret
+}

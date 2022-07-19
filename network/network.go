@@ -127,12 +127,52 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 	return v.BaseResource.Validate(ctx)
 }
 
+// create new network resources.
 func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
 	theRes := zebra.NewBaseResource("VlanPool", labels)
 	ret := &VLANPool{
 		BaseResource: *theRes,
 		RangeStart:   start,
 		RangeEnd:     end,
+	}
+
+	return ret
+}
+
+func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switch {
+	theRes := zebra.NewBaseResource("Switch", labels)
+
+	cred := new(zebra.Credentials)
+
+	// add some info to these sample credentials
+	named := new(zebra.NamedResource)
+
+	named.BaseResource = *theRes
+
+	named.Name = arr[2]
+
+	cred.NamedResource = *named
+
+	cred.Keys = labels
+
+	ret := &Switch{
+		BaseResource: *theRes,
+		ManagementIP: ip,
+		SerialNumber: arr[0],
+		Model:        arr[1],
+		NumPorts:     port,
+		Credentials:  *cred,
+	}
+
+	return ret
+}
+
+func NewIPAddressPool(netArr []net.IPNet, labels zebra.Labels) *IPAddressPool {
+	theRes := zebra.NewBaseResource("IPAddressPool", labels)
+
+	ret := &IPAddressPool{
+		BaseResource: *theRes,
+		Subnets:      netArr,
 	}
 
 	return ret
