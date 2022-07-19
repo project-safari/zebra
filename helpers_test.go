@@ -26,3 +26,13 @@ func TestNewBaseResource(t *testing.T) {
 	assert.True(br.Labels != nil)
 	assert.True(br.Labels.MatchEqual("owner", "shravya"))
 }
+
+func TestIsIn(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	list := []string{"hi", "hello", "goodbye"}
+
+	assert.True(zebra.IsIn("hello", list))
+	assert.False(zebra.IsIn("hey", list))
+}

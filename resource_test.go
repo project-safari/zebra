@@ -23,6 +23,9 @@ func TestBaseResource(t *testing.T) {
 	}
 	assert.NotNil(res.Validate(ctx))
 
+	res.ID = "ab"
+	assert.NotNil(res.Validate(ctx))
+
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
 
