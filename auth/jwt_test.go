@@ -17,7 +17,7 @@ func TestClaims(t *testing.T) {
 	assert.Nil(err)
 
 	role := &auth.Role{"boy", []*auth.Priv{crud}}
-	claims := auth.NewClaims("zebra", "adam", role)
+	claims := auth.NewClaims("zebra", "adam", role, "email@domain")
 
 	assert.True(claims.Create("anything"))
 	assert.True(claims.Read("anything"))

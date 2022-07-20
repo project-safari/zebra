@@ -32,8 +32,8 @@ func TestFindUser(t *testing.T) {
 
 	store := makeQueryStore(root, assert, makeUser(assert))
 
-	assert.Nil(findUser(store, "ali"))
-	assert.NotNil(findUser(store, "jini"))
+	assert.Nil(findUser(store, "ali", ""))
+	assert.NotNil(findUser(store, "jini", "email@domain"))
 }
 
 func makeUser(assert *assert.Assertions) *auth.User {
@@ -44,6 +44,7 @@ func makeUser(assert *assert.Assertions) *auth.User {
 
 	jini := new(auth.User)
 	jini.Name = "jini"
+	jini.Email = "email@domain"
 	jini.ID = "007"
 	jini.Type = "User"
 	jini.PasswordHash = auth.HashPassword(jiniWords)
@@ -72,12 +73,12 @@ func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zeb
 	return store
 }
 
-func makeRequest(assert *assert.Assertions, user string, password string) *http.Request {
+func makeRequest(assert *assert.Assertions, user string, password string, email string) *http.Request {
 	req, err := http.NewRequest("POST", "/login", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
-	v := fmt.Sprintf("{\"user\":\"%s\",\"password\":\"%s\"}", user, password)
+	v := fmt.Sprintf("{\"user\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}", user, password, email)
 	req.Body = ioutil.NopCloser(bytes.NewBufferString(v))
 
 	return req
@@ -91,7 +92,7 @@ func TestBadUser(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	req := makeRequest(assert, "ali", "aliOfAgrabha")
+	req := makeRequest(assert, "ali", "aliOfAgrabha", "email@domain1")
 	store := makeQueryStore(root, assert, makeUser(assert))
 
 	h := handleLogin(context.Background(), store, authKey)
@@ -103,7 +104,7 @@ func TestBadUser(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 
-	req = makeRequest(assert, "\"", "\"")
+	req = makeRequest(assert, "\"", "\"", "\"")
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
@@ -117,7 +118,7 @@ func TestBadLogin(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	req := makeRequest(assert, "jini", "aliOfAgrabha")
+	req := makeRequest(assert, "jini", "aliOfAgrabha", "email@domain2")
 	store := makeQueryStore(root, assert, makeUser(assert))
 	h := handleLogin(context.Background(), store, authKey)
 	rr := httptest.NewRecorder()
@@ -137,7 +138,7 @@ func TestLogin(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	req := makeRequest(assert, "jini", jiniWords)
+	req := makeRequest(assert, "jini", jiniWords, "email@domain")
 	store := makeQueryStore(root, assert, makeUser(assert))
 	h := handleLogin(setupLogger(nil), store, authKey)
 	rr := httptest.NewRecorder()
