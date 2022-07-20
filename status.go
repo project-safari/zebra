@@ -113,9 +113,9 @@ func (l *LeaseState) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (s ActivityState) String() string {
+func (s *ActivityState) String() string {
 	strs := map[ActivityState]string{Active: "active", Inactive: "inactive"}
-	sstr, ok := strs[s]
+	sstr, ok := strs[*s]
 
 	if !ok {
 		return Unknown
