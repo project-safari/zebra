@@ -8,34 +8,34 @@ import (
 )
 
 type Status struct {
-	Fault       Fault     `json:"fault"`
-	Lease       Lease     `json:"lease"`
-	UsedBy      string    `json:"usedBy"`
-	State       State     `json:"state"`
-	CreatedTime time.Time `json:"createdTime"`
+	Fault       FaultState    `json:"fault"`
+	Lease       LeaseState    `json:"lease"`
+	UsedBy      string        `json:"usedBy"`
+	State       ActivityState `json:"state"`
+	CreatedTime time.Time     `json:"createdTime"`
 }
 
 type (
-	Fault uint8
-	Lease uint8
-	State uint8
+	FaultState    uint8
+	LeaseState    uint8
+	ActivityState uint8
 )
 
 const (
-	None Fault = iota
+	None FaultState = iota
 	Minor
 	Major
 	Critical
 )
 
 const (
-	Leased Lease = iota
+	Leased LeaseState = iota
 	Free
 	Setup
 )
 
 const (
-	Active State = iota
+	Active ActivityState = iota
 	Inactive
 )
 
@@ -48,8 +48,8 @@ var (
 	ErrCreatedTime = errors.New(`createdTime is incorrect, must be before current time`)
 )
 
-func (f *Fault) String() string {
-	strs := map[Fault]string{None: "none", Minor: "minor", Major: "major", Critical: "critical"}
+func (f *FaultState) String() string {
+	strs := map[FaultState]string{None: "none", Minor: "minor", Major: "major", Critical: "critical"}
 	fstr, ok := strs[*f]
 
 	if !ok {
@@ -59,12 +59,12 @@ func (f *Fault) String() string {
 	return fstr
 }
 
-func (f *Fault) MarshalText() ([]byte, error) {
+func (f *FaultState) MarshalText() ([]byte, error) {
 	return []byte(f.String()), nil
 }
 
-func (f *Fault) UnmarshalText(data []byte) error {
-	fmap := map[string]Fault{
+func (f *FaultState) UnmarshalText(data []byte) error {
+	fmap := map[string]FaultState{
 		"none":     None,
 		"minor":    Minor,
 		"major":    Major,
@@ -81,9 +81,9 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (l Lease) String() string {
-	strs := map[Lease]string{Leased: "leased", Free: "free", Setup: "setup"}
-	lstr, ok := strs[l]
+func (l *LeaseState) String() string {
+	strs := map[LeaseState]string{Leased: "leased", Free: "free", Setup: "setup"}
+	lstr, ok := strs[*l]
 
 	if !ok {
 		return Unknown
@@ -92,12 +92,12 @@ func (l Lease) String() string {
 	return lstr
 }
 
-func (l *Lease) MarshalText() ([]byte, error) {
+func (l *LeaseState) MarshalText() ([]byte, error) {
 	return []byte(l.String()), nil
 }
 
-func (l *Lease) UnmarshalText(data []byte) error {
-	lmap := map[string]Lease{
+func (l *LeaseState) UnmarshalText(data []byte) error {
+	lmap := map[string]LeaseState{
 		"leased": Leased,
 		"free":   Free,
 		"setup":  Setup,
@@ -113,8 +113,8 @@ func (l *Lease) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (s State) String() string {
-	strs := map[State]string{Active: "active", Inactive: "inactive"}
+func (s ActivityState) String() string {
+	strs := map[ActivityState]string{Active: "active", Inactive: "inactive"}
 	sstr, ok := strs[s]
 
 	if !ok {
@@ -124,12 +124,12 @@ func (s State) String() string {
 	return sstr
 }
 
-func (s *State) MarshalText() ([]byte, error) {
+func (s *ActivityState) MarshalText() ([]byte, error) {
 	return []byte(s.String()), nil
 }
 
-func (s *State) UnmarshalText(data []byte) error {
-	smap := map[string]State{
+func (s *ActivityState) UnmarshalText(data []byte) error {
+	smap := map[string]ActivityState{
 		"active":   Active,
 		"inactive": Inactive,
 	}

@@ -53,11 +53,11 @@ func TestString(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	var f zebra.Fault = 8
+	var f zebra.FaultState = 8
 
-	var l zebra.Lease = 8
+	var l zebra.LeaseState = 8
 
-	var s zebra.State = 8
+	var s zebra.ActivityState = 8
 
 	assert.Equal("unknown", f.String())
 	assert.Equal("unknown", l.String())
@@ -70,11 +70,11 @@ func TestUnmarshal(t *testing.T) {
 
 	body := `8`
 
-	var f *zebra.Fault
+	var f *zebra.FaultState
 
-	var l *zebra.Lease
+	var l *zebra.LeaseState
 
-	var s *zebra.State
+	var s *zebra.ActivityState
 
 	assert.NotNil(f.UnmarshalText([]byte(body)))
 	assert.NotNil(l.UnmarshalText([]byte(body)))
