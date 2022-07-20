@@ -19,6 +19,7 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 		userData := &struct {
 			Name     string `json:"user"`
 			Password string `json:"password"`
+			Email    string `json:"email"`
 		}{}
 
 		body, err := ioutil.ReadAll(req.Body)
@@ -36,7 +37,7 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 			return
 		}
 
-		user := findUser(store, userData.Name)
+		user := findUser(store, userData.Name, userData.Email)
 		if user == nil {
 			log.Error(err, "user not found", "user", userData.Name)
 			res.WriteHeader(http.StatusUnauthorized)
@@ -51,7 +52,7 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 			return
 		}
 
-		claims := auth.NewClaims("zebra", user.Name, user.Role)
+		claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
 		respondWithClaims(log, res, claims, authKey)
 
 		log.Info("login succeeded", "user", userData.Name)
@@ -67,13 +68,13 @@ func makeCookie(jwt string) *http.Cookie {
 	return cookie
 }
 
-func findUser(store zebra.Store, userName string) *auth.User {
+func findUser(store zebra.Store, userName string, email string) *auth.User {
 	resMap := store.QueryType([]string{"User"})
 	users := resMap.Resources["User"]
 
 	for _, u := range users.Resources {
 		user, ok := u.(*auth.User)
-		if ok && user.Name == userName {
+		if ok && user.Name == userName && user.Email == email {
 			return user
 		}
 	}

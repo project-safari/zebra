@@ -28,6 +28,7 @@ type User struct {
 	Key          *RsaIdentity `json:"key"`
 	PasswordHash string       `json:"passwordHash"`
 	Role         *Role        `json:"role"`
+	Email        string       `json:"email"`
 }
 
 // Validate returns an error if the given Datacenter object has incorrect values.

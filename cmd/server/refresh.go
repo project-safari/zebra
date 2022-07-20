@@ -40,7 +40,7 @@ func handleRefresh(ctx context.Context, store zebra.Store, authKey string) httpr
 		}
 
 		// Make sure the user still exists
-		user := findUser(store, jwtClaims.Subject)
+		user := findUser(store, jwtClaims.Subject, jwtClaims.Email)
 		if user == nil {
 			log.Error(err, "user not found", "user", jwtClaims.Subject)
 			res.WriteHeader(http.StatusUnauthorized)
@@ -49,7 +49,7 @@ func handleRefresh(ctx context.Context, store zebra.Store, authKey string) httpr
 		}
 
 		// Create a new token and cookie
-		claims := auth.NewClaims("zebra", user.Name, user.Role)
+		claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
 		respondWithClaims(log, res, claims, authKey)
 
 		log.Info("refresh succeeded", "user", jwtClaims.Subject)

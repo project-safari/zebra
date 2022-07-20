@@ -13,16 +13,18 @@ const TokenDuration = time.Minute * 10
 
 type Claims struct {
 	jwt.StandardClaims
-	Role *Role `json:"role"`
+	Role  *Role  `json:"role"`
+	Email string `json:"email"`
 }
 
-func NewClaims(issuer string, subject string, role *Role) *Claims {
+func NewClaims(issuer string, subject string, role *Role, email string) *Claims {
 	claims := new(Claims)
 
 	claims.Issuer = issuer
 	claims.Subject = subject
 	claims.ExpiresAt = time.Now().Add(TokenDuration).Unix()
 	claims.Role = role
+	claims.Email = email
 
 	return claims
 }

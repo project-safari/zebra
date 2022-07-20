@@ -20,10 +20,10 @@ func TestRefresh(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	jini := makeUser(assert)
-	claims := auth.NewClaims("zebra", jini.Name, jini.Role)
+	claims := auth.NewClaims("zebra", jini.Name, jini.Role, "email@domain")
 	jwtStr := claims.JWT(authKey)
 
-	req := makeRequest(assert, "jini", jiniWords)
+	req := makeRequest(assert, "jini", jiniWords, "email@domain")
 	req.AddCookie(makeCookie(jwtStr))
 
 	store := makeQueryStore(root, assert, jini)
