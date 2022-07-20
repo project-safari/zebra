@@ -58,6 +58,7 @@ func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
 		}
 
 		responseRegister(log, res, newuser)
+		log.Info("Registry succeeded", "user", registryData.Name)
 	}
 }
 
@@ -97,8 +98,12 @@ func createNewUser(email string, name string, key *auth.RsaIdentity, passward st
 	}
 	newuser.Key = key
 	newuser.PasswordHash = auth.HashPassword(passward)
-	newuser.NamedResource.Name = name
-	newuser.Role = nil
+	newuser.Name = name
+	none, _ := auth.NewPriv("", false, false, false, false)
+	newuser.Role = &auth.Role{
+		Name:       "No role",
+		Privileges: []*auth.Priv{none},
+	}
 	newuser.BaseResource = *zebra.NewBaseResource("User", nil)
 
 	return newuser
@@ -106,15 +111,13 @@ func createNewUser(email string, name string, key *auth.RsaIdentity, passward st
 
 func (nw *NewUser) createRole(role *auth.Role) {
 	nw.Role = role
-	return
 }
 
-func (nw *NewUser) changeActiveStatus(status bool) {
+func (nw *NewUser) changeActiveStatus(store zebra.Store, status bool) {
 	if !status {
-
+		nw.deleteUser(store)
 	}
 	nw.Active = status
-	return
 }
 
 func (nw *NewUser) deleteUser(store zebra.Store) error {
