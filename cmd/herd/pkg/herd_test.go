@@ -15,6 +15,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func verifyType(assert *assert.Assertions, t string, resources []zebra.Resource) {
+	for _, r := range resources {
+		assert.NotNil(r)
+		assert.Equal(t, r.GetType())
+		assert.Nil(r.Validate(context.Background()))
+	}
+}
+
 // tests for the address file - IP generation.
 func TestAddresses(t *testing.T) {
 	t.Parallel()
@@ -199,6 +207,7 @@ func TestGenerateVlan(t *testing.T) {
 
 	assert.NotNil(testVlans)
 	assert.Equal(len(testVlans), 3)
+	verifyType(assert, "VLANPool", testVlans)
 }
 
 // tests for switch generation.
@@ -221,6 +230,7 @@ func TestGenerateSwitch(t *testing.T) {
 
 	assert.NotNil(testSwitch)
 	assert.Equal(len(testSwitch), 2)
+	verifyType(assert, "Switch", testSwitch)
 }
 
 // tests for IPAddress generation.
@@ -241,6 +251,7 @@ func TestGenerateIPAddressPool(t *testing.T) {
 	testPool := pkg.GenerateIPPool(2)
 
 	assert.NotNil(testPool)
+	verifyType(assert, "IPAddressPool", testPool)
 }
 
 // tests for datacenter generation.
@@ -262,6 +273,7 @@ func TestGenerateDatacenterl(t *testing.T) {
 
 	assert.NotNil(testDC)
 	assert.Equal(len(testDC), 4)
+	verifyType(assert, "Datacenter", testDC)
 }
 
 // tests for lab generation.
@@ -282,6 +294,7 @@ func TestGenerateLab(t *testing.T) {
 	testLab := pkg.GenerateLab(2)
 
 	assert.Equal(len(testLab), 2)
+	verifyType(assert, "Lab", testLab)
 }
 
 // tests for rack generation.
@@ -301,6 +314,7 @@ func TestGenerateRack(t *testing.T) {
 	testRack := pkg.GenerateRack(1)
 
 	assert.Equal(len(testRack), 1)
+	verifyType(assert, "Rack", testRack)
 }
 
 // tests for vcenter generation.
@@ -311,15 +325,17 @@ func TestCreateVCenter(t *testing.T) {
 	vc := compute.NewVCenter(pkg.Name(), net.IP("192.222.004"), pkg.CreateLabels())
 
 	assert.NotEmpty(vc)
+	assert.Equal("VCenter", vc.GetType())
 }
 
 func TestGenerateVC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	testVC := pkg.GenerateVcenter(3)
+	testVC := pkg.GenerateVCenter(3)
 
 	assert.Equal(len(testVC), 3)
+	verifyType(assert, "VCenter", testVC)
 }
 
 // tests for esx generation.
@@ -340,6 +356,7 @@ func TestGenerateESX(t *testing.T) {
 
 	assert.Equal(len(testESX), 2)
 	assert.NotNil((testESX))
+	verifyType(assert, "ESX", testESX)
 }
 
 // tests for server generation.
@@ -361,6 +378,7 @@ func TestGenerateServer(t *testing.T) {
 
 	assert.Equal(len(testServer), 10)
 	assert.NotNil((testServer))
+	verifyType(assert, "Server", testServer)
 }
 
 // tests for vm generation.
@@ -381,6 +399,7 @@ func TestGenerateVM(t *testing.T) {
 	testVM := pkg.GenerateVM(5)
 
 	assert.NotNil(testVM)
+	verifyType(assert, "VM", testVM)
 }
 
 // tests for user info generation.
@@ -403,6 +422,7 @@ func TestGenerateUser(t *testing.T) {
 	usr := pkg.GenerateUser(3)
 
 	assert.NotEmpty(usr)
+	verifyType(assert, "User", usr)
 }
 
 // tests for credential info generation.

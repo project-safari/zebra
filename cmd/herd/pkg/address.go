@@ -42,7 +42,6 @@ func IPsamples() []string {
 
 func RandIP() net.IP {
 	ipAddr := RandData(IPsamples())
-	ip, _, _ := net.ParseCIDR(ipAddr)
 
-	return ip
+	return net.ParseIP(ipAddr)
 }

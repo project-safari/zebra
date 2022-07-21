@@ -178,9 +178,9 @@ func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 
 	namedRes.Name = name
 
-	cred.NamedResource = *namedRes
-
-	cred.Keys = labels
+	cred.BaseResource = *zebra.NewBaseResource("Credentials", zebra.Labels{})
+	cred.Name = "name"
+	cred.Keys = map[string]string{"ssh-key": ""}
 
 	ret := &VCenter{
 		NamedResource: *namedRes,
@@ -202,7 +202,7 @@ func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 
 	cred.NamedResource = *named
 
-	cred.Keys = labels
+	cred.Keys = map[string]string{"ssh-key": ""}
 
 	ret := &Server{
 		NamedResource: *named,
@@ -228,7 +228,7 @@ func NewESX(name string, serverID string, ip net.IP, labels zebra.Labels) *ESX {
 
 	cred.NamedResource = *namedRes
 
-	cred.Keys = labels
+	cred.Keys = map[string]string{"ssh-key": ""}
 
 	ret := &ESX{
 		NamedResource: *namedRes,
@@ -250,7 +250,7 @@ func NewVM(arr []string, ip net.IP, labels zebra.Labels) *VM {
 
 	cred.NamedResource = *namedRes
 
-	cred.Keys = labels
+	cred.Keys = map[string]string{"ssh-key": ""}
 
 	ret := &VM{
 		NamedResource: *namedRes,
