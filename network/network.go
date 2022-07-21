@@ -129,7 +129,7 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 
 // create new network resources.
 func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
-	theRes := zebra.NewBaseResource("VlanPool", labels)
+	theRes := zebra.NewBaseResource("VLANPool", labels)
 	ret := &VLANPool{
 		BaseResource: *theRes,
 		RangeStart:   start,
@@ -153,7 +153,7 @@ func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switc
 
 	cred.NamedResource = *named
 
-	cred.Keys = labels
+	cred.Keys = map[string]string{"ssh-key": ""}
 
 	ret := &Switch{
 		BaseResource: *theRes,

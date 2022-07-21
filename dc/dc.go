@@ -95,7 +95,7 @@ func (r *Rack) Validate(ctx context.Context) error {
 func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter {
 	named := new(zebra.NamedResource)
 
-	named.BaseResource = *zebra.NewBaseResource(address, labels)
+	named.BaseResource = *zebra.NewBaseResource("Datacenter", labels)
 
 	named.Name = name
 

@@ -3,12 +3,13 @@ package pkg
 import (
 	"net"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/compute"
 )
 
 // gererate VCenter.
-func GenerateVcenter(numVC int) []*compute.VCenter {
-	centers := make([]*compute.VCenter, 0, numVC)
+func GenerateVCenter(numVC int) []zebra.Resource {
+	centers := make([]zebra.Resource, 0, numVC)
 
 	for i := 0; i < numVC; i++ {
 		name := Name()
