@@ -15,10 +15,11 @@ func GenerateUser(numUsr int) []zebra.Resource {
 
 	for i := 0; i < numUsr; i++ {
 		name := Name()
+		email := Email(name)
 		pwd := Password(name)
 		labels := CreateLabels()
 
-		usr := auth.NewUser(name, pwd, key, labels)
+		usr := auth.NewUser(name, email, pwd, key, labels)
 		users = append(users, usr)
 	}
 

@@ -17,7 +17,6 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		log := logr.FromContextOrDiscard(ctx)
 		userData := &struct {
-			Name     string `json:"name"`
 			Password string `json:"password"`
 			Email    string `json:"email"`
 		}{}
@@ -39,14 +38,14 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 
 		user := findUser(store, userData.Email)
 		if user == nil {
-			log.Error(err, "user not found", "user", userData.Name)
+			log.Error(err, "user not found", "user", userData.Email)
 			res.WriteHeader(http.StatusUnauthorized)
 
 			return
 		}
 
 		if err := user.AuthenticatePassword(userData.Password); err != nil {
-			log.Error(err, "user auth failed", "user", userData.Name)
+			log.Error(err, "user auth failed", "user", user.Email)
 			res.WriteHeader(http.StatusUnauthorized)
 
 			return
@@ -55,7 +54,7 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 		claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
 		respondWithClaims(log, res, claims, authKey)
 
-		log.Info("login succeeded", "user", userData.Name)
+		log.Info("login succeeded", "user", user.Email)
 	}
 }
 

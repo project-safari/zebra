@@ -125,7 +125,7 @@ func TestUser(t *testing.T) {
 	assert.True(eve.Update("eden"))
 	assert.False(eve.Update("universe"))
 
-	newUser := auth.NewUser("eve", "eve123", eveKey, zebra.Labels{})
+	newUser := auth.NewUser("eve", "eve@email.com", "eve123", eveKey, zebra.Labels{})
 	assert.NotNil(newUser)
 	assert.Nil(newUser.Validate(context.Background()))
 }
