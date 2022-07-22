@@ -46,7 +46,7 @@ func TestUpdateUser(t *testing.T) {
 
 	store := makeQueryStore(root, assert, user)
 	assert.NotNil(store)
-	err := changeActiveStatus(user, store, false)
+	err := deleteUser(user, store)
 	assert.Nil(err)
 
 	changePassword(user, "newpassword")
@@ -66,7 +66,7 @@ func TestDeleteUser(t *testing.T) {
 
 	store := makeQueryStore(root, assert, user)
 	assert.NotNil(store)
-	err := changeActiveStatus(user, store, false)
+	err := deleteUser(user, store)
 	assert.Nil(err)
 	assert.Empty(store.Query().Resources)
 }
@@ -90,10 +90,12 @@ func TestRegistry(t *testing.T) {
 		Password string            `json:"password"`
 		Email    string            `json:"email"`
 		Key      *auth.RsaIdentity `json:"key"`
-	}{Name: "testuser2",
+	}{
+		Name:     "testuser2",
 		Password: "secrect",
 		Email:    "myemail@domain",
-		Key:      pubKey}
+		Key:      pubKey,
+	}
 
 	v, err := json.Marshal(registryData)
 	assert.Nil(err)
@@ -130,7 +132,8 @@ func TestNoKeyUser(t *testing.T) {
 		Password string            `json:"password"`
 		Email    string            `json:"email"`
 		Key      *auth.RsaIdentity `json:"key"`
-	}{Name: "testuser2",
+	}{
+		Name:     "testuser2",
 		Password: "secrect",
 		Email:    "myemail@domain",
 	}
@@ -171,7 +174,8 @@ func TestSameUser(t *testing.T) {
 		Password string            `json:"password"`
 		Email    string            `json:"email"`
 		Key      *auth.RsaIdentity `json:"key"`
-	}{Name: "testuser",
+	}{
+		Name:     "testuser",
 		Key:      pubKey,
 		Email:    "test@cisco123.com",
 		Password: "secrect",
@@ -240,6 +244,6 @@ func TestDelete1User(t *testing.T) {
 
 	store := makeQueryStore(root, assert, user)
 	assert.NotNil(store)
-	err := changeActiveStatus(user2, store, false)
+	err := deleteUser(user2, store)
 	assert.NotNil(err)
 }

@@ -17,7 +17,7 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		log := logr.FromContextOrDiscard(ctx)
 		userData := &struct {
-			Name     string `json:"user"`
+			Name     string `json:"name"`
 			Password string `json:"password"`
 			Email    string `json:"email"`
 		}{}
@@ -37,7 +37,7 @@ func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprou
 			return
 		}
 
-		user := findUser(store, userData.Name, userData.Email)
+		user := findUser(store, userData.Email)
 		if user == nil {
 			log.Error(err, "user not found", "user", userData.Name)
 			res.WriteHeader(http.StatusUnauthorized)
@@ -68,13 +68,13 @@ func makeCookie(jwt string) *http.Cookie {
 	return cookie
 }
 
-func findUser(store zebra.Store, userName string, email string) *auth.User {
+func findUser(store zebra.Store, email string) *auth.User {
 	resMap := store.QueryType([]string{"User"})
 	users := resMap.Resources["User"]
 
 	for _, u := range users.Resources {
 		user, ok := u.(*auth.User)
-		if ok && user.Name == userName && user.Email == email {
+		if ok && user.Email == email {
 			return user
 		}
 	}

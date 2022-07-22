@@ -38,7 +38,7 @@ func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
 			return
 		}
 
-		user := findUser(store, registryData.Name, registryData.Email)
+		user := findUser(store, registryData.Email)
 
 		if user != nil {
 			log.Error(err, "user already exist", "user", registryData.Name)
@@ -101,17 +101,6 @@ func DefaultRole() *auth.Role {
 	}
 
 	return role
-}
-
-func changeActiveStatus(u *auth.User, store zebra.Store, status bool) error {
-	if !status {
-		err := deleteUser(u, store)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func deleteUser(u *auth.User, store zebra.Store) error {

@@ -32,8 +32,8 @@ func TestFindUser(t *testing.T) {
 
 	store := makeQueryStore(root, assert, makeUser(assert))
 
-	assert.Nil(findUser(store, "ali", ""))
-	assert.NotNil(findUser(store, "jini", "email@domain"))
+	assert.Nil(findUser(store, ""))
+	assert.NotNil(findUser(store, "email@domain"))
 }
 
 func makeUser(assert *assert.Assertions) *auth.User {
@@ -78,7 +78,7 @@ func makeRequest(assert *assert.Assertions, user string, password string, email 
 	assert.Nil(err)
 	assert.NotNil(req)
 
-	v := fmt.Sprintf("{\"user\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}", user, password, email)
+	v := fmt.Sprintf("{\"name\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}", user, password, email)
 	req.Body = ioutil.NopCloser(bytes.NewBufferString(v))
 
 	return req

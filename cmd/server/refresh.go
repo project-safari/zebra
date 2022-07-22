@@ -40,7 +40,7 @@ func handleRefresh(ctx context.Context, store zebra.Store, authKey string) httpr
 		}
 
 		// Make sure the user still exists
-		user := findUser(store, jwtClaims.Subject, jwtClaims.Email)
+		user := findUser(store, jwtClaims.Email)
 		if user == nil {
 			log.Error(err, "user not found", "user", jwtClaims.Subject)
 			res.WriteHeader(http.StatusUnauthorized)
