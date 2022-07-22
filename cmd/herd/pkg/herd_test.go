@@ -410,7 +410,9 @@ func TestCreateUser(t *testing.T) {
 	key, err := auth.Generate()
 	assert.Nil(err)
 
-	user := auth.NewUser(pkg.Name(), pkg.Password("person"), key, pkg.CreateLabels())
+	name := pkg.Name()
+
+	user := auth.NewUser(name, pkg.Email(name), pkg.Password(name), key, pkg.CreateLabels())
 	assert.NotNil(user)
 	assert.Nil(user.Validate(context.Background()))
 }

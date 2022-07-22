@@ -43,3 +43,7 @@ func Password(user string) string {
 
 	return pwd
 }
+
+func Email(user string) string {
+	return user + "@cisco.com"
+}
