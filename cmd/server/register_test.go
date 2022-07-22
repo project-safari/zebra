@@ -84,22 +84,23 @@ func TestRegistry(t *testing.T) {
 	assert.NotNil(req)
 
 	key, _ := auth.Generate()
+	pubKey := key.Public()
 	registryData := &struct {
 		Name     string            `json:"name"`
 		Password string            `json:"password"`
 		Email    string            `json:"email"`
 		Key      *auth.RsaIdentity `json:"key"`
-	}{Name: "newuser",
+	}{Name: "testuser2",
 		Password: "secrect",
 		Email:    "myemail@domain",
-		Key:      key.Public()}
+		Key:      pubKey}
 
 	v, err := json.Marshal(registryData)
 	assert.Nil(err)
 	assert.NotEmpty(v)
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
 
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	user := createNewUser("testuser", "test@cisco.com", "bigword", pubKey)
 	store := makeQueryStore(root, assert, user)
 	h := handleRegister(setupLogger(nil), store)
 	rr := httptest.NewRecorder()
@@ -129,7 +130,7 @@ func TestNoKeyUser(t *testing.T) {
 		Password string            `json:"password"`
 		Email    string            `json:"email"`
 		Key      *auth.RsaIdentity `json:"key"`
-	}{Name: "newuser",
+	}{Name: "testuser2",
 		Password: "secrect",
 		Email:    "myemail@domain",
 	}
@@ -164,15 +165,16 @@ func TestSameUser(t *testing.T) {
 	assert.NotNil(req)
 
 	key, _ := auth.Generate()
+	pubKey := key.Public()
 	registryData := &struct {
 		Name     string            `json:"name"`
 		Password string            `json:"password"`
 		Email    string            `json:"email"`
 		Key      *auth.RsaIdentity `json:"key"`
 	}{Name: "testuser",
+		Key:      pubKey,
+		Email:    "test@cisco123.com",
 		Password: "secrect",
-		Email:    "myemail@domain",
-		Key:      key.Public(),
 	}
 
 	v, err := json.Marshal(registryData)
@@ -180,7 +182,7 @@ func TestSameUser(t *testing.T) {
 	assert.NotEmpty(v)
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
 
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	user := createNewUser("testuser", "test@cisco123.com", "bigword", key.Public())
 	store := makeQueryStore(root, assert, user)
 	h := handleRegister(setupLogger(nil), store)
 	rr := httptest.NewRecorder()
