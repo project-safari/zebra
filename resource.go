@@ -14,6 +14,7 @@ type Resource interface {
 	GetID() string
 	GetType() string
 	GetLabels() Labels
+	GetStatus() *Status
 }
 
 var ErrNameEmpty = errors.New("name is empty")
@@ -78,6 +79,10 @@ func (r *BaseResource) GetLabels() Labels {
 	}
 
 	return dest
+}
+
+func (r *BaseResource) GetStatus() *Status {
+	return &r.Status
 }
 
 // NamedResource represents all resources assigned both a string ID and a name.

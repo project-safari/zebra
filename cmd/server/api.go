@@ -12,8 +12,9 @@ import (
 )
 
 type ResourceAPI struct {
-	factory zebra.ResourceFactory
-	Store   zebra.Store
+	factory    zebra.ResourceFactory
+	Store      zebra.Store
+	LeaseQueue LeaseQueue
 }
 
 type QueryRequest struct {
@@ -47,8 +48,9 @@ func (qr *QueryRequest) Validate(ctx context.Context) error {
 
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
-		factory: factory,
-		Store:   nil,
+		factory:    factory,
+		Store:      nil,
+		LeaseQueue: nil,
 	}
 }
 
@@ -56,7 +58,13 @@ func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 func (api *ResourceAPI) Initialize(storageRoot string) error {
 	api.Store = store.NewResourceStore(storageRoot, api.factory)
 
-	return api.Store.Initialize()
+	if err := api.Store.Initialize(); err != nil {
+		return err
+	}
+
+	api.InitializeLeaseQueue()
+
+	return nil
 }
 
 // Apply given function f to each resource in resMap.
