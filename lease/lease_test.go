@@ -1,4 +1,4 @@
-package lease_test
+package lease //nolint:testpackage
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/lease"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,90 +22,103 @@ func TestActivate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	l := getLease()
+	l := getEmptyLease()
 	assert.NotNil(l)
 
-	assert.Equal(zebra.Inactive, l.Status)
+	assert.Equal(zebra.Inactive, l.Status.State)
 
 	assert.Nil(l.Activate())
-	assert.Equal(zebra.Active, l.Status)
-	assert.False(l.ActivationTime.IsZero())
+	assert.Equal(zebra.Active, l.Status.State)
+	assert.False(l.activationTime.IsZero())
 }
 
 func TestDeactivate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	l := getLease()
+	l := getEmptyLease()
 	assert.NotNil(l)
 
-	assert.Equal(zebra.Inactive, l.Status)
+	assert.Equal(zebra.Inactive, l.Status.State)
 
 	assert.Nil(l.Activate())
-	assert.Equal(zebra.Active, l.Status)
-	assert.False(l.ActivationTime.IsZero())
+	assert.Equal(zebra.Active, l.Status.State)
+	assert.False(l.activationTime.IsZero())
 
 	l.Deactivate()
-	assert.Equal(zebra.Inactive, l.Status)
+	assert.Equal(zebra.Inactive, l.Status.State)
 }
 
 func TestBadResources(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	l := getLease()
+	l := getEmptyLease()
 	assert.NotNil(l)
 
-	res := getActiveRes()
+	res := getRes()
 
-	l.Resources.Add(res, res.GetType())
-
-	assert.NotNil(l.Activate())
-
-	res.GetStatus().Lease = zebra.Free
-
+	l.Assign(res)
 	assert.Nil(l.Activate())
 }
 
-func getLease() *lease.Lease {
+func TestValidExpired(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	l := getEmptyLease()
+	assert.NotNil(l)
+
+	assert.Nil(l.Activate())
+	assert.True(l.IsValid())
+	assert.False(l.IsExpired())
+
+	l.Deactivate()
+	assert.False(l.IsValid())
+	assert.True(l.IsExpired())
+}
+
+func getEmptyLease() *Lease {
 	d, err := time.ParseDuration("4h")
 	if err != nil {
 		return nil
 	}
 
-	resources := []lease.ResourceReq{
-		{
+	return NewLease(getUser(), d, make(map[*zebra.Group]*ResourceReq, 0))
+}
+
+func getLease() *Lease {
+	d, err := time.ParseDuration("4h")
+	if err != nil {
+		return nil
+	}
+
+	resources := map[*zebra.Group]*ResourceReq{
+		zebra.NewGroup("san-jose-building-14"): {
 			Type:  "Server",
+			Group: "san-jose-building-14",
 			Name:  "linux blah blah",
 			Count: 2,
 		},
-		{
+		zebra.NewGroup("san-jose-building-18"): {
 			Type:  "VM",
+			Group: "san-jose-building-18",
 			Name:  "virtual",
 			Count: 1,
 		},
 	}
 
-	req := lease.Request{
-		Duration:  d,
-		Group:     "san-jose-building-15",
-		Resources: resources,
-	}
-
-	return lease.NewLease(getUser(), req)
+	return NewLease(getUser(), d, resources)
 }
 
-func getActiveRes() zebra.Resource {
+func getRes() zebra.Resource {
 	res := &network.VLANPool{
 		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
 		RangeStart:   0,
 		RangeEnd:     10,
 	}
 
-	status := zebra.DefaultStatus()
-	status.Lease = zebra.Leased
-
-	res.Status = status
+	res.Status.Lease = zebra.Free
 
 	return res
 }
@@ -117,6 +129,7 @@ func getUser() auth.User {
 			BaseResource: *zebra.NewBaseResource("User", nil),
 			Name:         "shravya",
 		},
+		Email:        "shravya@cisco.com",
 		Key:          nil,
 		PasswordHash: "",
 		Role:         nil,
