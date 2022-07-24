@@ -178,7 +178,7 @@ func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 
 	namedRes.Name = name
 
-	cred.BaseResource = *zebra.NewBaseResource("Credentials", zebra.Labels{})
+	cred.NamedResource = *namedRes
 	cred.Name = "name"
 	cred.Keys = map[string]string{"ssh-key": ""}
 

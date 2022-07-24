@@ -19,6 +19,10 @@ func GenerateESX(numESX int) []zebra.Resource {
 
 		esx := compute.NewESX(name, serverID, ip, labels)
 
+		if esx.Labels.Validate() != nil {
+			esx.Labels = GroupLabels(esx.Labels, GroupVal(esx))
+		}
+
 		ESXarr = append(ESXarr, esx)
 	}
 

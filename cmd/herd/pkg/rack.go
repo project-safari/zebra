@@ -16,6 +16,10 @@ func GenerateRack(numRacks int) []zebra.Resource {
 
 		rack := dc.NewRack(name, rows, labels)
 
+		if rack.Labels.Validate() != nil {
+			rack.Labels = GroupLabels(rack.Labels, GroupVal(rack))
+		}
+
 		racks = append(racks, rack)
 	}
 

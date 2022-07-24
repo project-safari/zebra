@@ -17,6 +17,10 @@ func GenerateVM(numVM int) []zebra.Resource {
 
 		VM := compute.NewVM(arr, ip, labels)
 
+		if VM.Labels.Validate() != nil {
+			VM.Labels = GroupLabels(VM.Labels, GroupVal(VM))
+		}
+
 		VMarr = append(VMarr, VM)
 	}
 

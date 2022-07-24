@@ -20,6 +20,11 @@ func GenerateUser(numUsr int) []zebra.Resource {
 		labels := CreateLabels()
 
 		usr := auth.NewUser(name, email, pwd, key, labels)
+
+		if usr.Labels.Validate() != nil {
+			usr.Labels = GroupLabels(usr.Labels, GroupVal(usr))
+		}
+
 		users = append(users, usr)
 	}
 
