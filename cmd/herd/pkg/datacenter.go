@@ -16,6 +16,10 @@ func GenerateDatacenter(numDC int) []zebra.Resource {
 
 		data := dc.NewDatacenter(location, name, labels)
 
+		if data.Labels.Validate() != nil {
+			data.Labels = GroupLabels(data.Labels, GroupVal(data))
+		}
+
 		datacent = append(datacent, data)
 	}
 

@@ -16,9 +16,13 @@ func GenerateVCenter(numVC int) []zebra.Resource {
 		labels := CreateLabels()
 		ip := net.IP(RandData(IPsamples()))
 
-		center := compute.NewVCenter(name, ip, labels)
+		cent := compute.NewVCenter(name, ip, labels)
 
-		centers = append(centers, center)
+		if cent.Labels.Validate() != nil {
+			cent.Labels = GroupLabels(cent.Labels, GroupVal(cent))
+		}
+
+		centers = append(centers, cent)
 	}
 
 	return centers

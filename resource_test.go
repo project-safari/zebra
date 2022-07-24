@@ -31,7 +31,7 @@ func TestBaseResource(t *testing.T) {
 	assert.NotNil(res.Validate(ctx))
 
 	res.Type = "BaseResource"
-	assert.Nil(res.Validate(ctx))
+	assert.NotNil(res.Validate(ctx))
 
 	assert.Equal(res.ID, res.GetID())
 	assert.Equal(res.Type, res.GetType())
@@ -65,7 +65,7 @@ func TestNamedResource(t *testing.T) {
 	assert.Equal(res.Type, res.GetType())
 
 	res.Name = "jasmine"
-	assert.Nil(res.Validate(ctx))
+	assert.NotNil(res.Validate(ctx))
 
 	assert.True(res.GetLabels().HasKey("key"))
 }
@@ -100,7 +100,7 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.Keys = make(map[string]string)
-	assert.Nil(credentials.Validate(ctx))
+	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.Keys["password"] = "a"
 	credentials.Keys["ssh-key"] = "test"
@@ -119,5 +119,5 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.Keys["password"] = "properPass123$"
-	assert.Nil(credentials.Validate(ctx))
+	assert.NotNil(credentials.Validate(ctx))
 }

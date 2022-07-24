@@ -1,7 +1,9 @@
 package pkg
 
 import (
+	// some imports from zebra.
 	"github.com/project-safari/zebra"
+	// some imports from compute.
 	"github.com/project-safari/zebra/compute"
 )
 
@@ -16,6 +18,10 @@ func GenerateServer(numServers int) []zebra.Resource {
 		ip := RandIP()
 
 		server := compute.NewServer(arr, ip, labels)
+
+		if server.Labels.Validate() != nil {
+			server.Labels = GroupLabels(server.Labels, GroupVal(server))
+		}
 
 		servers = append(servers, server)
 	}

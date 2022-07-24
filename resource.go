@@ -55,6 +55,8 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 		return ErrIDShort
 	case r.Type == "":
 		return ErrTypeEmpty
+	case r.Labels.Validate() != nil:
+		return ErrLabel
 	}
 
 	return r.Status.Validate(ctx)
