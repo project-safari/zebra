@@ -11,6 +11,9 @@ import (
 var ErrLabel = errors.New("missing default mandatory group label")
 
 // The Labels.Validate function ensures that labels have the mandatory default group label.
+// Must only be called for BaseResource.Labels.
+// This is called in BaseResource.Validate().
+// Other labels for non-resources do not need a mandatory group label.
 func (l Labels) Validate() error {
 	if _, found := l["group"]; found {
 		return nil
