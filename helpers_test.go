@@ -27,6 +27,14 @@ func TestNewBaseResource(t *testing.T) {
 	assert.True(br.Labels.MatchEqual("owner", "shravya"))
 }
 
+func TestNewCredentials(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	assert.NotNil(zebra.NewCredentials("ssh-key-1", nil))
+	assert.NotNil(zebra.NewCredentials("", nil))
+}
+
 func TestIsIn(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

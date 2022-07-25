@@ -7,7 +7,7 @@ import (
 const DefaultMaxDuration = 4
 
 func NewBaseResource(resType string, labels Labels) *BaseResource {
-	id := uuid.New().String()
+	id := GenerateID()
 
 	if resType == "" {
 		resType = "BaseResource"
@@ -19,6 +19,31 @@ func NewBaseResource(resType string, labels Labels) *BaseResource {
 		Labels: labels,
 		Status: DefaultStatus(),
 	}
+}
+
+func NewCredentials(name string, labels Labels) *Credentials {
+	namedRes := new(NamedResource)
+
+	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
+
+	// Ensure name is set, and returned resource will be valid
+	if name == "" {
+		name = "unknown"
+	}
+
+	namedRes.Name = name
+
+	ret := &Credentials{
+		NamedResource: *namedRes,
+		// some labels.
+		Keys: labels,
+	}
+
+	return ret
+}
+
+func GenerateID() string {
+	return uuid.New().String()
 }
 
 // Return if val is in string list.

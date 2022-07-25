@@ -14,6 +14,7 @@ type Resource interface {
 	GetID() string
 	GetType() string
 	GetLabels() Labels
+	GetStatus() *Status
 }
 
 var (
@@ -33,10 +34,10 @@ var (
 // BaseResource must be embedded in all resource structs, ensuring each resource is
 // assigned an ID string.
 type BaseResource struct {
-	ID     string `json:"id"`
-	Type   string `json:"type"`
-	Labels Labels `json:"labels,omitempty"`
-	Status Status `json:"status,omitempty"`
+	ID     string  `json:"id"`
+	Type   string  `json:"type"`
+	Labels Labels  `json:"labels,omitempty"`
+	Status *Status `json:"status,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.
@@ -76,6 +77,11 @@ func (r *BaseResource) GetLabels() Labels {
 	}
 
 	return dest
+}
+
+// Return pointer to status of BaseResource r.
+func (r *BaseResource) GetStatus() *Status {
+	return r.Status
 }
 
 // Special label validation to ensure all resources have group label.
@@ -173,20 +179,4 @@ func ValidatePassword(password string) error { //nolint:cyclop
 // Check to make sure SSH key follows specified rules.
 func ValidateSSHKey(key string) error {
 	return nil
-}
-
-func NewCredential(name string, labels Labels) *Credentials {
-	namedRes := new(NamedResource)
-
-	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
-
-	namedRes.Name = name
-
-	ret := &Credentials{
-		NamedResource: *namedRes,
-		// some labels.
-		Keys: labels,
-	}
-
-	return ret
 }

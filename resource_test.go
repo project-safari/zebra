@@ -122,6 +122,14 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 }
 
+func TestGetStatus(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	b := zebra.NewBaseResource("", nil)
+	assert.NotNil(b.GetStatus())
+}
+
 func TestLabelsValidation(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
