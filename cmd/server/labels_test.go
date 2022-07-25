@@ -17,6 +17,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func makeStore(assert *assert.Assertions, root string) zebra.Store {
+	s := store.NewResourceStore(root, store.DefaultFactory())
+	assert.Nil(s.Initialize())
+
+	labels := zebra.Labels{}
+
+	for i := 0; i < 10; i++ {
+		key := fmt.Sprintf("label%d", i)
+		value := fmt.Sprintf("value%d", i)
+		labels[key] = value
+	}
+
+	// create 100 labs
+	for i := 0; i < 100; i++ {
+		l := new(dc.Lab)
+		l.Name = fmt.Sprintf("lab-%d", i+1)
+		l.Type = "Lab"
+		l.BaseResource = *zebra.NewBaseResource("Lab", labels)
+
+		assert.NotNil(s.Create(l))
+	}
+
+	return s
+}
+
 func makeLabelRequest(assert *assert.Assertions, labels ...string) *http.Request {
 	req, err := http.NewRequest("GET", "/api/v1/labels", nil)
 	assert.Nil(err)
@@ -96,29 +121,4 @@ func TestLabels(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(rr.Code, http.StatusOK)
-}
-
-func makeStore(assert *assert.Assertions, root string) zebra.Store {
-	s := store.NewResourceStore(root, store.DefaultFactory())
-	assert.Nil(s.Initialize())
-
-	labels := zebra.Labels{}
-
-	for i := 0; i < 10; i++ {
-		key := fmt.Sprintf("label%d", i)
-		value := fmt.Sprintf("value%d", i)
-		labels[key] = value
-	}
-
-	// create 100 labs
-	for i := 0; i < 100; i++ {
-		l := new(dc.Lab)
-		l.Name = fmt.Sprintf("lab-%d", i+1)
-		l.Type = "Lab"
-		l.BaseResource = *zebra.NewBaseResource("Lab", labels)
-
-		assert.Nil(s.Create(l))
-	}
-
-	return s
 }

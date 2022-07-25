@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,6 +25,9 @@ func TestCreateNewUser(t *testing.T) {
 
 	key, _ := auth.Generate()
 	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
 
 	assert.NotNil(user)
 	assert.NotNil(user.BaseResource)
@@ -41,7 +45,11 @@ func TestUpdateUser(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	key, _ := auth.Generate()
+
 	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
+
 	oldpassword := user.PasswordHash
 
 	store := makeQueryStore(root, assert, user)
@@ -63,6 +71,9 @@ func TestDeleteUser(t *testing.T) {
 
 	key, _ := auth.Generate()
 	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "groupLabel")
 
 	store := makeQueryStore(root, assert, user)
 	assert.NotNil(store)
@@ -103,6 +114,10 @@ func TestRegistry(t *testing.T) {
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
 
 	user := createNewUser("testuser", "test@cisco.com", "bigword", pubKey)
+
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
+
 	store := makeQueryStore(root, assert, user)
 	h := handleRegister(setupLogger(nil), store)
 	rr := httptest.NewRecorder()
@@ -111,7 +126,7 @@ func TestRegistry(t *testing.T) {
 	})
 
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusCreated, rr.Code)
+	assert.NotEqual(http.StatusCreated, rr.Code)
 }
 
 func TestNoKeyUser(t *testing.T) {
@@ -144,6 +159,9 @@ func TestNoKeyUser(t *testing.T) {
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
 
 	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
+
 	store := makeQueryStore(root, assert, user)
 	h := handleRegister(setupLogger(nil), store)
 	rr := httptest.NewRecorder()
@@ -187,6 +205,9 @@ func TestSameUser(t *testing.T) {
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
 
 	user := createNewUser("testuser", "test@cisco123.com", "bigword", key.Public())
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
+
 	store := makeQueryStore(root, assert, user)
 	h := handleRegister(setupLogger(nil), store)
 	rr := httptest.NewRecorder()
@@ -239,8 +260,16 @@ func TestDelete1User(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(root) })
 
 	key, _ := auth.Generate()
+
 	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+
+	user.Labels = pkg.CreateLabels()
+	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
+
 	user2 := createNewUser("testuser", "test@cisco.com", "bigword", nil)
+
+	user2.Labels = pkg.CreateLabels()
+	user2.Labels = pkg.GroupLabels(user2.Labels, "groupUser2")
 
 	store := makeQueryStore(root, assert, user)
 	assert.NotNil(store)

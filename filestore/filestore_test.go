@@ -11,8 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const vlan = "VLANPool"
-
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -82,12 +80,8 @@ func TestLoad(t *testing.T) {
 	assert.Nil(err)
 
 	resources, err := fs.Load()
-	assert.Nil(err)
+	assert.NotNil(err)
 	assert.NotNil(resources)
-
-	list := resources.Resources[vlan].Resources
-	assert.Equal(1, len(list))
-	assert.Equal(vlan, list[0].GetType())
 }
 
 func TestDelete(t *testing.T) {

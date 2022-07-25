@@ -6,6 +6,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,6 @@ func TestUser(t *testing.T) {
 	writeAll, e := auth.NewPriv("", true, false, true, true)
 	assert.Nil(e)
 	assert.NotNil(writeAll)
-	writer := &auth.Role{"writer", []*auth.Priv{writeAll}}
 
 	readAll, e := auth.NewPriv("", false, true, false, false)
 	assert.Nil(e)
@@ -58,19 +58,8 @@ func TestUser(t *testing.T) {
 	assert.NotNil(god.Validate(ctx))
 
 	god.PasswordHash = auth.HashPassword("youhaveachoice")
-	assert.Nil(god.Validate(ctx))
 
-	luciferKey, err := auth.Generate()
-	assert.Nil(err)
-	assert.NotNil(luciferKey)
-
-	lucifer := new(auth.User)
-	lucifer.Name = "lucifer"
-	lucifer.ID = "00000000000002"
-	lucifer.Type = userType
-	lucifer.Key = luciferKey
-	lucifer.Role = writer
-	lucifer.PasswordHash = auth.HashPassword("youwillbetempted")
+	assert.NotNil(god.Validate(ctx)) // it will have an error because it does not have group label, so not nil.
 
 	adamKey, err := auth.Generate()
 	assert.Nil(err)
@@ -102,16 +91,13 @@ func TestUser(t *testing.T) {
 
 	assert.Nil(god.Authenticate(string(token)))
 	assert.Nil(god.AuthenticatePassword("youhaveachoice"))
-	assert.NotNil(lucifer.Authenticate(string(token)))
-	assert.NotNil(lucifer.AuthenticatePassword("youhaveachoice"))
 
 	assert.True(god.Create("universe"))
 	assert.True(god.Read("universe"))
 	assert.True(god.Delete("universe"))
 	assert.True(god.Update("universe"))
 	assert.True(god.Write("universe"))
-	assert.False(lucifer.Read("universe"))
-	assert.True(lucifer.Write("universe"))
+
 	assert.False(adam.Write("something"))
 	assert.False(adam.Delete("something"))
 	assert.False(eve.Create("universe"))
@@ -127,5 +113,7 @@ func TestUser(t *testing.T) {
 
 	newUser := auth.NewUser("eve", "eve@email.com", "eve123", eveKey, zebra.Labels{})
 	assert.NotNil(newUser)
+
+	newUser.Labels = pkg.GroupLabels(newUser.Labels, "sample-label")
 	assert.Nil(newUser.Validate(context.Background()))
 }

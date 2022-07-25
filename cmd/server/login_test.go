@@ -13,6 +13,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,20 +22,6 @@ const (
 	authKey   = "abracadabra"
 	jiniWords = "youGetThreewishes!"
 )
-
-func TestFindUser(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	root := "teststore1"
-
-	t.Cleanup(func() { os.RemoveAll(root) })
-
-	store := makeQueryStore(root, assert, makeUser(assert))
-
-	assert.Nil(findUser(store, ""))
-	assert.NotNil(findUser(store, "email@domain"))
-}
 
 func makeUser(assert *assert.Assertions) *auth.User {
 	ctx := context.Background()
@@ -49,6 +36,8 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	jini.Type = "User"
 	jini.PasswordHash = auth.HashPassword(jiniWords)
 	jini.Role = &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
+	jini.Labels = pkg.CreateLabels()
+	jini.Labels = pkg.GroupLabels(jini.Labels, "sampleGroup")
 
 	jiniKey, err := auth.Generate()
 	assert.Nil(err)
@@ -82,6 +71,20 @@ func makeRequest(assert *assert.Assertions, user string, password string, email 
 	req.Body = ioutil.NopCloser(bytes.NewBufferString(v))
 
 	return req
+}
+
+func TestFindUser(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	root := "teststore1"
+
+	t.Cleanup(func() { os.RemoveAll(root) })
+
+	store := makeQueryStore(root, assert, makeUser(assert))
+
+	assert.Nil(findUser(store, ""))
+	assert.NotNil(findUser(store, "email@domain"))
 }
 
 func TestBadUser(t *testing.T) {
