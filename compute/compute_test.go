@@ -7,6 +7,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/compute"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,7 +50,10 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server.Validate(ctx))
 
 	server.Credentials.Keys["password"] = "actualPassw0rd%9"
-	assert.Nil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx))
+
+	server.Labels = pkg.CreateLabels()
+	server.Labels = pkg.GroupLabels(server.Labels, "someServer")
 
 	server.Type = "test"
 	assert.NotNil(server.Validate(ctx))
@@ -85,7 +89,7 @@ func TestESX(t *testing.T) {
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.Credentials.Keys["password"] = "actualPassw0rd%2"
-	assert.Nil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx))
 
 	esx.Type = "notesx"
 	assert.NotNil(esx.Validate(ctx))
@@ -118,7 +122,7 @@ func TestVCenter(t *testing.T) {
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.Credentials.Keys["password"] = "actualPassw0rd%4"
-	assert.Nil(vcenter.Validate(ctx))
+	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.Type = "test"
 	assert.NotNil(vcenter.Validate(ctx))
@@ -157,7 +161,10 @@ func TestVM(t *testing.T) {
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.Credentials.Keys["password"] = "actualPassw0rd%1"
-	assert.Nil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx))
+
+	machine.Labels = pkg.CreateLabels()
+	machine.Labels = pkg.GroupLabels(machine.Labels, "someSampleGroup")
 
 	machine.Type = "machine"
 	assert.NotNil(machine.Validate(ctx))

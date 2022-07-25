@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 	"github.com/project-safari/zebra/store"
@@ -202,13 +203,13 @@ func TestPostResource(t *testing.T) {
 	req := createRequest(assert, "POST", "/resources", body)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusOK, rr.Code)
+	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Update existing resource
 	req = createRequest(assert, "POST", "/resources", body)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusOK, rr.Code)
+	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Create resource with an invalid type, won't read properly
 	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
@@ -265,15 +266,21 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 		},
 	}
 
-	assert.Nil(myAPI.Store.Create(lab1))
-	assert.Nil(myAPI.Store.Create(lab2))
+	assert.NotNil(myAPI.Store.Create(lab1))
+	assert.NotNil(myAPI.Store.Create(lab2))
+
+	lab1.Labels = pkg.CreateLabels()
+	lab2.Labels = pkg.CreateLabels()
+
+	lab1.Labels = pkg.GroupLabels(lab1.Labels, "sampleGroup")
+	lab2.Labels = pkg.GroupLabels(lab2.Labels, "sampleGroup2")
 
 	// Invalid resources requested to be deleted
 	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
 	req := createRequest(assert, "DELETE", "/resources", body)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusOK, rr.Code)
+	assert.NotEqual(http.StatusOK, rr.Code)
 
 	body = `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
 	req = createRequest(assert, "DELETE", "/resources", body)
