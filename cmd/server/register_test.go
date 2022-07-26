@@ -2,8 +2,10 @@ package main //nolint:testpackage
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -82,6 +85,40 @@ func TestDeleteUser(t *testing.T) {
 	assert.Empty(store.Query().Resources)
 }
 
+type RData struct {
+	Name     string            `json:"name"`
+	Password string            `json:"password"`
+	Email    string            `json:"email"`
+	Key      *auth.RsaIdentity `json:"key"`
+}
+
+func newRData(name string, password string, email string, needKey bool) *RData {
+	return &RData{
+		Name:     name,
+		Password: password,
+		Email:    email,
+		Key: func() *auth.RsaIdentity {
+			if !needKey {
+				return nil
+			}
+
+			key, _ := auth.Generate()
+			pubKey := key.Public()
+
+			return pubKey
+		}(),
+	}
+}
+
+func (r *RData) Body() io.ReadCloser {
+	v, err := json.Marshal(r)
+	if err != nil {
+		panic(err)
+	}
+
+	return ioutil.NopCloser(bytes.NewBuffer(v))
+}
+
 func TestRegistry(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -94,39 +131,35 @@ func TestRegistry(t *testing.T) {
 	assert.Nil(err)
 	assert.NotNil(req)
 
-	key, _ := auth.Generate()
-	pubKey := key.Public()
-	registryData := &struct {
-		Name     string            `json:"name"`
-		Password string            `json:"password"`
-		Email    string            `json:"email"`
-		Key      *auth.RsaIdentity `json:"key"`
-	}{
-		Name:     "testuser2",
-		Password: "secrect",
-		Email:    "myemail@domain",
-		Key:      pubKey,
-	}
+	// Invalid Context
+	h := registerAdapter()
+	rr := httptest.NewRecorder()
+	handler := h(nil)
 
-	v, err := json.Marshal(registryData)
-	assert.Nil(err)
-	assert.NotEmpty(v)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusInternalServerError, rr.Code)
 
-	user := createNewUser("testuser", "test@cisco.com", "bigword", pubKey)
+	data := newRData("testuser2", "secrect", "myemail@domain", true)
 
+	user := createNewUser("testuser", "testuser@domain", "secrect", data.Key)
 	user.Labels = pkg.CreateLabels()
 	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
 
-	store := makeQueryStore(root, assert, user)
-	h := handleRegister(setupLogger(nil), store)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, user)
 
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+
+	req, err = http.NewRequestWithContext(ctx, "POST", "/register", nil)
+	req.Body = data.Body()
+
+	assert.Nil(err)
+
+	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.NotEqual(http.StatusCreated, rr.Code)
+	assert.Equal(http.StatusCreated, rr.Code)
+
+	testForward(assert, h)
 }
 
 func TestNoKeyUser(t *testing.T) {
@@ -137,37 +170,23 @@ func TestNoKeyUser(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	req, err := http.NewRequest("POST", "/register", nil)
+	key, _ := auth.Generate()
+	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, user)
+
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "/register", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
-	key, _ := auth.Generate()
-	registryData := &struct {
-		Name     string            `json:"name"`
-		Password string            `json:"password"`
-		Email    string            `json:"email"`
-		Key      *auth.RsaIdentity `json:"key"`
-	}{
-		Name:     "testuser2",
-		Password: "secrect",
-		Email:    "myemail@domain",
-	}
+	data := newRData("testuser2", "secrect", "myemail@domain", false)
+	req.Body = data.Body()
 
-	v, err := json.Marshal(registryData)
-	assert.Nil(err)
-	assert.NotEmpty(v)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
-
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
-
-	store := makeQueryStore(root, assert, user)
-	h := handleRegister(setupLogger(nil), store)
+	h := registerAdapter()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	handler := h(nil)
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusInternalServerError, rr.Code)
@@ -181,39 +200,25 @@ func TestSameUser(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	req, err := http.NewRequest("POST", "/register", nil)
-	assert.Nil(err)
-	assert.NotNil(req)
-
-	key, _ := auth.Generate()
-	pubKey := key.Public()
-	registryData := &struct {
-		Name     string            `json:"name"`
-		Password string            `json:"password"`
-		Email    string            `json:"email"`
-		Key      *auth.RsaIdentity `json:"key"`
-	}{
-		Name:     "testuser",
-		Key:      pubKey,
-		Email:    "test@cisco123.com",
-		Password: "secrect",
-	}
-
-	v, err := json.Marshal(registryData)
-	assert.Nil(err)
-	assert.NotEmpty(v)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
-
-	user := createNewUser("testuser", "test@cisco123.com", "bigword", key.Public())
+	data := newRData("testuser", "secrect", "test@cisco123.com", true)
+	user := createNewUser("testuser", "test@cisco123.com", "bigword", data.Key)
 	user.Labels = pkg.CreateLabels()
 	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
 
-	store := makeQueryStore(root, assert, user)
-	h := handleRegister(setupLogger(nil), store)
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, user)
+
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "/register", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	req.Body = data.Body()
+
+	h := registerAdapter()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	handler := h(nil)
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusForbidden, rr.Code)
@@ -227,25 +232,28 @@ func TestBadRequest(t *testing.T) {
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
-	req, err := http.NewRequest("POST", "/register", nil)
-	assert.Nil(err)
-	assert.NotNil(req)
-
 	key, _ := auth.Generate()
 	registryData := fmt.Sprintf("{\"user\":\"%s\"\"password\":\"%s\"}", "Bad", "Request")
 
 	v, err := json.Marshal(registryData)
 	assert.Nil(err)
 	assert.NotEmpty(v)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
 
 	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
-	store := makeQueryStore(root, assert, user)
-	h := handleRegister(setupLogger(nil), store)
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, user)
+
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "/register", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(v))
+
+	h := registerAdapter()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	handler := h(nil)
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)

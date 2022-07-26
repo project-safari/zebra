@@ -2,7 +2,6 @@ package main //nolint:testpackage
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -30,7 +29,7 @@ func TestBadReq(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	h := handleTypes(context.Background())
+	h := handleTypes()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
@@ -51,7 +50,7 @@ func TestDefaultFactory(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	h := handleTypes(context.Background())
+	h := handleTypes()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
@@ -67,7 +66,7 @@ func TestTypes(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	h := handleTypes(context.Background())
+	h := handleTypes()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)

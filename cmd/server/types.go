@@ -1,26 +1,24 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
-	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/store"
 )
 
-func handleTypes(ctx context.Context) httprouter.Handle {
+func handleTypes() httprouter.Handle {
 	allTypes := store.DefaultFactory()
 
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		ctx := req.Context()
+
 		typeReq := &struct {
 			Types []string `json:"types"`
 		}{Types: []string{}}
 
-		if err := readReq(ctx, req, typeReq); err != nil {
+		if err := readJSON(ctx, req, typeReq); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 
 			return
@@ -43,21 +41,4 @@ func handleTypes(ctx context.Context) httprouter.Handle {
 
 		writeJSON(ctx, res, typeRes)
 	}
-}
-
-func readReq(ctx context.Context, req *http.Request, data interface{}) error {
-	log := logr.FromContextOrDiscard(ctx)
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return err
-	}
-
-	log.Info("request", "body", string(body))
-
-	if len(body) > 0 {
-		err = json.Unmarshal(body, data)
-	}
-
-	return err
 }
