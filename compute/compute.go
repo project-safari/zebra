@@ -49,7 +49,7 @@ func (s *Server) Validate(ctx context.Context) error {
 		return ErrModelEmpty
 	}
 
-	if s.Type != "Server" {
+	if s.Type.Name != "Server" {
 		return zebra.ErrWrongType
 	}
 
@@ -85,7 +85,7 @@ func (e *ESX) Validate(ctx context.Context) error {
 		return ErrServerIDEmtpy
 	}
 
-	if e.Type != "ESX" {
+	if e.Type.Name != "ESX" {
 		return zebra.ErrWrongType
 	}
 
@@ -116,7 +116,7 @@ func (v *VCenter) Validate(ctx context.Context) error {
 		return ErrIPEmpty
 	}
 
-	if v.Type != "VCenter" {
+	if v.Type.Name != "VCenter" {
 		return zebra.ErrWrongType
 	}
 
@@ -155,7 +155,7 @@ func (v *VM) Validate(ctx context.Context) error {
 		return ErrVCenterEmpty
 	}
 
-	if v.Type != "VM" {
+	if v.Type.Name != "VM" {
 		return zebra.ErrWrongType
 	}
 
@@ -170,7 +170,7 @@ func (v *VM) Validate(ctx context.Context) error {
 func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 	namedRes := new(zebra.NamedResource)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("VCenter", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(VCenterType(), labels)
 
 	namedRes.Name = name
 
@@ -178,7 +178,7 @@ func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 
 	namedRes.Name = name
 
-	cred.NamedResource = *namedRes
+	cred.BaseResource = *zebra.NewBaseResource(zebra.CredentialsType(), zebra.Labels{})
 	cred.Name = "name"
 	cred.Keys = map[string]string{"ssh-key": ""}
 
@@ -194,7 +194,7 @@ func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 	named := new(zebra.NamedResource)
 
-	named.BaseResource = *zebra.NewBaseResource("Server", labels)
+	named.BaseResource = *zebra.NewBaseResource(ServerType(), labels)
 
 	named.Name = arr[2]
 
@@ -218,7 +218,7 @@ func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 func NewESX(name string, serverID string, ip net.IP, labels zebra.Labels) *ESX {
 	namedRes := new(zebra.NamedResource)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("ESX", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(ESXType(), labels)
 
 	namedRes.Name = name
 
@@ -244,7 +244,7 @@ func NewVM(arr []string, ip net.IP, labels zebra.Labels) *VM {
 	namedRes := new(zebra.NamedResource)
 	cred := new(zebra.Credentials)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("VM", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(VMType(), labels)
 
 	namedRes.Name = arr[0]
 

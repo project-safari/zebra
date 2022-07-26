@@ -32,6 +32,14 @@ func makeQueryRequest(assert *assert.Assertions, resources *ResourceAPI, q *Quer
 	return req
 }
 
+func EmptyType() zebra.Type {
+	return zebra.Type{
+		Name:        "Empty",
+		Description: "Empty Type",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
+
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -208,9 +216,24 @@ func TestPostResource(t *testing.T) {
 		h(w, r, nil)
 	})
 
-	body := `{"lab":[{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
+	lab3 := &dc.Lab{
+		NamedResource: zebra.NamedResource{
+			BaseResource: zebra.BaseResource{
+				ID:     "10000003",
+				Type:   dc.LabType(),
+				Labels: nil,
+				Status: zebra.DefaultStatus(),
+			},
+			Name: "Lab3",
+		},
+	}
+
+	labjson, err := json.Marshal(lab3)
+	assert.Nil(err)
+	assert.NotEmpty(labjson)
 
 	// Create new resource
+	body := string(labjson)
 	req := createRequest(assert, "POST", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
@@ -257,7 +280,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 		NamedResource: zebra.NamedResource{
 			BaseResource: zebra.BaseResource{
 				ID:     "10000001",
-				Type:   "Lab",
+				Type:   dc.LabType(),
 				Labels: nil,
 				Status: zebra.DefaultStatus(),
 			},
@@ -269,11 +292,23 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 		NamedResource: zebra.NamedResource{
 			BaseResource: zebra.BaseResource{
 				ID:     "10000002",
-				Type:   "Lab",
+				Type:   dc.LabType(),
 				Labels: nil,
 				Status: zebra.DefaultStatus(),
 			},
 			Name: "Lab2",
+		},
+	}
+
+	lab3 := &dc.Lab{
+		NamedResource: zebra.NamedResource{
+			BaseResource: zebra.BaseResource{
+				ID:     "10000003",
+				Type:   dc.LabType(),
+				Labels: nil,
+				Status: zebra.DefaultStatus(),
+			},
+			Name: "Lab3",
 		},
 	}
 
@@ -287,7 +322,10 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	lab2.Labels = pkg.GroupLabels(lab2.Labels, "sampleGroup2")
 
 	// Invalid resources requested to be deleted
-	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
+	lab3bjson, err := json.Marshal(lab3)
+	assert.Nil(err)
+
+	body := string(lab3bjson)
 	req := createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
@@ -347,7 +385,7 @@ func TestApplyFunc(t *testing.T) {
 
 	invalidRes := &dc.Lab{
 		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("notLab", nil),
+			BaseResource: *zebra.NewBaseResource(EmptyType(), nil),
 			Name:         "",
 		},
 	}

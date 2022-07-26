@@ -10,8 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const userType = "user"
-
 //nolint:funlen
 func TestUser(t *testing.T) {
 	t.Parallel()
@@ -48,7 +46,7 @@ func TestUser(t *testing.T) {
 
 	god.Name = "almighty"
 	god.ID = "00000000000001"
-	god.Type = userType
+	god.Type = auth.UserType()
 	assert.NotNil(god.Validate(ctx))
 
 	god.Key = godKey
@@ -68,7 +66,7 @@ func TestUser(t *testing.T) {
 	adam := new(auth.User)
 	adam.Name = "adam"
 	adam.ID = "00000000000003"
-	adam.Type = userType
+	adam.Type = auth.UserType()
 	adam.Key = adamKey
 	adam.Role = user
 	adam.PasswordHash = auth.HashPassword("iloveeve")
@@ -80,7 +78,7 @@ func TestUser(t *testing.T) {
 	eve := new(auth.User)
 	eve.Name = "eve"
 	eve.ID = "00000000000004"
-	eve.Type = userType
+	eve.Type = auth.UserType()
 	eve.Key = eveKey
 	eve.Role = user
 	eve.PasswordHash = auth.HashPassword("iloveadam")

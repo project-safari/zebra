@@ -8,10 +8,17 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
+
+func EmptyType() zebra.Type {
+	return zebra.Type{
+		Name:        "Empty",
+		Description: "Empty Type",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
 
 // TestSwitch tests the *Switch Validate function with a pass and a fail case.
 func TestSwitch(t *testing.T) {
@@ -27,7 +34,7 @@ func TestSwitch(t *testing.T) {
 	switch1.ID = "aaaa"
 	assert.NotNil(switch1.Validate(ctx))
 
-	switch1.Type = "Switch"
+	switch1.Type.Name = "Switch"
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.ManagementIP = net.ParseIP("10.1.0.0")
@@ -46,7 +53,7 @@ func TestSwitch(t *testing.T) {
 		NamedResource: zebra.NamedResource{
 			BaseResource: zebra.BaseResource{
 				ID:     "blahblah",
-				Type:   "Credentials",
+				Type:   zebra.CredentialsType(),
 				Labels: nil,
 				Status: zebra.DefaultStatus(),
 			},
@@ -59,7 +66,7 @@ func TestSwitch(t *testing.T) {
 	switch1.Credentials.Keys = make(map[string]string)
 	assert.NotNil(switch1.Validate(ctx))
 
-	switch1.Type = "test"
+	switch1.Type = EmptyType()
 	assert.NotNil(switch1.Validate(ctx))
 }
 
@@ -75,13 +82,7 @@ func TestIPAddressPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "aaaa"
-	pool.Type = "IPAddressPool"
-
-	pool.Labels = make(map[string]string)
-	pool.Labels = pkg.GroupLabels(pool.Labels, "groupSample")
-
-	assert.Nil(pool.Validate(ctx))
-
+	pool.Type = network.IPAddressPoolType()
 	assert.Nil(pool.Validate(ctx))
 
 	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
@@ -101,7 +102,7 @@ func TestIPAddressPool(t *testing.T) {
 	pool.Subnets = append(pool.Subnets, ipnet2)
 	assert.NotNil(pool.Validate(ctx))
 
-	pool.Type = "test"
+	pool.Type = EmptyType()
 	assert.NotNil(pool.Validate(ctx))
 }
 
@@ -117,7 +118,7 @@ func TestVLANPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "cccc"
-	pool.Type = "VLANPool"
+	pool.Type = network.VLANPoolType()
 	pool.RangeStart = 10
 	pool.RangeEnd = 1
 	assert.NotNil(pool.Validate(ctx))
@@ -125,6 +126,6 @@ func TestVLANPool(t *testing.T) {
 	pool.RangeEnd = 11
 	assert.NotNil(pool.Validate(ctx))
 
-	pool.Type = "test123"
+	pool.Type = EmptyType()
 	assert.NotNil(pool.Validate(ctx))
 }

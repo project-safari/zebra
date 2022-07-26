@@ -176,6 +176,7 @@ func handlePost() httprouter.Handle {
 		if err := readJSON(ctx, req, resMap); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be created, could not read request")
+			log.Error(err, err.Error())
 
 			return
 		}

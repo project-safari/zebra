@@ -94,7 +94,7 @@ func (ids *IDStore) Query(uuids []string) *zebra.ResourceMap {
 			continue
 		}
 
-		retMap.Add(res, res.GetType())
+		retMap.Add(res, res.GetType().Name)
 	}
 
 	return retMap

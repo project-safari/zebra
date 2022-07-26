@@ -113,7 +113,7 @@ func createNewUser(name string, email string, password string, key *auth.RsaIden
 		Email:        email,
 		NamedResource: zebra.NamedResource{
 			Name:         name,
-			BaseResource: *zebra.NewBaseResource("User", labels),
+			BaseResource: *zebra.NewBaseResource(auth.UserType(), labels),
 		},
 	}
 
