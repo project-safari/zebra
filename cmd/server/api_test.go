@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
 	"github.com/project-safari/zebra/store"
@@ -315,11 +314,8 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	assert.NotNil(myAPI.Store.Create(lab1))
 	assert.NotNil(myAPI.Store.Create(lab2))
 
-	lab1.Labels = pkg.CreateLabels()
-	lab2.Labels = pkg.CreateLabels()
-
-	lab1.Labels = pkg.GroupLabels(lab1.Labels, "sampleGroup")
-	lab2.Labels = pkg.GroupLabels(lab2.Labels, "sampleGroup2")
+	assert.Nil(myAPI.Store.Create(lab1))
+	assert.Nil(myAPI.Store.Create(lab2))
 
 	// Invalid resources requested to be deleted
 	lab3bjson, err := json.Marshal(lab3)
