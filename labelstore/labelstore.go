@@ -152,7 +152,7 @@ func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.Resource
 			}
 
 			for _, res := range ls.resources[query.Key].Resources[val].Resources {
-				results.Add(res, res.GetType())
+				results.Add(res, res.GetType().Name)
 			}
 		}
 
@@ -162,7 +162,7 @@ func (ls *LabelStore) labelMatch(query zebra.Query, inVals bool) *zebra.Resource
 	for val, valMap := range ls.resources[query.Key].Resources {
 		if !zebra.IsIn(val, query.Values) {
 			for _, res := range valMap.Resources {
-				results.Add(res, res.GetType())
+				results.Add(res, res.GetType().Name)
 			}
 		}
 	}

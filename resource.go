@@ -12,7 +12,7 @@ import (
 type Resource interface {
 	Validate(ctx context.Context) error
 	GetID() string
-	GetType() string
+	GetType() Type
 	GetLabels() Labels
 }
 
@@ -40,7 +40,7 @@ var ErrNoKeys = errors.New("keys is nil")
 // assigned an ID string.
 type BaseResource struct {
 	ID     string `json:"id"`
-	Type   string `json:"type"`
+	Type   Type   `json:"type"`
 	Labels Labels `json:"labels,omitempty"`
 	Status Status `json:"status,omitempty"`
 }
@@ -53,7 +53,7 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 		return ErrIDEmpty
 	case len(r.ID) < 3: // nolint:gomnd
 		return ErrIDShort
-	case r.Type == "":
+	case r.Type.Name == "":
 		return ErrTypeEmpty
 	}
 
@@ -66,7 +66,7 @@ func (r *BaseResource) GetID() string {
 }
 
 // BaseResource has no name. Return empty string.
-func (r *BaseResource) GetType() string {
+func (r *BaseResource) GetType() Type {
 	return r.Type
 }
 
@@ -102,6 +102,14 @@ func (r *NamedResource) Validate(ctx context.Context) error {
 type Credentials struct {
 	NamedResource
 	Keys map[string]string
+}
+
+func CredentialsType() Type {
+	return Type{
+		Name:        "Credentials",
+		Description: "Credentials",
+		Constructor: func() Resource { return new(Credentials) },
+	}
 }
 
 // Validate returns an error if the given Credentials object has incorrect values.
@@ -171,7 +179,7 @@ func ValidateSSHKey(key string) error {
 func NewCredential(name string, labels Labels) *Credentials {
 	namedRes := new(NamedResource)
 
-	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
+	namedRes.BaseResource = *NewBaseResource(CredentialsType(), labels)
 
 	namedRes.Name = name
 

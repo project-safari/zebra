@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -49,7 +50,8 @@ func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
 
 		newuser := createNewUser(registryData.Name, registryData.Email, registryData.Password, registryData.Key)
 
-		if store.Initialize() != nil || store.Create(newuser) != nil {
+		if err := store.Create(newuser); err != nil {
+			fmt.Println(err)
 			log.Error(err, "user cant be stored", "user", registryData.Name)
 			res.WriteHeader(http.StatusInternalServerError)
 
@@ -86,7 +88,7 @@ func createNewUser(name string, email string, password string, key *auth.RsaIden
 		Email:        email,
 		NamedResource: zebra.NamedResource{
 			Name:         name,
-			BaseResource: *zebra.NewBaseResource("User", nil),
+			BaseResource: *zebra.NewBaseResource(auth.UserType(), labels),
 		},
 	}
 

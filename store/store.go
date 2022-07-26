@@ -100,14 +100,15 @@ func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
 }
 
 func (rs *ResourceStore) Create(res zebra.Resource) error {
-	if res == nil || res.Validate(context.Background()) != nil {
-		return zebra.ErrInvalidResource
+	err := res.Validate(context.Background())
+	if res == nil || err != nil {
+		return err
 	}
 
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
 
-	err := rs.fs.Create(res)
+	err = rs.fs.Create(res)
 	if err != nil {
 		return err
 	}
@@ -341,9 +342,13 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-			matchIn := zebra.IsIn(val, query.Values)
+			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).Interface()
+			vType, err := zebra.TypeChecker(val)
+			if err != nil {
+				return resMap, err
+			}
 
+			matchIn := zebra.IsIn(vType.Name, query.Values)
 			if (inVals && matchIn) || (!inVals && !matchIn) {
 				retMap.Add(res, t)
 			}

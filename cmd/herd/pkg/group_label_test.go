@@ -5,6 +5,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/compute"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +31,7 @@ func TestLabelGeneration(t *testing.T) {
 
 	resource := new(zebra.BaseResource)
 
-	resource.Type = "VM"
+	resource.Type = compute.VMType()
 
 	grouped := pkg.GroupVal(resource)
 

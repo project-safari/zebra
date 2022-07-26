@@ -9,6 +9,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func EmptyType() zebra.Type {
+	return zebra.Type{
+		Name:        "",
+		Description: "Empty Type",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
+
+func BaseResourceType() zebra.Type {
+	return zebra.Type{
+		Name:        "BaseResource",
+		Description: "Base Resource",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
+
+func NamedResourceType() zebra.Type {
+	return zebra.Type{
+		Name:        "NamedResource",
+		Description: "Named Resource",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
+
 // TestBaseResource tests the *BaseResource Validate function with a pass case
 // and a fail case.
 func TestBaseResource(t *testing.T) {
@@ -18,7 +42,7 @@ func TestBaseResource(t *testing.T) {
 	ctx := context.Background()
 	res := &zebra.BaseResource{
 		ID:     "",
-		Type:   "",
+		Type:   EmptyType(),
 		Labels: zebra.Labels{"key": "value"},
 		Status: zebra.DefaultStatus(),
 	}
@@ -30,11 +54,11 @@ func TestBaseResource(t *testing.T) {
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
 
-	res.Type = "BaseResource"
-	assert.Nil(res.Validate(ctx))
+	res.Type = BaseResourceType()
+	assert.NotNil(res.Validate(ctx))
 
 	assert.Equal(res.ID, res.GetID())
-	assert.Equal(res.Type, res.GetType())
+	assert.Equal(res.Type.Name, res.GetType().Name)
 	assert.True(res.GetLabels().HasKey("key"))
 }
 
@@ -48,7 +72,7 @@ func TestNamedResource(t *testing.T) {
 	res := &zebra.NamedResource{
 		BaseResource: zebra.BaseResource{
 			ID:     "",
-			Type:   "",
+			Type:   EmptyType(),
 			Labels: zebra.Labels{"key": "value"},
 			Status: zebra.DefaultStatus(),
 		},
@@ -60,9 +84,9 @@ func TestNamedResource(t *testing.T) {
 	assert.NotNil(res.Validate(ctx))
 	assert.Equal(res.ID, res.GetID())
 
-	res.Type = "NamedResource"
+	res.Type = NamedResourceType()
 	assert.NotNil(res.Validate(ctx))
-	assert.Equal(res.Type, res.GetType())
+	assert.Equal(res.Type.Name, res.GetType().Name)
 
 	res.Name = "jasmine"
 	assert.Nil(res.Validate(ctx))
@@ -80,7 +104,7 @@ func TestCredentials(t *testing.T) {
 		NamedResource: zebra.NamedResource{
 			BaseResource: zebra.BaseResource{
 				ID:     "",
-				Type:   "Credentials",
+				Type:   zebra.CredentialsType(),
 				Labels: zebra.Labels{},
 				Status: zebra.DefaultStatus(),
 			},
@@ -93,7 +117,7 @@ func TestCredentials(t *testing.T) {
 	credentials.ID = "id123"
 	assert.NotNil(credentials.Validate(ctx))
 
-	credentials.Type = "Credentials"
+	credentials.Type = zebra.CredentialsType()
 	assert.NotNil(credentials.Validate(ctx))
 
 	credentials.Name = "name"

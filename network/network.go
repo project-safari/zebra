@@ -54,7 +54,7 @@ func (s *Switch) Validate(ctx context.Context) error {
 		return ErrNumPortsEmpty
 	}
 
-	if s.Type != "Switch" {
+	if s.Type.Name != "Switch" {
 		return zebra.ErrWrongType
 	}
 
@@ -91,7 +91,7 @@ func (p *IPAddressPool) Validate(ctx context.Context) error {
 		}
 	}
 
-	if p.Type != "IPAddressPool" {
+	if p.Type.Name != "IPAddressPool" {
 		return zebra.ErrWrongType
 	}
 
@@ -120,7 +120,7 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 		return ErrInvalidRange
 	}
 
-	if v.Type != "VLANPool" {
+	if v.Type.Name != "VLANPool" {
 		return zebra.ErrWrongType
 	}
 
@@ -129,7 +129,7 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 
 // create new network resources.
 func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
-	theRes := zebra.NewBaseResource("VLANPool", labels)
+	theRes := zebra.NewBaseResource(VLANPoolType(), labels)
 	ret := &VLANPool{
 		BaseResource: *theRes,
 		RangeStart:   start,
@@ -140,7 +140,7 @@ func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
 }
 
 func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switch {
-	theRes := zebra.NewBaseResource("Switch", labels)
+	theRes := zebra.NewBaseResource(SwitchType(), labels)
 
 	cred := new(zebra.Credentials)
 
@@ -168,7 +168,7 @@ func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switc
 }
 
 func NewIPAddressPool(netArr []net.IPNet, labels zebra.Labels) *IPAddressPool {
-	theRes := zebra.NewBaseResource("IPAddressPool", labels)
+	theRes := zebra.NewBaseResource(IPAddressPoolType(), labels)
 
 	ret := &IPAddressPool{
 		BaseResource: *theRes,

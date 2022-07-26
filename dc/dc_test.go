@@ -6,9 +6,18 @@ import (
 	"context"
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/dc"
 	"github.com/stretchr/testify/assert"
 )
+
+func EmptyType() zebra.Type {
+	return zebra.Type{
+		Name:        "Empty",
+		Description: "Empty Type",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
 
 // TestDatacenter tests the *Datacenter Validate function with a pass and a fail
 // case.
@@ -25,12 +34,12 @@ func TestDatacenter(t *testing.T) {
 	assert.NotNil(datacenter.Validate(ctx))
 
 	datacenter.ID = "bahbah"
-	datacenter.Type = "Datacenter"
+	datacenter.Type = dc.DataCenterType()
 	datacenter.Name = "jasmine"
 	datacenter.Address = "1 palace st, agrabah"
 	assert.Nil(datacenter.Validate(ctx))
 
-	datacenter.Type = "test1"
+	datacenter.Type = EmptyType()
 	assert.NotNil(datacenter.Validate(ctx))
 
 	labType := dc.LabType()
@@ -48,11 +57,11 @@ func TestLab(t *testing.T) {
 	assert.NotNil(lab.Validate(ctx))
 
 	lab.ID = "abracadabra"
-	lab.Type = "Lab"
+	lab.Type = dc.LabType()
 	lab.Name = "sher"
 	assert.Nil(lab.Validate(ctx))
 
-	lab.Type = "test2"
+	lab.Type = EmptyType()
 	assert.NotNil(lab.Validate(ctx))
 }
 
@@ -68,11 +77,11 @@ func TestRack(t *testing.T) {
 	assert.NotNil(rack.Validate(ctx))
 
 	rack.ID = "abracadabra"
-	rack.Type = "Rack"
+	rack.Type = dc.RackType()
 	rack.Name = "sher"
 	rack.Row = "bazar"
 	assert.Nil(rack.Validate(ctx))
 
-	rack.Type = "test3"
+	rack.Type = EmptyType()
 	assert.NotNil(rack.Validate(ctx))
 }

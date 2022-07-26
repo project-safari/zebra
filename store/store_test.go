@@ -11,6 +11,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func getVLAN() *network.VLANPool {
+	return &network.VLANPool{
+		BaseResource: *zebra.NewBaseResource(network.VLANPoolType(), nil),
+		RangeStart:   0,
+		RangeEnd:     1,
+	}
+}
+
+func getLab() *dc.Lab {
+	br := *zebra.NewBaseResource(dc.LabType(), nil)
+
+	return &dc.Lab{
+		NamedResource: zebra.NamedResource{
+			BaseResource: br,
+			Name:         "lab" + br.ID,
+		},
+	}
+}
+
+func getResMap() *zebra.ResourceMap {
+	// make 10 resources and add them to list
+	resMap := zebra.NewResourceMap(nil)
+
+	for i := 0; i < 10; i++ {
+		resMap.Add(getVLAN(), "VLANPool")
+	}
+
+	return resMap
+}
+
 func TestNewResourceStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -486,34 +516,5 @@ func TestFilterProperty(t *testing.T) {
 	resMap, err = store.FilterProperty(query, resMap)
 	assert.Nil(err)
 	assert.Equal(0, len(resMap.Resources))
-}
 
-func getVLAN() *network.VLANPool {
-	return &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
-		RangeStart:   0,
-		RangeEnd:     1,
-	}
-}
-
-func getLab() *dc.Lab {
-	br := *zebra.NewBaseResource("Lab", nil)
-
-	return &dc.Lab{
-		NamedResource: zebra.NamedResource{
-			BaseResource: br,
-			Name:         "lab" + br.ID,
-		},
-	}
-}
-
-func getResMap() *zebra.ResourceMap {
-	// make 10 resources and add them to list
-	resMap := zebra.NewResourceMap(nil)
-
-	for i := 0; i < 10; i++ {
-		resMap.Add(getVLAN(), "VLANPool")
-	}
-
-	return resMap
 }

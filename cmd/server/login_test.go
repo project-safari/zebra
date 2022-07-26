@@ -46,7 +46,7 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	jini.Name = "jini"
 	jini.Email = "email@domain"
 	jini.ID = "007"
-	jini.Type = "User"
+	jini.Type = auth.UserType()
 	jini.PasswordHash = auth.HashPassword(jiniWords)
 	jini.Role = &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
 

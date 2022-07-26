@@ -7,11 +7,21 @@ import (
 	"net"
 	"testing"
 
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/compute"
 	"github.com/stretchr/testify/assert"
 )
 
 const Creds string = "Credentials"
+
+func EmptyType() zebra.Type {
+	return zebra.Type{
+		Name:        "Empty",
+		Description: "Empty Type",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
 
 func TestServer(t *testing.T) {
 	t.Parallel()
@@ -28,7 +38,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server.Validate(ctx))
 
 	server.ID = "hello"
-	server.Type = "Server"
+	server.Type = compute.ServerType()
 	server.Name = "there"
 	assert.NotNil(server.Validate(ctx))
 
@@ -42,7 +52,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server.Validate(ctx))
 
 	server.Credentials.Name = "c"
-	server.Credentials.Type = Creds
+	server.Credentials.Type = zebra.CredentialsType()
 	server.Credentials.ID = "dddd"
 	server.Credentials.Keys = make(map[string]string)
 	server.Credentials.Keys["password"] = "e"
@@ -51,7 +61,10 @@ func TestServer(t *testing.T) {
 	server.Credentials.Keys["password"] = "actualPassw0rd%9"
 	assert.Nil(server.Validate(ctx))
 
-	server.Type = "test"
+	server.Labels = pkg.CreateLabels()
+	server.Labels = pkg.GroupLabels(server.Labels, "someServer")
+
+	server.Type = EmptyType()
 	assert.NotNil(server.Validate(ctx))
 }
 
@@ -67,7 +80,7 @@ func TestESX(t *testing.T) {
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.ID = "rolling in the deep"
-	esx.Type = "ESX"
+	esx.Type = esxType
 	esx.Name = "adele"
 	assert.NotNil(esx.Validate(ctx))
 
@@ -79,7 +92,7 @@ func TestESX(t *testing.T) {
 
 	esx.Credentials.Name = "k"
 	esx.Credentials.ID = "lllll"
-	esx.Credentials.Type = Creds
+	esx.Credentials.Type = zebra.CredentialsType()
 	esx.Credentials.Keys = make(map[string]string)
 	esx.Credentials.Keys["password"] = "m"
 	assert.NotNil(esx.Validate(ctx))
@@ -87,7 +100,7 @@ func TestESX(t *testing.T) {
 	esx.Credentials.Keys["password"] = "actualPassw0rd%2"
 	assert.Nil(esx.Validate(ctx))
 
-	esx.Type = "notesx"
+	esx.Type = EmptyType()
 	assert.NotNil(esx.Validate(ctx))
 }
 
@@ -103,7 +116,7 @@ func TestVCenter(t *testing.T) {
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.ID = "blah"
-	vcenter.Type = "VCenter"
+	vcenter.Type = vcType
 	vcenter.Name = "blahblah"
 	assert.NotNil(vcenter.Validate(ctx))
 
@@ -112,7 +125,7 @@ func TestVCenter(t *testing.T) {
 
 	vcenter.Credentials.Name = "n"
 	vcenter.Credentials.ID = "oooo"
-	vcenter.Credentials.Type = Creds
+	vcenter.Credentials.Type = zebra.CredentialsType()
 	vcenter.Credentials.Keys = make(map[string]string)
 	vcenter.Credentials.Keys["password"] = "p"
 	assert.NotNil(vcenter.Validate(ctx))
@@ -120,7 +133,7 @@ func TestVCenter(t *testing.T) {
 	vcenter.Credentials.Keys["password"] = "actualPassw0rd%4"
 	assert.Nil(vcenter.Validate(ctx))
 
-	vcenter.Type = "test"
+	vcenter.Type = EmptyType()
 	assert.NotNil(vcenter.Validate(ctx))
 }
 
@@ -136,7 +149,7 @@ func TestVM(t *testing.T) {
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.ID = "can you hear me"
-	machine.Type = "VM"
+	machine.Type = vmType
 	machine.Name = "you'd like to meet"
 	assert.NotNil(machine.Validate(ctx))
 
@@ -150,7 +163,7 @@ func TestVM(t *testing.T) {
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.Credentials.Name = "s"
-	machine.Credentials.Type = Creds
+	machine.Credentials.Type = zebra.CredentialsType()
 	machine.Credentials.ID = "tttt"
 	machine.Credentials.Keys = make(map[string]string)
 	machine.Credentials.Keys["password"] = "u"
@@ -159,6 +172,9 @@ func TestVM(t *testing.T) {
 	machine.Credentials.Keys["password"] = "actualPassw0rd%1"
 	assert.Nil(machine.Validate(ctx))
 
-	machine.Type = "machine"
+	machine.Labels = pkg.CreateLabels()
+	machine.Labels = pkg.GroupLabels(machine.Labels, "someSampleGroup")
+
+	machine.Type = EmptyType()
 	assert.NotNil(machine.Validate(ctx))
 }
