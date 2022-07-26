@@ -15,14 +15,14 @@ import (
 
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		BaseResource: *zebra.NewBaseResource(network.VLANPoolType(), nil),
 		RangeStart:   0,
 		RangeEnd:     1,
 	}
 }
 
 func getLab() *dc.Lab {
-	br := *zebra.NewBaseResource("Lab", nil)
+	br := *zebra.NewBaseResource(dc.LabType(), nil)
 
 	return &dc.Lab{
 		NamedResource: zebra.NamedResource{

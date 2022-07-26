@@ -160,6 +160,7 @@ func handlePost(ctx context.Context, api *ResourceAPI) httprouter.Handle {
 		if err := readReq(ctx, req, resMap); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be created, could not read request")
+			log.Error(err, err.Error())
 
 			return
 		}

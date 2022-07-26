@@ -21,6 +21,14 @@ const (
 	Max                 = 1500
 )
 
+func EmptyType() zebra.Type {
+	return zebra.Type{
+		Name:        "Empty",
+		Description: "Empty Type",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
+
 func main() {
 	name := filepath.Base(os.Args[0])
 	rootCmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct

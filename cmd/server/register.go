@@ -49,8 +49,13 @@ func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
 
 		newuser := createNewUser(registryData.Name, registryData.Email, registryData.Password, registryData.Key)
 
-		if store.Initialize() != nil || store.Create(newuser) != nil {
-			log.Error(err, "user cant be stored", "user", registryData.Name)
+		//Figure out error message
+		err = store.Create(newuser)
+		err2 := store.Initialize()
+
+		if err2 != nil || err != nil {
+			log.Error(err2, err2.Error())
+			log.Error(err, err.Error(), "user", registryData.Name)
 			res.WriteHeader(http.StatusInternalServerError)
 
 			return
@@ -86,7 +91,7 @@ func createNewUser(name string, email string, password string, key *auth.RsaIden
 		Email:        email,
 		NamedResource: zebra.NamedResource{
 			Name:         name,
-			BaseResource: *zebra.NewBaseResource("User", nil),
+			BaseResource: *zebra.NewBaseResource(auth.UserType(), nil),
 		},
 	}
 
