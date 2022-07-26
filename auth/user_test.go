@@ -7,6 +7,7 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,6 +50,7 @@ func TestUser(t *testing.T) {
 	god.Name = "almighty"
 	god.ID = "00000000000001"
 	god.Type = userType
+	god.Status = status.DefaultStatus()
 	assert.NotNil(god.Validate(ctx))
 
 	god.Key = godKey

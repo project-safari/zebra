@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/stretchr/testify/assert"
@@ -25,9 +26,7 @@ func TestDatacenter(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(datacenter.Validate(ctx))
 
-	datacenter.ID = "bahbah"
-	datacenter.Type = "Datacenter"
-	datacenter.Name = "jasmine"
+	datacenter.NamedResource = *zebra.NewNamedResource("jasmine", "Datacenter", nil)
 	datacenter.Address = "1 palace st, agrabah"
 	assert.NotNil(datacenter.Validate(ctx))
 
@@ -52,10 +51,7 @@ func TestLab(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(lab.Validate(ctx))
 
-	lab.ID = "abracadabra"
-	lab.Type = "Lab"
-	lab.Name = "sher"
-
+	lab.NamedResource = *zebra.NewNamedResource("sher", "Lab", nil)
 	lab.Labels = pkg.CreateLabels()
 	assert.NotNil(lab.Validate(ctx))
 
@@ -77,9 +73,7 @@ func TestRack(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(rack.Validate(ctx))
 
-	rack.ID = "abracadabra"
-	rack.Type = "Rack"
-	rack.Name = "sher"
+	rack.NamedResource = *zebra.NewNamedResource("sher", "Rack", nil)
 	rack.Row = "bazar"
 	assert.NotNil(rack.Validate(ctx))
 

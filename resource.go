@@ -58,8 +58,7 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 		return err
 	}
 
-	return nil
-	//return r.Status.Validate(ctx)
+	return r.Status.Validate(ctx)
 }
 
 // Return ID of BaseResource r.

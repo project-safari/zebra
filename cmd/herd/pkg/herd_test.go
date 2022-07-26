@@ -436,7 +436,7 @@ func TestCreateCredential(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	credentials := zebra.NewCredentials(pkg.Name(), pkg.CreateLabels())
+	credentials := zebra.NewCredentials(pkg.Name(), nil, pkg.CreateLabels())
 
 	assert.NotEmpty(credentials)
 }

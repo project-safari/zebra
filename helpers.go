@@ -22,22 +22,31 @@ func NewBaseResource(resType string, labels Labels) *BaseResource {
 	}
 }
 
-func NewCredentials(name string, labels Labels) *Credentials {
-	namedRes := new(NamedResource)
+func NewNamedResource(name string, resType string, labels Labels) *NamedResource {
+	if resType == "" {
+		resType = "NamedResource"
+	}
 
-	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
+	return &NamedResource{
+		BaseResource: *NewBaseResource(resType, labels),
+		Name:         name,
+	}
+}
 
+func NewCredentials(name string, keys map[string]string, labels Labels) *Credentials {
 	// Ensure name is set, and returned resource will be valid
 	if name == "" {
 		name = "unknown"
 	}
 
-	namedRes.Name = name
+	// Ensure keys are not nil
+	if keys == nil {
+		keys = map[string]string{}
+	}
 
 	ret := &Credentials{
-		NamedResource: *namedRes,
-		// some labels.
-		Keys: labels,
+		NamedResource: *NewNamedResource(name, "Credentials", labels),
+		Keys:          keys,
 	}
 
 	return ret

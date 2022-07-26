@@ -14,6 +14,7 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/status"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -48,6 +49,7 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	jini.Email = "email@domain"
 	jini.ID = "007"
 	jini.Type = "User"
+	jini.Status = status.DefaultStatus()
 	jini.PasswordHash = auth.HashPassword(jiniWords)
 	jini.Role = &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
 	jini.Labels = pkg.CreateLabels()
