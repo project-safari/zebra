@@ -92,7 +92,7 @@ func NewUser(name string, email string, pwd string, key *RsaIdentity, labels zeb
 	priv, _ := NewPriv("", false, true, false, false)
 	user := new(User)
 
-	user.BaseResource = *zebra.NewBaseResource("User", labels)
+	user.BaseResource = *zebra.NewBaseResource(UserType(), labels)
 	user.Name = name
 	user.Email = email
 	user.Role = &Role{Name: "user", Privileges: []*Priv{priv}}

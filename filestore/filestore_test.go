@@ -272,7 +272,7 @@ func TestBadLoad2(t *testing.T) {
 
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		BaseResource: *zebra.NewBaseResource(network.IPAddressPoolType(), nil),
 		RangeStart:   0,
 		RangeEnd:     1,
 	}

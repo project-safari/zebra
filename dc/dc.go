@@ -34,7 +34,7 @@ func (dc *Datacenter) Validate(ctx context.Context) error {
 		return ErrAddressEmpty
 	}
 
-	if dc.Type != "Datacenter" {
+	if dc.Type.Name != "Datacenter" {
 		return zebra.ErrWrongType
 	}
 
@@ -55,7 +55,7 @@ type Lab struct {
 }
 
 func (l *Lab) Validate(ctx context.Context) error {
-	if l.Type != "Lab" {
+	if l.Type.Name != "Lab" {
 		return zebra.ErrWrongType
 	}
 
@@ -84,7 +84,7 @@ func (r *Rack) Validate(ctx context.Context) error {
 		return ErrRowEmpty
 	}
 
-	if r.Type != "Rack" {
+	if r.Type.Name != "Rack" {
 		return zebra.ErrWrongType
 	}
 
@@ -95,7 +95,7 @@ func (r *Rack) Validate(ctx context.Context) error {
 func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter {
 	named := new(zebra.NamedResource)
 
-	named.BaseResource = *zebra.NewBaseResource("Datacenter", labels)
+	named.BaseResource = *zebra.NewBaseResource(DataCenterType(), labels)
 
 	named.Name = name
 
@@ -111,7 +111,7 @@ func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter
 func NewLab(name string, labels zebra.Labels) *Lab {
 	namedR := new(zebra.NamedResource)
 
-	namedR.BaseResource = *zebra.NewBaseResource("Lab", labels)
+	namedR.BaseResource = *zebra.NewBaseResource(LabType(), labels)
 
 	namedR.Name = name
 
@@ -125,7 +125,7 @@ func NewLab(name string, labels zebra.Labels) *Lab {
 func NewRack(name string, rows string, labels zebra.Labels) *Rack {
 	namedRes := new(zebra.NamedResource)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("Rack", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(RackType(), labels)
 
 	namedRes.Name = name
 

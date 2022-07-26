@@ -9,8 +9,10 @@ const DefaultMaxDuration = 4
 func NewBaseResource(resType string, labels Labels) *BaseResource {
 	id := uuid.New().String()
 
-	if resType == "" {
-		resType = "BaseResource"
+	if resType.Name == "" {
+		resType.Name = "BaseResource"
+		resType.Description = "Base Resource"
+		resType.Constructor = func() Resource { return new(BaseResource) }
 	}
 
 	return &BaseResource{

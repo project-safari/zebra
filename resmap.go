@@ -2,6 +2,7 @@ package zebra
 
 import (
 	"encoding/json"
+	"log"
 )
 
 type Type struct {
@@ -92,6 +93,24 @@ func CopyResourceList(dest *ResourceList, src *ResourceList) {
 	copy(dest.Resources, src.Resources)
 }
 
+//Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not
+func TypeChecker(data interface{}) (Type, error) {
+	empty := Type{
+		Name:        "",
+		Description: "",
+		Constructor: func() Resource { return nil },
+	}
+	vType, err := json.Marshal(data)
+	if err != nil {
+		return empty, err
+	}
+
+	if err = json.Unmarshal(vType, &empty); err != nil {
+		return empty, err
+	}
+	return empty, nil
+}
+
 func (r *ResourceList) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Resources)
 }
@@ -111,16 +130,16 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 		// all resources must have type
 		vAny, ok := value["type"]
 		if !ok {
+			log.Default().Print("Could not find type")
+
 			return ErrTypeEmpty
 		}
 
-		// Make a new resource for this value based on the embedded type field
-		vType, ok := vAny.(string)
-		if !ok {
+		vType, err := TypeChecker(vAny)
+		if err != nil {
 			return ErrTypeEmpty
 		}
-
-		resource := r.factory.New(vType)
+		resource := r.factory.New(vType.Name)
 
 		if resource == nil {
 			// Type factory doesnt know this type return error
