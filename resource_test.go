@@ -54,11 +54,7 @@ func TestBaseResource(t *testing.T) {
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
 
-<<<<<<< HEAD
-	res.Type = "BaseResource"
-=======
 	res.Type = BaseResourceType()
->>>>>>> 59df87d (Updated the `BaseResource` type field with a `Type` struct)
 	assert.NotNil(res.Validate(ctx))
 
 	assert.Equal(res.ID, res.GetID())
@@ -160,7 +156,7 @@ func TestLabelsValidation(t *testing.T) {
 		"color":        "red",
 	}
 
-	resOne := zebra.NewBaseResource("", mapOne)
+	resOne := zebra.NewBaseResource(BaseResourceType(), mapOne)
 	assert.Nil(resOne.Validate(context.Background()))
 
 	// second test - with an incorrect default label
@@ -169,7 +165,7 @@ func TestLabelsValidation(t *testing.T) {
 		"color":  "blue",
 	}
 
-	resTwo := zebra.NewBaseResource("", mapTwo)
+	resTwo := zebra.NewBaseResource(BaseResourceType(), mapTwo)
 
 	assert.NotNil(resTwo.Validate(context.Background()))
 	assert.Equal(zebra.ErrLabel, resTwo.Validate(context.Background()))

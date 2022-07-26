@@ -83,11 +83,7 @@ func TestIPAddressPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.ID = "aaaa"
-<<<<<<< HEAD
-	pool.Type = "IPAddressPool"
-=======
 	pool.Type = network.IPAddressPoolType()
->>>>>>> 59df87d (Updated the `BaseResource` type field with a `Type` struct)
 
 	pool.Labels = make(map[string]string)
 	pool.Labels = pkg.GroupLabels(pool.Labels, "groupSample")
