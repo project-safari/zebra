@@ -14,6 +14,7 @@ import (
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -259,7 +260,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 				ID:     "10000001",
 				Type:   "Lab",
 				Labels: nil,
-				Status: zebra.DefaultStatus(),
+				Status: status.DefaultStatus(),
 			},
 			Name: "Lab1",
 		},
@@ -271,7 +272,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 				ID:     "10000002",
 				Type:   "Lab",
 				Labels: nil,
-				Status: zebra.DefaultStatus(),
+				Status: status.DefaultStatus(),
 			},
 			Name: "Lab2",
 		},

@@ -2,6 +2,8 @@ package zebra
 
 import (
 	"errors"
+
+	"github.com/project-safari/zebra/status"
 )
 
 type Group struct {
@@ -29,7 +31,7 @@ func NewGroup(name string) *Group {
 func (g *Group) Add(res Resource) {
 	g.Resources.Add(res, res.GetType())
 
-	if res.GetStatus().Lease() == Free {
+	if res.GetStatus().Lease() == status.Free {
 		g.FreePool.Add(res, res.GetType())
 	}
 

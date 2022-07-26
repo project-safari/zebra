@@ -1,4 +1,4 @@
-package zebra
+package status
 
 import (
 	"context"

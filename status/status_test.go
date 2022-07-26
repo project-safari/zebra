@@ -1,11 +1,12 @@
-package zebra_test
+package status_test
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
-	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,12 +14,12 @@ func TestDefaultStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	s := zebra.DefaultStatus()
+	s := status.DefaultStatus()
 	assert.NotNil(s)
-	assert.Equal(zebra.None, s.Fault())
-	assert.Equal(zebra.Free, s.Lease())
+	assert.Equal(status.None, s.Fault())
+	assert.Equal(status.Free, s.Lease())
 	assert.Equal("", s.UsedBy())
-	assert.Equal(zebra.Active, s.State())
+	assert.Equal(status.Active, s.State())
 	assert.True(s.CreatedTime().Before(time.Now()))
 }
 
@@ -26,20 +27,20 @@ func TestValidateStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	s := zebra.NewStatus(8, 8, 8, "", time.Now().AddDate(2, 1, 3))
+	s := status.NewStatus(8, 8, 8, "", time.Now().AddDate(2, 1, 3))
 	ctx := context.Background()
 
 	assert.NotNil(s.Validate(ctx))
-	s = zebra.NewStatus(zebra.Critical, 8, 8, "", time.Now().AddDate(2, 1, 3))
+	s = status.NewStatus(status.Critical, 8, 8, "", time.Now().AddDate(2, 1, 3))
 
 	assert.NotNil(s.Validate(ctx))
-	s = zebra.NewStatus(zebra.Critical, zebra.Free, 8, "", time.Now().AddDate(2, 1, 3))
+	s = status.NewStatus(status.Critical, status.Free, 8, "", time.Now().AddDate(2, 1, 3))
 
 	assert.NotNil(s.Validate(ctx))
-	s = zebra.NewStatus(zebra.Critical, zebra.Free, zebra.Inactive, "", time.Now().AddDate(2, 1, 3))
+	s = status.NewStatus(status.Critical, status.Free, status.Inactive, "", time.Now().AddDate(2, 1, 3))
 
 	assert.NotNil(s.Validate(ctx))
-	s = zebra.NewStatus(zebra.None, zebra.Free, zebra.Inactive, "", time.Now())
+	s = status.NewStatus(status.None, status.Free, status.Inactive, "", time.Now())
 
 	assert.Nil(s.Validate(ctx))
 }
@@ -48,23 +49,23 @@ func TestString(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	var f zebra.FaultState = 8
+	var f status.FaultState = 8
 
-	var l zebra.LeaseState = 8
+	var l status.LeaseState = 8
 
-	var s zebra.ActivityState = 8
+	var s status.ActivityState = 8
 
 	assert.Equal("unknown", f.String())
 	assert.Equal("unknown", l.String())
 	assert.Equal("unknown", s.String())
 
-	f = zebra.None
+	f = status.None
 	assert.Equal("none", f.String())
 
-	l = zebra.Free
+	l = status.Free
 	assert.Equal("free", l.String())
 
-	s = zebra.Active
+	s = status.Active
 	assert.Equal("active", s.String())
 }
 
@@ -72,20 +73,10 @@ func TestMarshal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	f := zebra.None
-	bytes, err := f.MarshalText()
+	status := status.DefaultStatus()
+	bytes, err := json.Marshal(status)
 	assert.Nil(err)
-	assert.Equal([]byte(`none`), bytes)
-
-	l := zebra.Leased
-	bytes, err = l.MarshalText()
-	assert.Nil(err)
-	assert.Equal([]byte(`leased`), bytes)
-
-	s := zebra.Inactive
-	bytes, err = s.MarshalText()
-	assert.Nil(err)
-	assert.Equal([]byte(`inactive`), bytes)
+	assert.NotNil(bytes)
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -94,13 +85,13 @@ func TestUnmarshal(t *testing.T) {
 
 	body := `8`
 
-	var f *zebra.FaultState
+	var f *status.FaultState
 
-	var l *zebra.LeaseState
+	var l *status.LeaseState
 
-	var s *zebra.ActivityState
+	var s *status.ActivityState
 
-	status := new(zebra.Status)
+	status := new(status.Status)
 
 	assert.NotNil(f.UnmarshalText([]byte(body)))
 	assert.NotNil(l.UnmarshalText([]byte(body)))
@@ -118,25 +109,25 @@ func TestActivateDeactivate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	s := zebra.DefaultStatus()
-	assert.Equal(zebra.Active, s.State())
+	s := status.DefaultStatus()
+	assert.Equal(status.Active, s.State())
 
 	s.Deactivate()
-	assert.Equal(zebra.Inactive, s.State())
+	assert.Equal(status.Inactive, s.State())
 
 	s.Activate()
-	assert.Equal(zebra.Active, s.State())
+	assert.Equal(status.Active, s.State())
 }
 
 func TestSetLeaseState(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	s := zebra.DefaultStatus()
-	assert.Equal(zebra.Free, s.Lease())
+	s := status.DefaultStatus()
+	assert.Equal(status.Free, s.Lease())
 
 	assert.Nil(s.SetLeased())
-	assert.Equal(zebra.Leased, s.Lease())
+	assert.Equal(status.Leased, s.Lease())
 
 	assert.NotNil(s.SetLeased())
 }
@@ -145,7 +136,7 @@ func TestSetOwner(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	s := zebra.DefaultStatus()
+	s := status.DefaultStatus()
 	assert.Equal("", s.UsedBy())
 
 	s.SetOwner("Shravya")

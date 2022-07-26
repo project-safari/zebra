@@ -8,6 +8,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/status"
 )
 
 type ResourceReq struct {
@@ -56,8 +57,8 @@ func NewLease(owner auth.User, dur time.Duration, req []*ResourceReq) *Lease {
 		Request:        req,
 		ActivationTime: time.Time{},
 	}
-	l.Status.UsedBy = owner.Email
-	l.Status.State = zebra.Inactive
+	l.Status.SetOwner(owner.Email)
+	l.Status.Deactivate()
 
 	return l
 }
@@ -67,7 +68,7 @@ func (l *Lease) Owner() string {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
-	return l.Status.UsedBy
+	return l.Status.UsedBy()
 }
 
 // Activate lease.
@@ -82,7 +83,7 @@ func (l *Lease) Activate() error {
 	defer l.lock.Unlock()
 
 	l.ActivationTime = time.Now()
-	l.Status.State = zebra.Active
+	l.Status.Activate()
 
 	return nil
 }
@@ -92,7 +93,7 @@ func (l *Lease) Deactivate() {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	l.Status.State = zebra.Inactive
+	l.Status.Deactivate()
 }
 
 func (l *Lease) IsSatisfied() bool {
@@ -113,7 +114,7 @@ func (l *Lease) IsValid() bool {
 	defer l.lock.RUnlock()
 
 	// Return if lease has not expired yet
-	return time.Now().Before(l.ActivationTime.Add(l.Duration)) && l.Status.State == zebra.Active
+	return time.Now().Before(l.ActivationTime.Add(l.Duration)) && l.Status.State() == status.Active
 }
 
 func (l *Lease) IsExpired() bool {
@@ -121,7 +122,7 @@ func (l *Lease) IsExpired() bool {
 	defer l.lock.RUnlock()
 
 	// Return if lease is expired
-	return time.Now().After(l.ActivationTime.Add(l.Duration)) || l.Status.State == zebra.Inactive
+	return time.Now().After(l.ActivationTime.Add(l.Duration)) || l.Status.State() == status.Inactive
 }
 
 func (l *Lease) RequestList() []*ResourceReq {

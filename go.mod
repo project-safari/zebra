@@ -3,6 +3,7 @@ module github.com/project-safari/zebra
 go 1.18
 
 require (
+	github.com/edwingeng/deque v1.0.2
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zerologr v1.2.2
 	github.com/golang-jwt/jwt/v4 v4.4.2

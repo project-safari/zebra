@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"unicode"
+
+	"github.com/project-safari/zebra/status"
 )
 
 // Resource interface is implemented by all resources and provides resource
@@ -14,7 +16,7 @@ type Resource interface {
 	GetID() string
 	GetType() string
 	GetLabels() Labels
-	GetStatus() *Status
+	GetStatus() *status.Status
 }
 
 var (
@@ -34,10 +36,10 @@ var (
 // BaseResource must be embedded in all resource structs, ensuring each resource is
 // assigned an ID string.
 type BaseResource struct {
-	ID     string  `json:"id"`
-	Type   string  `json:"type"`
-	Labels Labels  `json:"labels,omitempty"`
-	Status *Status `json:"status,omitempty"`
+	ID     string         `json:"id"`
+	Type   string         `json:"type"`
+	Labels Labels         `json:"labels,omitempty"`
+	Status *status.Status `json:"status,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.
@@ -56,7 +58,8 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 		return err
 	}
 
-	return r.Status.Validate(ctx)
+	return nil
+	//return r.Status.Validate(ctx)
 }
 
 // Return ID of BaseResource r.
@@ -80,7 +83,7 @@ func (r *BaseResource) GetLabels() Labels {
 }
 
 // Return pointer to status of BaseResource r.
-func (r *BaseResource) GetStatus() *Status {
+func (r *BaseResource) GetStatus() *status.Status {
 	return r.Status
 }
 
@@ -122,15 +125,15 @@ type Credentials struct {
 func (c *Credentials) Validate(ctx context.Context) error {
 	keyValidators := map[string]func(string) error{"password": ValidatePassword, "ssh-key": ValidateSSHKey}
 
+	if c.Keys == nil {
+		return ErrNoKeys
+	}
+
 	for keyType, key := range c.Keys {
 		v := keyValidators[keyType]
 		if err := v(key); err != nil {
 			return err
 		}
-	}
-
-	if c.Keys == nil {
-		return ErrNoKeys
 	}
 
 	return c.NamedResource.Validate(ctx)
