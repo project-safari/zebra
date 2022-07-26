@@ -1,57 +1,46 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-logr/logr"
-	"github.com/julienschmidt/httprouter"
-	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"gojini.dev/web"
 )
 
-func handleRefresh(ctx context.Context, store zebra.Store, authKey string) httprouter.Handle {
-	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		log := logr.FromContextOrDiscard(ctx)
+func refreshAdapter() web.Adapter {
+	return func(nextHandler http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			if req.URL.Path != "/refresh" {
+				// This is not a refresh request just forward it
+				callNext(nextHandler, res, req)
 
-		jwtCookie, err := req.Cookie("jwt")
-		if err != nil {
-			log.Error(err, "jwt cookie missing")
-			res.WriteHeader(http.StatusBadRequest)
+				return
+			}
 
-			return
-		}
+			ctx := req.Context()
+			log := logr.FromContextOrDiscard(ctx)
+			jwtClaims, ok := ctx.Value(ClaimsCtxKey).(*auth.Claims)
+			if !ok {
+				log.Error(nil, "claims not in context")
+				res.WriteHeader(http.StatusInternalServerError)
 
-		// Parse the claims
-		jwtClaims, err := auth.FromJWT(jwtCookie.Value, authKey)
-		if err != nil {
-			log.Error(err, "bad jwt token")
-			res.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-			return
-		}
+			authKey, ok := ctx.Value(AuthCtxKey).(string)
+			if !ok {
+				log.Error(nil, "authKey not in context")
+				res.WriteHeader(http.StatusInternalServerError)
 
-		// Make sure the jwt is still valid
-		if err := jwtClaims.Valid(); err != nil {
-			log.Error(err, "invalid jwt token")
-			res.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-			return
-		}
+			// Create a new token and cookie
+			claims := auth.NewClaims("zebra", jwtClaims.Subject, jwtClaims.Role, jwtClaims.Email)
+			respondWithClaims(ctx, res, claims, authKey)
 
-		// Make sure the user still exists
-		user := findUser(store, jwtClaims.Email)
-		if user == nil {
-			log.Error(err, "user not found", "user", jwtClaims.Subject)
-			res.WriteHeader(http.StatusUnauthorized)
-
-			return
-		}
-
-		// Create a new token and cookie
-		claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
-		respondWithClaims(log, res, claims, authKey)
-
-		log.Info("refresh succeeded", "user", jwtClaims.Subject)
+			log.Info("refresh succeeded", "user", jwtClaims.Subject)
+		})
 	}
 }

@@ -1,20 +1,28 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 )
 
-func handleLabels(ctx context.Context, store zebra.Store) httprouter.Handle {
+func handleLabels() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		ctx := req.Context()
+		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+
+		if !ok {
+			res.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
+
 		labelReq := &struct {
 			Labels []string `json:"labels"`
 		}{Labels: []string{}}
 
-		if err := readReq(ctx, req, labelReq); err != nil {
+		if err := readJSON(ctx, req, labelReq); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 
 			return
@@ -32,7 +40,7 @@ func handleLabels(ctx context.Context, store zebra.Store) httprouter.Handle {
 		// added and removed to the resources. For now it a naive
 		// o(n)*o(m) implementation, where n is number of resources
 		// and m is amortized number of labels per resource
-		rMap := store.Query()
+		rMap := api.Store.Query()
 		labelRes.Labels = matchLabels(matchSet, rMap)
 
 		writeJSON(ctx, res, labelRes)

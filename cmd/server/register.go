@@ -1,64 +1,88 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/go-logr/logr"
-	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"gojini.dev/web"
 )
 
-func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
-	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		log := logr.FromContextOrDiscard(ctx)
-		registryData := &struct {
-			Name     string            `json:"name"`
-			Password string            `json:"password"`
-			Email    string            `json:"email"`
-			Key      *auth.RsaIdentity `json:"key"`
-		}{}
+func registerAdapter() web.Adapter {
+	return func(nextHandler http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			if req.URL.Path != "/register" {
+				// This is not a login request just forward it
+				callNext(nextHandler, res, req)
 
-		body, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			res.WriteHeader(http.StatusBadRequest)
+				return
+			}
 
-			return
-		}
-
-		log.Info("request", "body", string(body))
-
-		if err := json.Unmarshal(body, registryData); err != nil {
-			log.Error(err, "bad body")
-			res.WriteHeader(http.StatusBadRequest)
-
-			return
-		}
-
-		user := findUser(store, registryData.Email)
-
-		if user != nil {
-			log.Error(err, "user already exist", "user", registryData.Name)
-			res.WriteHeader(http.StatusForbidden)
-
-			return
-		}
-
-		newuser := createNewUser(registryData.Name, registryData.Email, registryData.Password, registryData.Key)
-
-		if store.Initialize() != nil || store.Create(newuser) != nil {
-			log.Error(err, "user cant be stored", "user", registryData.Name)
-			res.WriteHeader(http.StatusInternalServerError)
-
-			return
-		}
-
-		responseRegister(log, res, newuser)
-		log.Info("Registry succeeded", "user", registryData.Name)
+			registerHandler(res, req)
+		})
 	}
+}
+
+func registerHandler(res http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	log := logr.FromContextOrDiscard(ctx)
+	api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+
+	if !ok {
+		res.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+
+	registryData := &struct {
+		Name     string            `json:"name"`
+		Password string            `json:"password"`
+		Email    string            `json:"email"`
+		Key      *auth.RsaIdentity `json:"key"`
+	}{}
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		res.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
+
+	log.Info("request", "body", string(body))
+
+	if err := json.Unmarshal(body, registryData); err != nil {
+		log.Error(err, "bad body")
+		res.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
+
+	store := api.Store
+	user := findUser(store, registryData.Email)
+
+	if user != nil {
+		log.Error(err, "user already exist", "user", registryData.Name)
+		res.WriteHeader(http.StatusForbidden)
+
+		return
+	}
+
+	newuser := createNewUser(registryData.Name, registryData.Email, registryData.Password, registryData.Key)
+
+	if err := store.Create(newuser); err != nil {
+		fmt.Println(err)
+		log.Error(err, "user cant be stored", "user", registryData.Name)
+		res.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+
+	responseRegister(log, res, newuser)
+	log.Info("Registry succeeded", "user", registryData.Name)
 }
 
 func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *auth.User) {
@@ -79,6 +103,9 @@ func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *auth.Us
 }
 
 func createNewUser(name string, email string, password string, key *auth.RsaIdentity) *auth.User {
+	labels := zebra.Labels{}
+	labels.Add("group", "users")
+
 	newuser := &auth.User{
 		Key:          key,
 		PasswordHash: password,
@@ -86,7 +113,7 @@ func createNewUser(name string, email string, password string, key *auth.RsaIden
 		Email:        email,
 		NamedResource: zebra.NamedResource{
 			Name:         name,
-			BaseResource: *zebra.NewBaseResource("User", nil),
+			BaseResource: *zebra.NewBaseResource("User", labels),
 		},
 	}
 

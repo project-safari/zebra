@@ -18,8 +18,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func makeQueryRequest(assert *assert.Assertions, q *QueryRequest) *http.Request {
-	req, err := http.NewRequest("GET", "/api/v1/resources", nil)
+func makeQueryRequest(assert *assert.Assertions, resources *ResourceAPI, q *QueryRequest) *http.Request {
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/resources", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
@@ -37,12 +38,12 @@ func TestQuery(t *testing.T) {
 
 	root := "testquery"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	api := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(api.Initialize(root))
 
-	h := handleQuery(setupLogger(nil), api)
+	h := handleQuery()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
@@ -50,18 +51,18 @@ func TestQuery(t *testing.T) {
 
 	qr := new(QueryRequest)
 
-	req := makeQueryRequest(assert, qr)
+	req := makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusOK)
 
 	qr.IDs = []string{"0100000001"}
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusOK)
 
 	qr.IDs = []string{}
 	qr.Types = []string{"VLANPool"}
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusOK)
 
@@ -70,7 +71,7 @@ func TestQuery(t *testing.T) {
 		{Op: zebra.MatchEqual, Key: "test", Values: []string{"test"}},
 		{Op: zebra.MatchIn, Key: "test2", Values: []string{"test1", "test2"}},
 	}
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusOK)
 }
@@ -81,12 +82,12 @@ func TestBadQuery(t *testing.T) {
 
 	root := "testbadquery"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	api := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(api.Initialize(root))
 
-	h := handleQuery(setupLogger(nil), api)
+	h := handleQuery()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
@@ -96,14 +97,14 @@ func TestBadQuery(t *testing.T) {
 	qr := new(QueryRequest)
 	qr.IDs = []string{"0100000001"}
 	qr.Types = []string{"VLANPool"}
-	req := makeQueryRequest(assert, qr)
+	req := makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 
 	// Cannot have both Types and Properties
 	qr.IDs = []string{}
 	qr.Properties = []zebra.Query{{Op: zebra.MatchEqual, Key: "test", Values: []string{"test"}}}
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 
@@ -113,20 +114,20 @@ func TestBadQuery(t *testing.T) {
 		{Op: zebra.MatchEqual, Key: "test", Values: []string{"test"}},
 		{Op: zebra.MatchEqual, Key: "blah", Values: []string{"blah", "blah2"}},
 	}
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 
 	// Must have valid label queries
 	qr.Types = []string{}
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 
 	// Must have valid property queries
 	qr.Properties = qr.Labels
 	qr.Labels = nil
-	req = makeQueryRequest(assert, qr)
+	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 }
@@ -137,25 +138,35 @@ func TestInvalidQuery(t *testing.T) {
 
 	root := "testinvalidquery"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	api := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(api.Initialize(root))
 
-	h := handleQuery(setupLogger(nil), api)
+	h := handleQuery()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
 
-	// Invalid json request
+	// Invalid context
 	req, err := http.NewRequest("GET", "/api/v1/resources", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusInternalServerError, rr.Code)
+
+	// Invalid json request
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, api)
+	req, err = http.NewRequestWithContext(ctx, "GET", "/api/v1/resources", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
 	v := "{...}" // bad json
 	req.Body = ioutil.NopCloser(bytes.NewBufferString(v))
 
+	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 }
@@ -173,7 +184,7 @@ func TestInitialize(t *testing.T) {
 
 	root := "api_teststore"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	f := zebra.Factory().Add(network.VLANPoolType())
 
@@ -187,12 +198,12 @@ func TestPostResource(t *testing.T) {
 
 	root := "api_teststore1"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	myAPI := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(myAPI.Initialize(root))
 
-	h := handlePost(setupLogger(nil), myAPI)
+	h := handlePost()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
@@ -200,27 +211,27 @@ func TestPostResource(t *testing.T) {
 	body := `{"lab":[{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 
 	// Create new resource
-	req := createRequest(assert, "POST", "/resources", body)
+	req := createRequest(assert, "POST", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Update existing resource
-	req = createRequest(assert, "POST", "/resources", body)
+	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Create resource with an invalid type, won't read properly
 	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
-	req = createRequest(assert, "POST", "/resources", body)
+	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// Create resource with an invalid ID
 	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
-	req = createRequest(assert, "POST", "/resources", body)
+	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
@@ -232,12 +243,12 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 
 	root := "api_teststore2"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	myAPI := NewResourceAPI(store.DefaultFactory())
 	assert.Nil(myAPI.Initialize(root))
 
-	h := handleDelete(setupLogger(nil), myAPI)
+	h := handleDelete()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
@@ -277,19 +288,19 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 
 	// Invalid resources requested to be deleted
 	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
-	req := createRequest(assert, "DELETE", "/resources", body)
+	req := createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.NotEqual(http.StatusOK, rr.Code)
 
 	body = `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
-	req = createRequest(assert, "DELETE", "/resources", body)
+	req = createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	body = `{"lab":[{"id":"0","type":"Lab","name": "shravya's lab"}]}`
-	req = createRequest(assert, "DELETE", "/resources", body)
+	req = createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
@@ -297,7 +308,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	// DELETE resources
 	bytes, err := json.Marshal(myAPI.Store.Query())
 	assert.Nil(err)
-	req = createRequest(assert, "DELETE", "/resources", string(bytes))
+	req = createRequest(assert, "DELETE", "/resources", string(bytes), myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
@@ -345,8 +356,11 @@ func TestApplyFunc(t *testing.T) {
 	assert.NotNil(applyFunc(resMap, f))
 }
 
-func createRequest(assert *assert.Assertions, method string, url string, body string) *http.Request {
-	req, err := http.NewRequest(method, url, nil)
+func createRequest(assert *assert.Assertions, method string, url string,
+	body string, api *ResourceAPI,
+) *http.Request {
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, api)
+	req, err := http.NewRequestWithContext(ctx, method, url, nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 

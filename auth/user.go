@@ -49,10 +49,8 @@ func (u *User) Validate(ctx context.Context) error {
 	return u.NamedResource.Validate(ctx)
 }
 
-const SharedSecret = "खुल जा सिम सिम" //nolint:gosec
-
 func (u *User) Authenticate(token string) error {
-	return u.Key.Verify([]byte(SharedSecret), []byte(token), nil)
+	return u.Key.Verify([]byte(u.Email), []byte(token), nil)
 }
 
 func (u *User) AuthenticatePassword(password string) error {

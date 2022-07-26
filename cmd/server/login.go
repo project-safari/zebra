@@ -2,59 +2,72 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"gojini.dev/web"
 )
 
-func handleLogin(ctx context.Context, store zebra.Store, authKey string) httprouter.Handle {
-	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		log := logr.FromContextOrDiscard(ctx)
-		userData := &struct {
-			Password string `json:"password"`
-			Email    string `json:"email"`
-		}{}
+func loginAdapter() web.Adapter {
+	return func(nextHandler http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			if req.URL.Path != "/login" {
+				// This is not a login request just forward it
+				callNext(nextHandler, res, req)
 
-		body, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			res.WriteHeader(http.StatusBadRequest)
+				return
+			}
 
-			return
-		}
+			ctx := req.Context()
+			log := logr.FromContextOrDiscard(ctx)
+			api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+			if !ok {
+				res.WriteHeader(http.StatusInternalServerError)
 
-		log.Info("request", "body", string(body))
+				return
+			}
 
-		if err := json.Unmarshal(body, userData); err != nil {
-			res.WriteHeader(http.StatusBadRequest)
+			authKey, ok := ctx.Value(AuthCtxKey).(string)
+			if !ok {
+				res.WriteHeader(http.StatusInternalServerError)
 
-			return
-		}
+				return
+			}
 
-		user := findUser(store, userData.Email)
-		if user == nil {
-			log.Error(err, "user not found", "user", userData.Email)
-			res.WriteHeader(http.StatusUnauthorized)
+			userData := &struct {
+				Password string `json:"password"`
+				Email    string `json:"email"`
+			}{}
 
-			return
-		}
+			if err := readJSON(ctx, req, userData); err != nil {
+				res.WriteHeader(http.StatusBadRequest)
 
-		if err := user.AuthenticatePassword(userData.Password); err != nil {
-			log.Error(err, "user auth failed", "user", user.Email)
-			res.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-			return
-		}
+			user := findUser(api.Store, userData.Email)
+			if user == nil {
+				log.Error(nil, "user not found", "user", userData.Email)
+				res.WriteHeader(http.StatusUnauthorized)
 
-		claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
-		respondWithClaims(log, res, claims, authKey)
+				return
+			}
 
-		log.Info("login succeeded", "user", user.Email)
+			if err := user.AuthenticatePassword(userData.Password); err != nil {
+				log.Error(err, "user auth failed", "user", user.Email)
+				res.WriteHeader(http.StatusUnauthorized)
+
+				return
+			}
+
+			claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
+			respondWithClaims(ctx, res, claims, authKey)
+
+			log.Info("login succeeded", "user", user.Email)
+		})
 	}
 }
 
@@ -81,26 +94,13 @@ func findUser(store zebra.Store, email string) *auth.User {
 	return nil
 }
 
-func respondWithClaims(log logr.Logger, res http.ResponseWriter,
+func respondWithClaims(ctx context.Context, res http.ResponseWriter,
 	claims *auth.Claims, authKey string,
 ) {
 	resData := &struct {
 		JWT string `json:"jwt"`
 	}{JWT: claims.JWT(authKey)}
 
-	bytes, err := json.Marshal(resData)
-	if err != nil {
-		log.Error(err, "crazy we can't marshal our own data!")
-		res.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
-
 	http.SetCookie(res, makeCookie(resData.JWT))
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
-
-	if _, err := res.Write(bytes); err != nil {
-		log.Error(err, "error writing response")
-	}
+	writeJSON(ctx, res, resData)
 }

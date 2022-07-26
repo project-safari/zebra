@@ -42,8 +42,11 @@ func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	return s
 }
 
-func makeLabelRequest(assert *assert.Assertions, labels ...string) *http.Request {
-	req, err := http.NewRequest("GET", "/api/v1/labels", nil)
+func makeLabelRequest(assert *assert.Assertions, resources *ResourceAPI, labels ...string) *http.Request {
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+	ctx = context.WithValue(ctx, AuthCtxKey, authKey)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/labels", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
@@ -60,13 +63,14 @@ func TestBadLabelReq(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	h := handleLabels(context.Background(), nil)
+	h := handleLabels()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
 
-	req, err := http.NewRequest("GET", "/api/v1/labels", nil)
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, NewResourceAPI(store.DefaultFactory()))
+	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/labels", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
@@ -75,26 +79,36 @@ func TestBadLabelReq(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
+
+	// Bad context
+	req, err = http.NewRequest("GET", "/api/v1/labels", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusInternalServerError, rr.Code)
 }
 
 func TestAllLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	store := makeStore(assert, "test_all_labels")
-	assert.NotNil(store)
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeStore(assert, "test_all_labels")
+	assert.NotNil(resources.Store)
 
 	defer func() {
-		assert.Nil(os.RemoveAll("./test_all_labels"))
+		assert.Nil(os.RemoveAll("test_all_labels"))
 	}()
 
-	h := handleLabels(context.Background(), store)
+	h := handleLabels()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
 
-	req := makeLabelRequest(assert)
+	req := makeLabelRequest(assert, resources)
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(rr.Code, http.StatusOK)
@@ -104,20 +118,21 @@ func TestLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	store := makeStore(assert, "test_labels")
-	assert.NotNil(store)
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeStore(assert, "test_labels")
+	assert.NotNil(resources.Store)
 
 	defer func() {
-		assert.Nil(os.RemoveAll("./test_labels"))
+		assert.Nil(os.RemoveAll("test_labels"))
 	}()
 
-	h := handleLabels(context.Background(), store)
+	h := handleLabels()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
 
-	req := makeLabelRequest(assert, "label5", "label7")
+	req := makeLabelRequest(assert, resources, "label5", "label7")
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(rr.Code, http.StatusOK)

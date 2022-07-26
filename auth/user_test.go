@@ -58,7 +58,7 @@ func TestUser(t *testing.T) {
 	assert.NotNil(god.Validate(ctx))
 
 	god.PasswordHash = auth.HashPassword("youhaveachoice")
-
+	god.Email = "god@heaven.com"
 	assert.NotNil(god.Validate(ctx)) // it will have an error because it does not have group label, so not nil.
 
 	adamKey, err := auth.Generate()
@@ -85,7 +85,7 @@ func TestUser(t *testing.T) {
 	eve.Role = user
 	eve.PasswordHash = auth.HashPassword("iloveadam")
 
-	token, err := godKey.Sign([]byte(auth.SharedSecret))
+	token, err := godKey.Sign([]byte(god.Email))
 	assert.Nil(err)
 	assert.NotEmpty(token)
 

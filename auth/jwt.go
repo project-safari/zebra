@@ -59,11 +59,17 @@ func (claims *Claims) JWT(key string) string {
 func FromJWT(token string, key string) (*Claims, error) {
 	claims := new(Claims)
 	tkn, err := jwt.ParseWithClaims(token, claims,
-		func(token *jwt.Token) (interface{}, error) { return []byte(key), nil })
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(key), nil
+		})
+	// Error parsing token
+	if err != nil {
+		return nil, err
+	}
 
 	if !tkn.Valid {
 		return nil, ErrInvalidToken
 	}
 
-	return claims, err
+	return claims, nil
 }

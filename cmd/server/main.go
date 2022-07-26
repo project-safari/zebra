@@ -2,18 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/go-logr/logr"
-	"github.com/go-logr/zerologr"
-	"github.com/julienschmidt/httprouter"
-	"github.com/project-safari/zebra/store"
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"gojini.dev/config"
 	"gojini.dev/web"
@@ -23,13 +17,13 @@ const version = "unknown"
 
 func main() {
 	name := filepath.Base(os.Args[0])
-	rootCmd := &cobra.Command{ // nolint:exhaustruct,exhaustivestruct
-		Use:          name,
-		Short:        "zebra server",
-		Version:      version + "\n",
-		RunE:         run,
-		SilenceUsage: true,
-	}
+	rootCmd := new(cobra.Command)
+
+	rootCmd.Use = name
+	rootCmd.Short = "zebra server"
+	rootCmd.Version = version + "\n"
+	rootCmd.RunE = run
+	rootCmd.SilenceUsage = true
 	rootCmd.SetVersionTemplate(version + "\n")
 	rootCmd.Flags().StringP("config", "c", path.Join(
 		func() string {
@@ -58,83 +52,35 @@ func run(cmd *cobra.Command, args []string) error {
 	return startServer(cfgStore)
 }
 
-func setupLogger(cfgStore *config.Store) context.Context {
-	ctx := context.Background()
-	zl := zerolog.New(os.Stderr).Level(zerolog.DebugLevel)
-	logger := zerologr.New(&zl)
-
-	return logr.NewContext(ctx, logger.WithName("zebra"))
-}
-
 func startServer(cfgStore *config.Store) error {
 	appCtx := setupLogger(cfgStore)
 
-	log := logr.FromContextOrDiscard(appCtx)
-
 	serverCfg := new(web.Config)
 	if e := cfgStore.Get("server", serverCfg); e != nil {
-		log.Error(e, "web server config missing")
-
 		return e
 	}
 
-	handler := httpHandler(appCtx, cfgStore)
+	setup := setupAdapter(appCtx, cfgStore)
+	login := loginAdapter()
+	register := registerAdapter()
+	auth := authAdapter()
+	refresh := refreshAdapter()
+	routes := routeHandler()
+
+	// The order of wrap matters, routes is the final handler that is being
+	// wrapped. setup, login and register are unauthenticated APIs that serve
+	// as a way to bootstrap authentication. auth, refresh and all endpoints
+	// registered by routes must be authenticated either via a jwt in the cookie
+	// or via a rsa key token in the header.
+	handler := web.Wrap(routes, setup, login, register, auth, refresh)
+
 	webServer := web.NewServer(serverCfg, handler)
 
 	return webServer.Start(appCtx)
 }
 
-func httpHandler(ctx context.Context, cfgStore *config.Store) http.Handler {
-	log := logr.FromContextOrDiscard(ctx)
-	storeCfg := struct {
-		Root string `json:"rootDir"`
-	}{Root: ""}
-
-	if e := cfgStore.Get("store", &storeCfg); e != nil {
-		log.Error(e, "store configuration missing")
-		panic(e)
-	}
-
-	authKey := "key"
-
-	if e := cfgStore.Get("authKey", &authKey); e != nil {
-		log.Error(e, "auth key missing")
-		panic(e)
-	}
-
-	factory := store.DefaultFactory()
-
-	resAPI := NewResourceAPI(factory)
-	if e := resAPI.Initialize(storeCfg.Root); e != nil {
-		log.Error(e, "api initialization failed")
-		panic(e)
-	}
-
-	router := httprouter.New()
-	router.GET("/api/v1/resources", handleQuery(ctx, resAPI))
-	router.GET("/api/v1/types", handleTypes(ctx))
-	router.GET("/api/v1/labels", handleLabels(ctx, resAPI.Store))
-	router.POST("/login", handleLogin(ctx, resAPI.Store, authKey))
-	router.POST("/api/v1/resources", handlePost(ctx, resAPI))
-	router.DELETE("/api/v1/resources", handleDelete(ctx, resAPI))
-
-	return router
-}
-
-func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
-	log := logr.FromContextOrDiscard(ctx)
-
-	bytes, err := json.Marshal(data)
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
-
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
-
-	if _, err := res.Write(bytes); err != nil {
-		log.Error(err, "error writing response")
+func callNext(nextHandler http.Handler, res http.ResponseWriter, req *http.Request) {
+	if nextHandler != nil {
+		nextHandler.ServeHTTP(res, req)
 	}
 }
