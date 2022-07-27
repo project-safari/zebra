@@ -14,7 +14,7 @@ func GenerateLab(numLabs int) []zebra.Resource {
 
 		lab := dc.NewLab(name, labels)
 
-		if lab.Labels.Validate() != nil {
+		if lab.LabelsValidate() != nil {
 			lab.Labels = GroupLabels(lab.Labels, GroupVal(lab))
 		}
 

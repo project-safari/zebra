@@ -19,7 +19,7 @@ func GenerateVlanPool(numVlans int) []zebra.Resource {
 		labels := CreateLabels()
 		vlan := network.NewVlanPool(start, start+delta-1, labels)
 
-		if vlan.Labels.Validate() != nil {
+		if vlan.LabelsValidate() != nil {
 			vlan.Labels = GroupLabels(vlan.Labels, GroupVal(vlan))
 		}
 

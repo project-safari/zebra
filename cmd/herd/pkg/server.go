@@ -19,7 +19,7 @@ func GenerateServer(numServers int) []zebra.Resource {
 
 		server := compute.NewServer(arr, ip, labels)
 
-		if server.Labels.Validate() != nil {
+		if server.LabelsValidate() != nil {
 			server.Labels = GroupLabels(server.Labels, GroupVal(server))
 		}
 

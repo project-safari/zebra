@@ -17,7 +17,7 @@ func GenerateSwitch(numSwitch int) []zebra.Resource {
 		ip := RandIP()
 		sw := network.NewSwitch(arr, port, ip, labels)
 
-		if sw.Labels.Validate() != nil {
+		if sw.LabelsValidate() != nil {
 			sw.Labels = GroupLabels(sw.Labels, GroupVal(sw))
 		}
 

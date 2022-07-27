@@ -121,3 +121,28 @@ func TestCredentials(t *testing.T) {
 	credentials.Keys["password"] = "properPass123$"
 	assert.NotNil(credentials.Validate(ctx))
 }
+
+func TestLabelsValidation(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	// first test - with a correct default label
+	mapOne := map[string]string{
+		"system.group": "Americas",
+		"color":        "red",
+	}
+
+	resOne := zebra.NewBaseResource("", mapOne)
+	assert.Nil(resOne.Validate(context.Background()))
+
+	// second test - with an incorrect default label
+	mapTwo := map[string]string{
+		"letter": "alpha",
+		"color":  "blue",
+	}
+
+	resTwo := zebra.NewBaseResource("", mapTwo)
+
+	assert.NotNil(resTwo.Validate(context.Background()))
+	assert.Equal(zebra.ErrLabel, resTwo.Validate(context.Background()))
+}
