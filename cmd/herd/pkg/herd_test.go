@@ -417,7 +417,7 @@ func TestCreateUser(t *testing.T) {
 	assert.NotNil(user)
 	assert.NotNil(user.Validate(context.Background()))
 
-	user.Labels.Add("group", "testGroup")
+	user.Labels.Add("system.group", "testGroup")
 	assert.Nil(user.Validate(context.Background()))
 }
 

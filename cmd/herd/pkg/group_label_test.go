@@ -20,7 +20,7 @@ func TestGroupLabel(t *testing.T) {
 
 	// test to see if group is created for given address.
 	groupTest := pkg.GroupLabels(labels, "Mexico")
-	assert.True(groupTest.MatchEqual("group", "Mexico"))
+	assert.True(groupTest.MatchEqual("system.group", "Mexico"))
 }
 
 func TestLabelGeneration(t *testing.T) {

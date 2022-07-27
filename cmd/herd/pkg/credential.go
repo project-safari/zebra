@@ -12,7 +12,7 @@ func GenerateCredential(numCrds int) []*zebra.Credentials {
 
 		credential := zebra.NewCredential(name, labels)
 
-		if credential.Labels.Validate() != nil {
+		if credential.LabelsValidate() != nil {
 			credential.Labels = GroupLabels(credential.Labels, GroupVal(credential))
 		}
 

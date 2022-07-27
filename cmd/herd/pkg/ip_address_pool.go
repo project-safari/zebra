@@ -16,7 +16,7 @@ func GenerateIPPool(numAddr int) []zebra.Resource {
 
 		IPaddr := network.NewIPAddressPool(ipArr, labels)
 
-		if IPaddr.Labels.Validate() != nil {
+		if IPaddr.LabelsValidate() != nil {
 			IPaddr.Labels = GroupLabels(IPaddr.Labels, GroupVal(IPaddr))
 		}
 

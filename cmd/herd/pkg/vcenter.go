@@ -18,7 +18,7 @@ func GenerateVCenter(numVC int) []zebra.Resource {
 
 		cent := compute.NewVCenter(name, ip, labels)
 
-		if cent.Labels.Validate() != nil {
+		if cent.LabelsValidate() != nil {
 			cent.Labels = GroupLabels(cent.Labels, GroupVal(cent))
 		}
 

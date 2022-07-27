@@ -16,25 +16,19 @@ type Resource interface {
 	GetLabels() Labels
 }
 
-var ErrNameEmpty = errors.New("name is empty")
-
-var ErrIDEmpty = errors.New("id is empty")
-
-var ErrIDShort = errors.New("id must be at least 3 characters long")
-
-var ErrTypeEmpty = errors.New("type is empty")
-
-var ErrWrongType = errors.New("type value is incorrect")
-
-var ErrPassLen = errors.New("password is less than 12 characters long")
-
-var ErrPassCase = errors.New("password does not contain both upper and lowercase")
-
-var ErrPassNum = errors.New("password does not contain a number")
-
-var ErrPassSpecial = errors.New("password does not contain a special character")
-
-var ErrNoKeys = errors.New("keys is nil")
+var (
+	ErrNameEmpty   = errors.New("name is empty")
+	ErrIDEmpty     = errors.New("id is empty")
+	ErrIDShort     = errors.New("id must be at least 3 characters long")
+	ErrTypeEmpty   = errors.New("type is empty")
+	ErrWrongType   = errors.New("type value is incorrect")
+	ErrPassLen     = errors.New("password is less than 12 characters long")
+	ErrPassCase    = errors.New("password does not contain both upper and lowercase")
+	ErrPassNum     = errors.New("password does not contain a number")
+	ErrPassSpecial = errors.New("password does not contain a special character")
+	ErrNoKeys      = errors.New("keys is nil")
+	ErrLabel       = errors.New("missing mandatory system label")
+)
 
 // BaseResource must be embedded in all resource structs, ensuring each resource is
 // assigned an ID string.
@@ -55,8 +49,10 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 		return ErrIDShort
 	case r.Type == "":
 		return ErrTypeEmpty
-	case r.Labels.Validate() != nil:
-		return ErrLabel
+	}
+
+	if err := r.LabelsValidate(); err != nil {
+		return err
 	}
 
 	return r.Status.Validate(ctx)
@@ -80,6 +76,15 @@ func (r *BaseResource) GetLabels() Labels {
 	}
 
 	return dest
+}
+
+// Special label validation to ensure all resources have group label.
+func (r *BaseResource) LabelsValidate() error {
+	if _, ok := r.Labels["system.group"]; !ok {
+		return ErrLabel
+	}
+
+	return nil
 }
 
 // NamedResource represents all resources assigned both a string ID and a name.

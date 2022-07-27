@@ -21,7 +21,7 @@ func GenerateUser(numUsr int) []zebra.Resource {
 
 		usr := auth.NewUser(name, email, pwd, key, labels)
 
-		if usr.Labels.Validate() != nil {
+		if usr.LabelsValidate() != nil {
 			usr.Labels = GroupLabels(usr.Labels, GroupVal(usr))
 		}
 

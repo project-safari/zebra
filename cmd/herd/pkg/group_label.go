@@ -5,7 +5,7 @@ import "github.com/project-safari/zebra"
 // helper function to add mandatory group label.
 // call this function if the given resoure does not have a group label.
 func GroupLabels(l zebra.Labels, groupValue string) zebra.Labels {
-	groupLabel := l.Add("group", groupValue)
+	groupLabel := l.Add("system.group", groupValue)
 
 	return groupLabel
 }
