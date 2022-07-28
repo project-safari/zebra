@@ -17,10 +17,18 @@ func EmptyType() zebra.Type {
 	}
 }
 
+func BaseResourceType() zebra.Type {
+	return zebra.Type{
+		Name:        "BaseResource",
+		Description: "Base Resource",
+		Constructor: func() zebra.Resource { return nil },
+	}
+}
+
 func NamedResourceType() zebra.Type {
 	return zebra.Type{
 		Name:        "NamedResource",
-		Description: "Named Rsource",
+		Description: "Named Resource",
 		Constructor: func() zebra.Resource { return nil },
 	}
 }
@@ -33,12 +41,8 @@ func TestBaseResource(t *testing.T) {
 
 	ctx := context.Background()
 	res := &zebra.BaseResource{
-		ID: "",
-		Type: zebra.Type{
-			Name:        "",
-			Description: "",
-			Constructor: func() zebra.Resource { return nil },
-		},
+		ID:     "",
+		Type:   EmptyType(),
 		Labels: zebra.Labels{"key": "value"},
 		Status: zebra.DefaultStatus(),
 	}
@@ -50,8 +54,8 @@ func TestBaseResource(t *testing.T) {
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
 
-	res.Type.Name = "BaseResource"
-	assert.Nil(res.Validate(ctx))
+	res.Type = BaseResourceType()
+	assert.NotNil(res.Validate(ctx))
 
 	assert.Equal(res.ID, res.GetID())
 	assert.Equal(res.Type.Name, res.GetType().Name)

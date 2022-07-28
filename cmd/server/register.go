@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -49,13 +50,9 @@ func handleRegister(ctx context.Context, store zebra.Store) httprouter.Handle {
 
 		newuser := createNewUser(registryData.Name, registryData.Email, registryData.Password, registryData.Key)
 
-		//Figure out error message
-		err = store.Create(newuser)
-		err2 := store.Initialize()
-
-		if err2 != nil || err != nil {
-			log.Error(err2, err2.Error())
-			log.Error(err, err.Error(), "user", registryData.Name)
+		if err := store.Create(newuser); err != nil {
+			fmt.Println(err)
+			log.Error(err, "user cant be stored", "user", registryData.Name)
 			res.WriteHeader(http.StatusInternalServerError)
 
 			return
