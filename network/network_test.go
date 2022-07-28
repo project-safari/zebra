@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
@@ -83,6 +84,12 @@ func TestIPAddressPool(t *testing.T) {
 
 	pool.ID = "aaaa"
 	pool.Type = network.IPAddressPoolType()
+
+	pool.Labels = make(map[string]string)
+	pool.Labels = pkg.GroupLabels(pool.Labels, "groupSample")
+
+	assert.Nil(pool.Validate(ctx))
+
 	assert.Nil(pool.Validate(ctx))
 
 	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}

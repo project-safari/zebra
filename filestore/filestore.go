@@ -120,21 +120,39 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 				return nil, err
 			}
 
-			resType, ok := object["type"].(string)
+			resType, ok := object["type"]
 			if !ok {
 				retErr = ErrNoType
 
 				continue
 			}
 
-			newRes, err := f.unpackResource(contents, resType)
+			vType, err := json.Marshal(resType)
+			if err != nil {
+				retErr = ErrNoType
+
+				continue
+			}
+
+			emptyType := zebra.Type{
+				Name:        "",
+				Description: "Empty Type",
+				Constructor: func() zebra.Resource { return nil },
+			}
+
+			if err = json.Unmarshal(vType, &emptyType); err != nil {
+				retErr = ErrNoType
+				continue
+			}
+
+			newRes, err := f.unpackResource(contents, emptyType.Name)
 			if err != nil {
 				retErr = err
 
 				continue
 			}
 
-			resources.Add(newRes, resType)
+			resources.Add(newRes, emptyType.Name)
 		}
 	}
 

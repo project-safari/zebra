@@ -79,7 +79,7 @@ func TestListMarshalUnmarshal(t *testing.T) {
 	err = resB.UnmarshalJSON(bytes)
 	assert.NotNil(err)
 
-	vlan.Type = vlan.GetType()
+	vlan.Type = network.VLANPoolType()
 	resA.Resources = []zebra.Resource{vlan}
 
 	bytes, err = resA.MarshalJSON()
