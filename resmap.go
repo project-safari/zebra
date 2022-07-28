@@ -160,6 +160,7 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 		}
 
 		r.Resources = append(r.Resources, resource)
+
 	}
 
 	return nil
