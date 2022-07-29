@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/pem"
+	"os"
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
@@ -301,4 +302,28 @@ func TestSignVerify(t *testing.T) {
 	// (3) changing the public key
 	err = hans.Verify(msg, sig, ingrid.PublicKey())
 	assert.NotNil(err)
+
+	_, err = ingrid.Public().Sign([]byte("test"))
+	assert.Equal(auth.ErrNoPrivateKey, err)
+}
+
+func TestLoad(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	id, err := auth.Load("")
+	assert.Nil(id)
+	assert.NotNil(err)
+
+	id, err = auth.Load("rsa_test.go")
+	assert.Nil(id)
+	assert.NotNil(err)
+
+	id, err = auth.Load("../simulator/user.key")
+	assert.Nil(err)
+	assert.NotNil(id)
+
+	assert.Nil(id.Save("new_copy.key"))
+	assert.Nil(os.RemoveAll("new_copy.key"))
 }

@@ -8,12 +8,16 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"io/ioutil"
 )
+
+const ReadOnly = 0o600
 
 var (
 	ErrIdentityEmpty   = errors.New("identity is empty")
 	ErrBadPEMFile      = errors.New("bad PEM file")
 	ErrUnknownPEMBlock = errors.New("unknown PEM block")
+	ErrNoPrivateKey    = errors.New("no private key")
 )
 
 const RSAKeySize = 2048
@@ -39,6 +43,29 @@ func Empty() *RsaIdentity {
 		private: nil,
 		public:  nil,
 	}
+}
+
+func Load(rsaFile string) (*RsaIdentity, error) {
+	rsaText, err := ioutil.ReadFile(rsaFile)
+	if err != nil {
+		return nil, err
+	}
+
+	id := Empty()
+	if err := id.UnmarshalText(rsaText); err != nil {
+		return nil, err
+	}
+
+	return id, nil
+}
+
+func (r *RsaIdentity) Save(rsaFile string) error {
+	data, err := r.MarshalText()
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(rsaFile, data, ReadOnly)
 }
 
 func (r *RsaIdentity) MarshalText() ([]byte, error) {
@@ -121,6 +148,10 @@ func (r *RsaIdentity) Public() *RsaIdentity {
 // With the r.Verify function, the signature can be checked.
 func (r *RsaIdentity) Sign(msg []byte) ([]byte, error) {
 	hs := r.getHashSum(msg)
+
+	if r.private == nil {
+		return nil, ErrNoPrivateKey
+	}
 
 	return rsa.SignPKCS1v15(rand.Reader, r.private, crypto.SHA256, hs)
 }

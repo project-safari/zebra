@@ -166,7 +166,7 @@ func TestNoKeyUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore5"
+	root := "test_no_key_user"
 
 	t.Cleanup(func() { os.RemoveAll(root) })
 
@@ -181,7 +181,7 @@ func TestNoKeyUser(t *testing.T) {
 	assert.Nil(err)
 	assert.NotNil(req)
 
-	data := newRData("testuser2", "secrect", "myemail@domain", false)
+	data := newRData("testeruser", "secrect", "tester@cisco.com", false)
 	req.Body = data.Body()
 
 	h := registerAdapter()

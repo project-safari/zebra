@@ -104,7 +104,7 @@ func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *auth.Us
 
 func createNewUser(name string, email string, password string, key *auth.RsaIdentity) *auth.User {
 	labels := zebra.Labels{}
-	labels.Add("group", "users")
+	labels.Add("system.group", "users")
 
 	newuser := &auth.User{
 		Key:          key,

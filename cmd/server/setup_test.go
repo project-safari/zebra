@@ -11,7 +11,14 @@ import (
 
 const storeCfg = `
 {
-	"store": {"rootDir": "test"},
+	"store": {"rootDir": "test_setup"},
+	"authKey": "abracadabra"
+}
+`
+
+const storeCfgAdapter = `
+{
+	"store": {"rootDir": "test_setup_adapter"},
 	"authKey": "abracadabra"
 }
 `
@@ -30,7 +37,7 @@ func TestSetup(t *testing.T) {
 	})
 
 	cfgStore = config.New()
-	e := cfgStore.LoadFromStr(ctx, `{"store": {"rootDir": "test"}}`)
+	e := cfgStore.LoadFromStr(ctx, `{"store": {"rootDir": "test_setup"}}`)
 	assert.Nil(e)
 
 	// No authKey
@@ -43,7 +50,7 @@ func TestSetup(t *testing.T) {
 	assert.Nil(e)
 
 	defer func() {
-		assert.Nil(os.RemoveAll("test"))
+		assert.Nil(os.RemoveAll("test_setup"))
 	}()
 
 	assert.NotNil(setupAdapter(ctx, cfgStore))
@@ -54,10 +61,10 @@ func TestSetupAdapter(t *testing.T) {
 	assert := assert.New(t)
 
 	cfgStore := config.New()
-	assert.Nil(cfgStore.LoadFromStr(context.Background(), storeCfg))
+	assert.Nil(cfgStore.LoadFromStr(context.Background(), storeCfgAdapter))
 
 	defer func() {
-		assert.Nil(os.RemoveAll("test"))
+		assert.Nil(os.RemoveAll("test_setup_adapter"))
 	}()
 
 	ctx := setupLogger(cfgStore)

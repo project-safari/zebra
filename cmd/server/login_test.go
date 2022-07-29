@@ -69,9 +69,11 @@ func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zeb
 	assert.NotNil(factory)
 
 	store := store.NewResourceStore(root, factory)
-	if store.Initialize() != nil || store.Create(user) != nil {
-		return nil
-	}
+	err := store.Initialize()
+	assert.Nil(err)
+
+	err = store.Create(user)
+	assert.Nil(err)
 
 	return store
 }
