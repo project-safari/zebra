@@ -1,0 +1,13 @@
+{
+    "store": {
+        "rootDir": "./simulator/simulator-store"
+    },
+    "server": {
+        "address": "tcp://127.0.0.1:6666",
+        "tls": {
+            "certFile": "./simulator/zebra-server.crt",
+            "keyFile": "./simulator/zebra-server.key"
+        }
+    },
+    "authKey": "abracadabra"
+}
