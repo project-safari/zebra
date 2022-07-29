@@ -51,7 +51,16 @@ check-licenses:
 	 done
 	go fmt ./... && ([ -z $(CI) ] || git diff --exit-code)
 
-test: $(GO_SRC)
+.PHONY: certs
+certs:
+	./simulator/gen_certs.sh "./simulator" "zebra.inisieme.local" "1.1.1.1"
+	cd ./simulator && go test
+
+simulator: bin certs
+	rm -rf ./simulator/simulator-store && ./herd --store ./simulator/simulator-store
+	./zebra-server --config ./simulator/zebra-simulator.json
+
+test: $(GO_SRC) certs
 	go test -v -race -cover -coverpkg ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 .PHONY: check
@@ -64,9 +73,13 @@ mod:
 
 .PHONY: clean
 clean:
-	-rm zebra
-	-rm zebra-server
-	-rm *.crt
-	-rm *.key
-	-rm coverage.txt
+	-rm -f zebra
+	-rm -f zebra-server
+	-rm -f coverage.txt
 	-rm -rf ./bin
+	-rm -f ./simulator/*.crt
+	-rm -f ./simulator/*.key
+	-rm -rf ./simulator/simulator-store
+	-rm -rf ./simulator/*.crt
+	-rm -rf ./simulator/*.csr
+	-rm -rf ./simulator/*.key
