@@ -32,8 +32,6 @@ var (
 	ErrLeaseValid    = errors.New("lease is not valid")
 )
 
-const MaxDuration = 4
-
 func (r *ResourceReq) Assign(res zebra.Resource) error {
 	if r.Resources == nil {
 		r.Resources = make([]zebra.Resource, 0)
@@ -66,6 +64,9 @@ func NewLease(owner auth.User, dur time.Duration, req []*ResourceReq) *Lease {
 
 // Returns email of user associated with lease.
 func (l *Lease) Owner() string {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	return l.Status.UsedBy
 }
 
@@ -131,7 +132,7 @@ func (l *Lease) RequestList() []*ResourceReq {
 }
 
 func (l *Lease) Validate(ctx context.Context) error {
-	if l.Duration.Hours() > MaxDuration {
+	if l.Duration.Hours() > zebra.DefaultMaxDuration {
 		return ErrLeaseValid
 	}
 
