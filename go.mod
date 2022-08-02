@@ -29,5 +29,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	gojini.dev/web v0.0.0-20220611200440-c2f6a400e1e0
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
