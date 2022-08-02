@@ -130,6 +130,9 @@ func TestSetLeaseState(t *testing.T) {
 	assert.Equal(status.Leased, s.Lease())
 
 	assert.NotNil(s.SetLeased())
+
+	assert.Nil(s.SetFree())
+	assert.NotNil(s.SetFree())
 }
 
 func TestSetOwner(t *testing.T) {

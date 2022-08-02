@@ -50,6 +50,7 @@ var (
 	ErrState          = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
 	ErrCreatedTime    = errors.New(`createdTime is incorrect, must be before current time`)
 	ErrLeasedResource = errors.New("tried to set LeaseState to Leased but already leased")
+	ErrFreeResource   = errors.New("tried to set LeaseState Free Leased but already free")
 )
 
 func (f *FaultState) String() string {
@@ -247,6 +248,19 @@ func (s *Status) SetLeased() error {
 	}
 
 	s.lease = Leased
+
+	return nil
+}
+
+func (s *Status) SetFree() error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.lease != Leased {
+		return ErrLeasedResource
+	}
+
+	s.lease = Free
 
 	return nil
 }

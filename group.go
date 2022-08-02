@@ -9,62 +9,79 @@ import (
 type Group struct {
 	Name      string
 	Resources *ResourceMap
-	FreePool  *ResourceMap
-	Count     int
 }
 
 var (
 	ErrResourceMap = errors.New("resource map is nil")
-	ErrWrongCount  = errors.New("group count differs from associated resource map count")
+	ErrWrongGroup  = errors.New("resource does not have group name matching this group")
 )
 
 func NewGroup(name string) *Group {
 	return &Group{
 		Name:      name,
-		Resources: NewResourceMap(nil), // have to do something about this factory
-		FreePool:  NewResourceMap(nil), // considering we don't turn these into json, does this matter?
-		Count:     0,
+		Resources: NewResourceMap(nil),
 	}
 }
 
 // Add a resource to group.
 func (g *Group) Add(res Resource) {
 	g.Resources.Add(res, res.GetType())
-
-	if res.GetStatus().Lease() == status.Free {
-		g.FreePool.Add(res, res.GetType())
-	}
-
-	g.Count++
 }
 
 // Delete a resource from group.
 func (g *Group) Delete(res Resource) {
-	l, ok := g.Resources.Resources[res.GetType()]
-
 	// Nothing to delete
-	if !ok {
+	if _, ok := g.Resources.Resources[res.GetType()]; !ok {
 		return
 	}
 
-	// Keep track of how many resources there are before delete
-	count := len(l.Resources)
-
 	// Delete
 	g.Resources.Delete(res, res.GetType())
-	g.FreePool.Delete(res, res.GetType())
+}
 
-	countAfter := 0
-
-	// Check if list still exists before updating countAfter
-	if l, ok = g.Resources.Resources[res.GetType()]; ok {
-		countAfter = len(l.Resources)
+// Given a resource, update lease status.
+// If resource is not part of this group or is already free, throw an error.
+func (g *Group) Free(res Resource) error {
+	// If res is not in this group, return error
+	if name, ok := res.GetLabels()["system.group"]; !ok || name != g.Name {
+		return ErrWrongGroup
 	}
 
-	// Only update count if resource was really deleted
-	if count != countAfter {
-		g.Count--
+	if err := res.GetStatus().SetFree(); err != nil {
+		return err
 	}
+
+	return nil
+}
+
+// Given a resource, remove from free pool and update lease status.
+// If resource is not part of this group or is already free, throw an error.
+func (g *Group) Lease(res Resource) error {
+	// If res is not in this group, return error
+	if name, ok := res.GetLabels()["system.group"]; !ok || name != g.Name {
+		return ErrWrongGroup
+	}
+
+	if err := res.GetStatus().SetLeased(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Construct resource map with up-to-date free pool information.
+func (g *Group) FreePool() *ResourceMap {
+	freePool := NewResourceMap(nil)
+
+	for t, l := range g.Resources.Resources {
+		for _, r := range l.Resources {
+			if r.GetStatus().Lease() == status.Free {
+				freePool.Add(r, t)
+			}
+		}
+	}
+
+	return freePool
 }
 
 func (g *Group) Validate() error {
@@ -75,19 +92,6 @@ func (g *Group) Validate() error {
 
 	if g.Resources == nil {
 		return ErrResourceMap
-	}
-
-	if g.FreePool == nil {
-		return ErrResourceMap
-	}
-
-	count := 0
-	for _, l := range g.Resources.Resources {
-		count += len(l.Resources)
-	}
-
-	if count != g.Count {
-		return ErrWrongCount
 	}
 
 	return nil
