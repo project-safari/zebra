@@ -141,6 +141,24 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 	return resources, retErr
 }
 
+// refactor for better coverage.
+func CaseClose(f *os.File, errs *multierror.Error) *multierror.Error {
+	if e := f.Close(); e != nil {
+		errs = multierror.Append(errs, e)
+	}
+
+	return errs
+}
+
+// refactor for better coverage.
+func CaseRemove(f *os.File, errs *multierror.Error) *multierror.Error {
+	if e := os.Remove(f.Name()); e != nil {
+		errs = multierror.Append(errs, e)
+	}
+
+	return errs
+}
+
 // Store new object given storage root path and resource pointer.
 // If object already exists, update.
 func (f *FileStore) Create(res zebra.Resource) error {
@@ -158,13 +176,13 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	cleanup := func(f *os.File, err error) error {
 		errs := multierror.Append(nil, err)
 
-		if e := f.Close(); e != nil {
-			errs = multierror.Append(errs, e)
-		}
+		errOne := CaseClose(f, errs)
 
-		if e := os.Remove(f.Name()); e != nil {
-			errs = multierror.Append(errs, e)
-		}
+		errTwo := CaseRemove(f, errs)
+
+		errs = multierror.Append(errs, errOne)
+
+		errs = multierror.Append(errs, errTwo)
 
 		return errs
 	}

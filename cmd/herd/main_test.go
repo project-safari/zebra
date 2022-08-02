@@ -37,3 +37,12 @@ func TestFileStore(t *testing.T) {
 
 	assert.Nil(ret)
 }
+
+func TestInitStore(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	initial := initStore("./users")
+
+	assert.NotNil(initial)
+}

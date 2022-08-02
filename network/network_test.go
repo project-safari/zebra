@@ -128,3 +128,44 @@ func TestVLANPool(t *testing.T) {
 	pool.Type = "test123"
 	assert.NotNil(pool.Validate(ctx))
 }
+
+func TestVlan(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	vlan := network.NewVlanPool(1, 100, labels)
+
+	assert.NotNil(vlan)
+}
+
+func TestPool(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	vlan := network.NewIPAddressPool(pkg.CreateIPArr(3), labels)
+
+	assert.NotNil(vlan)
+}
+
+func TestNewSw(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	arr := []string{pkg.Serials(), pkg.Models(), pkg.Name()}
+
+	vlan := network.NewSwitch(arr, pkg.Ports(), net.IP("123.111.001"), labels)
+
+	assert.NotNil(vlan)
+}

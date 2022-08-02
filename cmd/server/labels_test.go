@@ -13,6 +13,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/dc"
+	"github.com/project-safari/zebra/network"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -112,6 +113,27 @@ func TestAllLabels(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(rr.Code, http.StatusOK)
+
+	// test matching
+	testLabels := []string{"label1", "label2", "label3", "label4", "label5"}
+
+	set1 := makeMatchSet(testLabels)
+
+	assert.NotNil(set1)
+
+	funMap := zebra.Factory()
+	funMap.Add(network.SwitchType())
+
+	resA := zebra.NewResourceMap(funMap)
+	assert.NotNil(resA)
+
+	switch1 := funMap.New("Switch")
+
+	resA.Add(switch1, "Switch")
+
+	matched := matchLabels(set1, resA)
+
+	assert.NotNil(matched)
 }
 
 func TestLabels(t *testing.T) {
