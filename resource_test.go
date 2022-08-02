@@ -122,6 +122,7 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 }
 
+/*
 func TestLabelsValidation(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -146,3 +147,4 @@ func TestLabelsValidation(t *testing.T) {
 	assert.NotNil(resTwo.Validate(context.Background()))
 	assert.Equal(zebra.ErrLabel, resTwo.Validate(context.Background()))
 }
+*/
