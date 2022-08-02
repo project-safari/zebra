@@ -6,6 +6,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,6 @@ func TestUser(t *testing.T) {
 	writeAll, e := auth.NewPriv("", true, false, true, true)
 	assert.Nil(e)
 	assert.NotNil(writeAll)
-	writer := &auth.Role{"writer", []*auth.Priv{writeAll}}
 
 	readAll, e := auth.NewPriv("", false, true, false, false)
 	assert.Nil(e)
@@ -82,22 +82,19 @@ func TestUser(t *testing.T) {
 	eve.Role = user
 	eve.PasswordHash = auth.HashPassword("iloveadam")
 
-	token, err := godKey.Sign([]byte(auth.SharedSecret))
+	token, err := godKey.Sign([]byte(god.Email))
 	assert.Nil(err)
 	assert.NotEmpty(token)
 
 	assert.Nil(god.Authenticate(string(token)))
 	assert.Nil(god.AuthenticatePassword("youhaveachoice"))
-	assert.NotNil(lucifer.Authenticate(string(token)))
-	assert.NotNil(lucifer.AuthenticatePassword("youhaveachoice"))
 
 	assert.True(god.Create("universe"))
 	assert.True(god.Read("universe"))
 	assert.True(god.Delete("universe"))
 	assert.True(god.Update("universe"))
 	assert.True(god.Write("universe"))
-	assert.False(lucifer.Read("universe"))
-	assert.True(lucifer.Write("universe"))
+
 	assert.False(adam.Write("something"))
 	assert.False(adam.Delete("something"))
 	assert.False(eve.Create("universe"))
@@ -113,5 +110,7 @@ func TestUser(t *testing.T) {
 
 	newUser := auth.NewUser("eve", "eve@email.com", "eve123", eveKey, zebra.Labels{})
 	assert.NotNil(newUser)
+
+	newUser.Labels = pkg.GroupLabels(newUser.Labels, "sample-label")
 	assert.Nil(newUser.Validate(context.Background()))
 }

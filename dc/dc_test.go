@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,6 +38,10 @@ func TestDatacenter(t *testing.T) {
 	datacenter.Type = dc.DataCenterType()
 	datacenter.Name = "jasmine"
 	datacenter.Address = "1 palace st, agrabah"
+	assert.NotNil(datacenter.Validate(ctx))
+
+	datacenter.Labels = pkg.CreateLabels()
+	datacenter.Labels = pkg.GroupLabels(datacenter.Labels, "someGroup")
 	assert.Nil(datacenter.Validate(ctx))
 
 	datacenter.Type = EmptyType()
@@ -59,6 +64,11 @@ func TestLab(t *testing.T) {
 	lab.ID = "abracadabra"
 	lab.Type = dc.LabType()
 	lab.Name = "sher"
+
+	lab.Labels = pkg.CreateLabels()
+	assert.NotNil(lab.Validate(ctx))
+
+	lab.Labels = pkg.GroupLabels(lab.Labels, "oneGroup")
 	assert.Nil(lab.Validate(ctx))
 
 	lab.Type = EmptyType()
@@ -80,7 +90,7 @@ func TestRack(t *testing.T) {
 	rack.Type = dc.RackType()
 	rack.Name = "sher"
 	rack.Row = "bazar"
-	assert.Nil(rack.Validate(ctx))
+	assert.NotNil(rack.Validate(ctx))
 
 	rack.Type = EmptyType()
 	assert.NotNil(rack.Validate(ctx))

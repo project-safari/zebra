@@ -13,6 +13,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,9 +27,9 @@ func TestFindUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore1"
+	root := "test_find_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	store := makeQueryStore(root, assert, makeUser(assert))
 
@@ -49,6 +50,8 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	jini.Type = auth.UserType()
 	jini.PasswordHash = auth.HashPassword(jiniWords)
 	jini.Role = &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
+	jini.Labels = pkg.CreateLabels()
+	jini.Labels = pkg.GroupLabels(jini.Labels, "sampleGroup")
 
 	jiniKey, err := auth.Generate()
 	assert.Nil(err)
@@ -73,8 +76,12 @@ func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zeb
 	return store
 }
 
-func makeRequest(assert *assert.Assertions, user string, password string, email string) *http.Request {
-	req, err := http.NewRequest("POST", "/login", nil)
+func makeLoginRequest(assert *assert.Assertions, user string, password string,
+	email string, resources *ResourceAPI,
+) *http.Request {
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+	ctx = context.WithValue(ctx, AuthCtxKey, authKey)
+	req, err := http.NewRequestWithContext(ctx, "POST", "/login", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
 
@@ -88,23 +95,23 @@ func TestBadUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore2"
+	root := "test_bad_user_login"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	req := makeRequest(assert, "ali", "aliOfAgrabha", "email@domain1")
-	store := makeQueryStore(root, assert, makeUser(assert))
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
-	h := handleLogin(context.Background(), store, authKey)
+	req := makeLoginRequest(assert, "ali", "aliOfAgrabha", "email@domain1", resources)
+
+	h := loginAdapter()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	handler := h(nil)
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 
-	req = makeRequest(assert, "\"", "\"", "\"")
+	req = makeLoginRequest(assert, "\"", "\"", "\"", resources)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
@@ -114,17 +121,17 @@ func TestBadLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore3"
+	root := "test_bad_login"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	req := makeRequest(assert, "jini", "aliOfAgrabha", "email@domain2")
-	store := makeQueryStore(root, assert, makeUser(assert))
-	h := handleLogin(context.Background(), store, authKey)
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, makeUser(assert))
+
+	req := makeLoginRequest(assert, "jini", "aliOfAgrabha", "email@domain", resources)
+	h := loginAdapter()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	handler := h(nil)
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusUnauthorized, rr.Code)
@@ -134,17 +141,18 @@ func TestLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore4"
+	root := "test_login"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	req := makeRequest(assert, "jini", jiniWords, "email@domain")
-	store := makeQueryStore(root, assert, makeUser(assert))
-	h := handleLogin(setupLogger(nil), store, authKey)
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeQueryStore(root, assert, makeUser(assert))
+
+	req := makeLoginRequest(assert, "jini", jiniWords, "email@domain", resources)
+
+	h := loginAdapter()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
+	handler := h(nil)
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
@@ -154,4 +162,36 @@ func TestLogin(t *testing.T) {
 	}{}
 	assert.Nil(json.Unmarshal(rr.Body.Bytes(), jwt))
 	assert.NotNil(jwt)
+}
+
+func TestLoginForward(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	testForward(assert, loginAdapter())
+}
+
+func TestLoginContext(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	req, err := http.NewRequest("POST", "/login", nil)
+	assert.Nil(err)
+
+	h := loginAdapter()
+	rr := httptest.NewRecorder()
+	handler := h(nil)
+
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusInternalServerError, rr.Code)
+
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey,
+		NewResourceAPI(store.DefaultFactory()))
+
+	req, err = http.NewRequestWithContext(ctx, "POST", "/login", nil)
+	assert.Nil(err)
+
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusInternalServerError, rr.Code)
 }

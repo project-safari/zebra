@@ -336,6 +336,7 @@ func TestGenerateVC(t *testing.T) {
 
 	assert.Equal(len(testVC), 3)
 	verifyType(assert, "VCenter", testVC)
+	assert.NotNil(testVC)
 }
 
 // tests for esx generation.
@@ -414,6 +415,9 @@ func TestCreateUser(t *testing.T) {
 
 	user := auth.NewUser(name, pkg.Email(name), pkg.Password(name), key, pkg.CreateLabels())
 	assert.NotNil(user)
+	assert.NotNil(user.Validate(context.Background()))
+
+	user.Labels.Add("group", "testGroup")
 	assert.Nil(user.Validate(context.Background()))
 }
 

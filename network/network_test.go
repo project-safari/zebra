@@ -65,7 +65,7 @@ func TestSwitch(t *testing.T) {
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.Credentials.Keys = make(map[string]string)
-	assert.Nil(switch1.Validate(ctx))
+	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.Type = EmptyType()
 	assert.NotNil(switch1.Validate(ctx))
@@ -131,7 +131,7 @@ func TestVLANPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 
 	pool.RangeEnd = 11
-	assert.Nil(pool.Validate(ctx))
+	assert.NotNil(pool.Validate(ctx))
 
 	pool.Type = EmptyType()
 	assert.NotNil(pool.Validate(ctx))

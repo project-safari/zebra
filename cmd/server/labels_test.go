@@ -17,87 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func makeLabelRequest(assert *assert.Assertions, labels ...string) *http.Request {
-	req, err := http.NewRequest("GET", "/api/v1/labels", nil)
-	assert.Nil(err)
-	assert.NotNil(req)
-
-	v := map[string][]string{"labels": labels}
-	b, e := json.Marshal(v)
-	assert.Nil(e)
-
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(b))
-
-	return req
-}
-
-func TestBadLabelReq(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	h := handleLabels(context.Background(), nil)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
-
-	req, err := http.NewRequest("GET", "/api/v1/labels", nil)
-	assert.Nil(err)
-	assert.NotNil(req)
-
-	v := "{....}" // bad json
-	req.Body = ioutil.NopCloser(bytes.NewBufferString(v))
-
-	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
-}
-
-func TestAllLabels(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	store := makeStore(assert, "test_all_labels")
-	assert.NotNil(store)
-
-	defer func() {
-		assert.Nil(os.RemoveAll("./test_all_labels"))
-	}()
-
-	h := handleLabels(context.Background(), store)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
-
-	req := makeLabelRequest(assert)
-	handler.ServeHTTP(rr, req)
-
-	assert.Equal(rr.Code, http.StatusOK)
-}
-
-func TestLabels(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	store := makeStore(assert, "test_labels")
-	assert.NotNil(store)
-
-	defer func() {
-		assert.Nil(os.RemoveAll("./test_labels"))
-	}()
-
-	h := handleLabels(context.Background(), store)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h(w, r, nil)
-	})
-
-	req := makeLabelRequest(assert, "label5", "label7")
-	handler.ServeHTTP(rr, req)
-
-	assert.Equal(rr.Code, http.StatusOK)
-}
-
 func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	s := store.NewResourceStore(root, store.DefaultFactory())
 	assert.Nil(s.Initialize())
@@ -117,8 +36,104 @@ func makeStore(assert *assert.Assertions, root string) zebra.Store {
 		l.Type = dc.LabType()
 		l.BaseResource = *zebra.NewBaseResource(dc.LabType(), labels)
 
-		assert.Nil(s.Create(l))
+		assert.NotNil(s.Create(l))
 	}
 
 	return s
+}
+
+func makeLabelRequest(assert *assert.Assertions, resources *ResourceAPI, labels ...string) *http.Request {
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
+	ctx = context.WithValue(ctx, AuthCtxKey, authKey)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/labels", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	v := map[string][]string{"labels": labels}
+	b, e := json.Marshal(v)
+	assert.Nil(e)
+
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+
+	return req
+}
+
+func TestBadLabelReq(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	h := handleLabels()
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, nil)
+	})
+
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, NewResourceAPI(store.DefaultFactory()))
+	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/labels", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	v := "{....}" // bad json
+	req.Body = ioutil.NopCloser(bytes.NewBufferString(v))
+
+	handler.ServeHTTP(rr, req)
+	assert.Equal(rr.Code, http.StatusBadRequest)
+
+	// Bad context
+	req, err = http.NewRequest("GET", "/api/v1/labels", nil)
+	assert.Nil(err)
+	assert.NotNil(req)
+
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusInternalServerError, rr.Code)
+}
+
+func TestAllLabels(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeStore(assert, "test_all_labels")
+	assert.NotNil(resources.Store)
+
+	defer func() {
+		assert.Nil(os.RemoveAll("test_all_labels"))
+	}()
+
+	h := handleLabels()
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, nil)
+	})
+
+	req := makeLabelRequest(assert, resources)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(rr.Code, http.StatusOK)
+}
+
+func TestLabels(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	resources := NewResourceAPI(store.DefaultFactory())
+	resources.Store = makeStore(assert, "test_labels")
+	assert.NotNil(resources.Store)
+
+	defer func() {
+		assert.Nil(os.RemoveAll("test_labels"))
+	}()
+
+	h := handleLabels()
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, nil)
+	})
+
+	req := makeLabelRequest(assert, resources, "label5", "label7")
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(rr.Code, http.StatusOK)
 }

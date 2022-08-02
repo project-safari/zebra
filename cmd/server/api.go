@@ -98,14 +98,22 @@ func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
 	return nil
 }
 
-func handleQuery(ctx context.Context, api *ResourceAPI) httprouter.Handle {
+func handleQuery() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		ctx := req.Context()
 		log := logr.FromContextOrDiscard(ctx)
+		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+
+		if !ok {
+			res.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
 
 		qr := new(QueryRequest)
 
 		// Read request, return error if applicable
-		if err := readReq(ctx, req, qr); err != nil {
+		if err := readJSON(ctx, req, qr); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be queried, could not read request")
 
@@ -150,14 +158,22 @@ func handleQuery(ctx context.Context, api *ResourceAPI) httprouter.Handle {
 	}
 }
 
-func handlePost(ctx context.Context, api *ResourceAPI) httprouter.Handle {
+func handlePost() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		ctx := req.Context()
 		log := logr.FromContextOrDiscard(ctx)
+		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+
+		if !ok {
+			res.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
 
 		resMap := zebra.NewResourceMap(store.DefaultFactory())
 
 		// Read request, return error if applicable
-		if err := readReq(ctx, req, resMap); err != nil {
+		if err := readJSON(ctx, req, resMap); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be created, could not read request")
 			log.Error(err, err.Error())
@@ -186,14 +202,22 @@ func handlePost(ctx context.Context, api *ResourceAPI) httprouter.Handle {
 	}
 }
 
-func handleDelete(ctx context.Context, api *ResourceAPI) httprouter.Handle {
+func handleDelete() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		ctx := req.Context()
 		log := logr.FromContextOrDiscard(ctx)
+		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+
+		if !ok {
+			res.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
 
 		resMap := zebra.NewResourceMap(store.DefaultFactory())
 
 		// Read request, return error if applicable
-		if err := readReq(ctx, req, resMap); err != nil {
+		if err := readJSON(ctx, req, resMap); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be deleted, could not read request")
 
