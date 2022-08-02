@@ -14,7 +14,7 @@ import (
 
 func dcData() (map[string]*dc.Datacenter, *dc.Datacenter) {
 	this := make(map[string]*dc.Datacenter)
-	valDC := &dc.Datacenter{} //nolint:exhaustruct,exhaustivestruct
+	valDC := new(dc.Datacenter)
 
 	return this, valDC
 }

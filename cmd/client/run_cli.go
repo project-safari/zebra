@@ -23,7 +23,7 @@ func ShowUsr(cmd *cobra.Command, args []string) error {
 	manyUsr := map[string]*auth.User{}
 	usr := new(auth.User)
 
-	path := fmt.Sprintf("users/%s", args[0])
+	path := fmt.Sprintf("/login/%s", args[0])
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -31,7 +31,7 @@ func ShowUsr(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("users", nil, manyUsr); e != nil {
+		if _, e := client.Get("/login", nil, manyUsr); e != nil {
 			return e
 		}
 	} else {
@@ -51,14 +51,14 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	if e != nil {
-		return e
-	}
-
 	manyUsr := map[string]*auth.User{}
 	usr := new(auth.User)
 
-	path := fmt.Sprintf("registrations/%s", args[0])
+	path := fmt.Sprintf("/register/%s", args[0])
+
+	if e != nil {
+		return e
+	}
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -66,7 +66,7 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("registrations", nil, manyUsr); e != nil {
+		if _, e := client.Get("/register", nil, manyUsr); e != nil {
 			return e
 		}
 	} else {
@@ -87,15 +87,16 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	if e != nil {
-		return e
-	}
+	path := fmt.Sprintf("/refresh/%s", args[0])
 
 	vlans := map[string]*network.VLANPool{}
 	netName := args[0]
+
 	vlan := new(network.VLANPool)
 
-	path := fmt.Sprintf("vlans/%s", args[0])
+	if e != nil {
+		return e
+	}
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -103,7 +104,7 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("vlans", nil, vlans); e != nil {
+		if _, e := client.Get("/refresh", nil, vlans); e != nil {
 			return e
 		}
 	} else {
@@ -122,15 +123,15 @@ func ShowSw(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	if e != nil {
-		return e
-	}
-
 	swName := args[0]
 	sw := new(network.Switch)
 
-	path := fmt.Sprintf("switches/%s", args[0])
+	path := fmt.Sprintf("/refresh/%s", args[0])
 	manySw := map[string]*network.Switch{}
+
+	if e != nil {
+		return e
+	}
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -138,7 +139,7 @@ func ShowSw(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("switches", nil, manySw); e != nil {
+		if _, e := client.Get("/refresh", nil, manySw); e != nil {
 			return e
 		}
 	} else {
@@ -158,15 +159,15 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
+	path := fmt.Sprintf("/refresh/%s", args[0])
+	IPName := args[0]
+
+	pools := map[string]*network.IPAddressPool{}
+	addr := new(network.IPAddressPool)
+
 	if e != nil {
 		return e
 	}
-
-	IPName := args[0]
-	addr := new(network.IPAddressPool)
-
-	pools := map[string]*network.IPAddressPool{}
-	path := fmt.Sprintf("ip/%s", args[0])
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -174,7 +175,7 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("ip", nil, pools); e != nil {
+		if _, e := client.Get("/refresh", nil, pools); e != nil {
 			return e
 		}
 	} else {
@@ -195,16 +196,16 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("datacenters/%s", args[0])
+	path := fmt.Sprintf("/refresh/%s", args[0])
+
+	center := new(dc.Datacenter)
+	centName := args[0]
+
+	manyCenters := map[string]*dc.Datacenter{}
 
 	if e != nil {
 		return e
 	}
-
-	centName := args[0]
-	center := new(dc.Datacenter)
-
-	manyCenters := map[string]*dc.Datacenter{}
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -212,7 +213,7 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("datacenters", nil, manyCenters); e != nil {
+		if _, e := client.Get("/refresh", nil, manyCenters); e != nil {
 			return e
 		}
 	} else {
@@ -229,18 +230,19 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 }
 
 func ShowLab(cmd *cobra.Command, args []string) error {
+	path := fmt.Sprintf("/refresh/%s", args[0])
+	labName := args[0]
+
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("labs/%s", args[0])
+	manyLabs := map[string]*dc.Lab{}
+
+	lab := new(dc.Lab)
 
 	if e != nil {
 		return e
 	}
-
-	labName := args[0]
-	lab := new(dc.Lab)
-	manyLabs := map[string]*dc.Lab{}
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -248,7 +250,7 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("labs", nil, manyLabs); e != nil {
+		if _, e := client.Get("/refresh", nil, manyLabs); e != nil {
 			return e
 		}
 	} else {
@@ -266,18 +268,19 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 
 func ShowRack(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
+	path := fmt.Sprintf("/refresh/%s", args[0])
 
-	path := fmt.Sprintf("racks/%s", args[0])
+	config, e := Load(configFile)
 
 	if e != nil {
 		return e
 	}
 
 	vcName := args[0]
-	rack := new(dc.Rack)
 
 	manyRacks := map[string]*dc.Rack{}
+
+	rack := new(dc.Rack)
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -285,7 +288,7 @@ func ShowRack(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("racks", nil, manyRacks); e != nil {
+		if _, e := client.Get("/refresh", nil, manyRacks); e != nil {
 			return e
 		}
 	} else {
@@ -306,7 +309,7 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("servers/%s", args[0])
+	path := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
@@ -323,7 +326,7 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("servers", nil, manySrv); e != nil {
+		if _, e := client.Get("/refresh", nil, manySrv); e != nil {
 			return e
 		}
 	} else {
@@ -340,19 +343,18 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 }
 
 func ShowESX(cmd *cobra.Command, args []string) error {
-	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
+	config, e := Load(cmd.Flag("config").Value.String())
 
-	path := fmt.Sprintf("esxs/%s", args[0])
+	path := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
 	}
 
 	esxName := args[0]
-	esx := new(compute.ESX)
-
 	manyESX := map[string]*compute.ESX{}
+
+	esx := new(compute.ESX)
 
 	client, err := NewClient(config)
 	if err != nil {
@@ -360,7 +362,7 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("esxs", nil, manyESX); e != nil {
+		if _, e := client.Get("/refresh", nil, manyESX); e != nil {
 			return e
 		}
 	} else {
@@ -377,17 +379,17 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 }
 
 func ShowVC(cmd *cobra.Command, args []string) error {
-	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
+	path := fmt.Sprintf("/refresh/%s", args[0])
 
-	path := fmt.Sprintf("vcenters/%s", args[0])
+	config, e := Load(cmd.Flag("config").Value.String())
 
 	if e != nil {
 		return e
 	}
 
-	vcName := args[0]
 	vc := new(compute.VCenter)
+
+	vcName := args[0]
 	manyVC := map[string]*compute.VCenter{}
 
 	client, err := NewClient(config)
@@ -396,7 +398,7 @@ func ShowVC(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("vcenters", nil, manyVC); e != nil {
+		if _, e := client.Get("/refresh", nil, manyVC); e != nil {
 			return e
 		}
 	} else {
@@ -413,18 +415,18 @@ func ShowVC(cmd *cobra.Command, args []string) error {
 }
 
 func ShowVM(cmd *cobra.Command, args []string) error {
-	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
+	config, e := Load(cmd.Flag("config").Value.String())
+	vcName := args[0]
 
-	path := fmt.Sprintf("vms/%s", args[0])
+	vm := new(compute.VM)
+
+	manyVM := map[string]*compute.VM{}
+
+	path := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
 	}
-
-	vcName := args[0]
-	vm := new(compute.VM)
-	manyVM := map[string]*compute.VM{}
 
 	client, e := NewClient(config)
 
@@ -433,7 +435,7 @@ func ShowVM(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("vms", nil, manyVM); e != nil {
+		if _, e := client.Get("/refresh", nil, manyVM); e != nil {
 			return e
 		}
 	} else {
