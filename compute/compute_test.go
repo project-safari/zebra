@@ -4,9 +4,11 @@ package compute_test
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/compute"
 	"github.com/stretchr/testify/assert"
@@ -28,9 +30,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server)
 	assert.NotNil(server.Validate(ctx))
 
-	server.ID = "hello"
-	server.Type = "Server"
-	server.Name = "there"
+	server.NamedResource = *zebra.NewNamedResource("there", "Server", nil)
 	assert.NotNil(server.Validate(ctx))
 
 	server.SerialNumber = "a"
@@ -42,11 +42,7 @@ func TestServer(t *testing.T) {
 	server.Model = "b"
 	assert.NotNil(server.Validate(ctx))
 
-	server.Credentials.Name = "c"
-	server.Credentials.Type = Creds
-	server.Credentials.ID = "dddd"
-	server.Credentials.Keys = make(map[string]string)
-	server.Credentials.Keys["password"] = "e"
+	server.Credentials = *zebra.NewCredentials("e", map[string]string{"password": "e"}, nil)
 	assert.NotNil(server.Validate(ctx))
 
 	server.Credentials.Keys["password"] = "actualPassw0rd%9"
@@ -70,9 +66,7 @@ func TestESX(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(esx.Validate(ctx))
 
-	esx.ID = "rolling in the deep"
-	esx.Type = "ESX"
-	esx.Name = "adele"
+	esx.NamedResource = *zebra.NewNamedResource("adele", "ESX", nil)
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.IP = net.ParseIP("10.1.0.0")
@@ -81,11 +75,7 @@ func TestESX(t *testing.T) {
 	esx.ServerID = "server id"
 	assert.NotNil(esx.Validate(ctx))
 
-	esx.Credentials.Name = "k"
-	esx.Credentials.ID = "lllll"
-	esx.Credentials.Type = Creds
-	esx.Credentials.Keys = make(map[string]string)
-	esx.Credentials.Keys["password"] = "m"
+	esx.Credentials = *zebra.NewCredentials("k", map[string]string{"password": "m"}, nil)
 	assert.NotNil(esx.Validate(ctx))
 
 	esx.Credentials.Keys["password"] = "actualPassw0rd%2"
@@ -106,19 +96,13 @@ func TestVCenter(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(vcenter.Validate(ctx))
 
-	vcenter.ID = "blah"
-	vcenter.Type = "VCenter"
-	vcenter.Name = "blahblah"
+	vcenter.NamedResource = *zebra.NewNamedResource("blah", "VCenter", nil)
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.IP = net.ParseIP("10.1.0.0")
 	assert.NotNil(vcenter.Validate(ctx))
 
-	vcenter.Credentials.Name = "n"
-	vcenter.Credentials.ID = "oooo"
-	vcenter.Credentials.Type = Creds
-	vcenter.Credentials.Keys = make(map[string]string)
-	vcenter.Credentials.Keys["password"] = "p"
+	vcenter.Credentials = *zebra.NewCredentials("n", map[string]string{"password": "p"}, nil)
 	assert.NotNil(vcenter.Validate(ctx))
 
 	vcenter.Credentials.Keys["password"] = "actualPassw0rd%4"
@@ -139,9 +123,7 @@ func TestVM(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(machine.Validate(ctx))
 
-	machine.ID = "can you hear me"
-	machine.Type = "VM"
-	machine.Name = "you'd like to meet"
+	machine.NamedResource = *zebra.NewNamedResource("test", "VM", nil)
 	assert.NotNil(machine.Validate(ctx))
 
 	machine.ESXID = "q"
@@ -153,13 +135,10 @@ func TestVM(t *testing.T) {
 	machine.VCenterID = "r"
 	assert.NotNil(machine.Validate(ctx))
 
-	machine.Credentials.Name = "s"
-	machine.Credentials.Type = Creds
-	machine.Credentials.ID = "tttt"
-	machine.Credentials.Keys = make(map[string]string)
-	machine.Credentials.Keys["password"] = "u"
+	machine.Credentials = *zebra.NewCredentials("s", map[string]string{"password": "u"}, nil)
 	assert.NotNil(machine.Validate(ctx))
 
+	fmt.Println(machine.Credentials.Keys)
 	machine.Credentials.Keys["password"] = "actualPassw0rd%1"
 	assert.NotNil(machine.Validate(ctx))
 

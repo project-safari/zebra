@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/lease"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -111,7 +111,7 @@ func TestClientDo(t *testing.T) {
 		User:          "loki",
 		Email:         "loki@asgard.io",
 		CACert:        testCACertFile,
-		Defaults:      ConfigDefaults{Duration: zebra.DefaultMaxDuration},
+		Defaults:      ConfigDefaults{Duration: lease.DefaultMaxDuration},
 	}
 
 	client, err := NewClient(cfg)

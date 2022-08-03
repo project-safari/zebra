@@ -10,6 +10,7 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,10 +25,7 @@ func TestSwitch(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(switch1.Validate(ctx))
 
-	switch1.ID = "aaaa"
-	assert.NotNil(switch1.Validate(ctx))
-
-	switch1.Type = "Switch"
+	switch1.BaseResource = *zebra.NewBaseResource("Switch", nil)
 	assert.NotNil(switch1.Validate(ctx))
 
 	switch1.ManagementIP = net.ParseIP("10.1.0.0")
@@ -44,13 +42,8 @@ func TestSwitch(t *testing.T) {
 
 	switch1.Credentials = zebra.Credentials{
 		NamedResource: zebra.NamedResource{
-			BaseResource: zebra.BaseResource{
-				ID:     "blahblah",
-				Type:   "Credentials",
-				Labels: nil,
-				Status: zebra.DefaultStatus(),
-			},
-			Name: "blah",
+			BaseResource: *zebra.NewBaseResource("Credentials", nil),
+			Name:         "blah",
 		},
 		Keys: nil,
 	}
@@ -76,12 +69,11 @@ func TestIPAddressPool(t *testing.T) {
 
 	pool.ID = "aaaa"
 	pool.Type = "IPAddressPool"
+	pool.Status = status.DefaultStatus()
+	assert.NotNil(pool.Validate(ctx))
 
 	pool.Labels = make(map[string]string)
 	pool.Labels = pkg.GroupLabels(pool.Labels, "groupSample")
-
-	assert.Nil(pool.Validate(ctx))
-
 	assert.Nil(pool.Validate(ctx))
 
 	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
@@ -116,8 +108,7 @@ func TestVLANPool(t *testing.T) {
 	assert.True(ok)
 	assert.NotNil(pool.Validate(ctx))
 
-	pool.ID = "cccc"
-	pool.Type = "VLANPool"
+	pool.BaseResource = *zebra.NewBaseResource("VLANPool", nil)
 	pool.RangeStart = 10
 	pool.RangeEnd = 1
 	assert.NotNil(pool.Validate(ctx))

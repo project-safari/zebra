@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,7 @@ func TestBaseResource(t *testing.T) {
 		ID:     "",
 		Type:   "",
 		Labels: zebra.Labels{"key": "value"},
-		Status: zebra.DefaultStatus(),
+		Status: status.DefaultStatus(),
 	}
 	assert.NotNil(res.Validate(ctx))
 
@@ -50,7 +51,7 @@ func TestNamedResource(t *testing.T) {
 			ID:     "",
 			Type:   "",
 			Labels: zebra.Labels{"key": "value"},
-			Status: zebra.DefaultStatus(),
+			Status: status.DefaultStatus(),
 		},
 		Name: "",
 	}
@@ -82,7 +83,7 @@ func TestCredentials(t *testing.T) {
 				ID:     "",
 				Type:   "Credentials",
 				Labels: zebra.Labels{},
-				Status: zebra.DefaultStatus(),
+				Status: status.DefaultStatus(),
 			},
 			Name: "",
 		},
@@ -120,6 +121,14 @@ func TestCredentials(t *testing.T) {
 
 	credentials.Keys["password"] = "properPass123$"
 	assert.NotNil(credentials.Validate(ctx))
+}
+
+func TestGetStatus(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	b := zebra.NewBaseResource("", nil)
+	assert.NotNil(b.GetStatus())
 }
 
 func TestLabelsValidation(t *testing.T) {

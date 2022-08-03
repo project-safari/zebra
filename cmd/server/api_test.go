@@ -14,6 +14,7 @@ import (
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -208,7 +209,8 @@ func TestPostResource(t *testing.T) {
 		h(w, r, nil)
 	})
 
-	body := `{"lab":[{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
+	body := `{"lab":[{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab",
+	"status": {}}]}`
 
 	// Create new resource
 	req := createRequest(assert, "POST", "/resources", body, myAPI)
@@ -223,14 +225,14 @@ func TestPostResource(t *testing.T) {
 	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Create resource with an invalid type, won't read properly
-	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
+	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab","status": {}}]}`
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// Create resource with an invalid ID
-	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
+	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab","status": {}}]}`
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
@@ -259,7 +261,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 				ID:     "10000001",
 				Type:   "Lab",
 				Labels: nil,
-				Status: zebra.DefaultStatus(),
+				Status: status.DefaultStatus(),
 			},
 			Name: "Lab1",
 		},
@@ -271,7 +273,7 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 				ID:     "10000002",
 				Type:   "Lab",
 				Labels: nil,
-				Status: zebra.DefaultStatus(),
+				Status: status.DefaultStatus(),
 			},
 			Name: "Lab2",
 		},
@@ -287,19 +289,19 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	lab2.Labels = pkg.GroupLabels(lab2.Labels, "sampleGroup2")
 
 	// Invalid resources requested to be deleted
-	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
+	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab","status": {}}]}`
 	req := createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.NotEqual(http.StatusOK, rr.Code)
 
-	body = `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
+	body = `{"lab":[{"id":"","type":"","name": "shravya's lab","status": {}}]}`
 	req = createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
-	body = `{"lab":[{"id":"0","type":"Lab","name": "shravya's lab"}]}`
+	body = `{"lab":[{"id":"0","type":"Lab","name": "shravya's lab","status": {}}]}`
 	req = createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)

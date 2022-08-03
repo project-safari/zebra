@@ -199,7 +199,7 @@ func TestBadLoad1(t *testing.T) {
 	fd, err := os.OpenFile(root+"/resources/01/00", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
 	assert.Nil(err)
 
-	_, err = fmt.Fprintf(fd, `{"id":"0100000001","type":"VLANPool","rangeStart":0, "rangeEnd":10}`)
+	_, err = fmt.Fprintf(fd, `{"id":"0100000001","type":"VLANPool","rangeStart":0, "rangeEnd":10,"status": {}}`)
 	assert.Nil(err)
 	fd.Close()
 
@@ -235,7 +235,7 @@ func TestBadLoad2(t *testing.T) {
 	fileDes, err = os.OpenFile(root+"/resources/01/02", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
 	assert.Nil(err)
 
-	_, err = fmt.Fprintf(fileDes, `{"id":"0100000001","type":"VLANPool","rangeStart":0}`)
+	_, err = fmt.Fprintf(fileDes, `{"id":"0100000001","type":"VLANPool","rangeStart":0,,"status": {}}`)
 	assert.Nil(err)
 
 	_, err = fs.Load()
@@ -244,7 +244,7 @@ func TestBadLoad2(t *testing.T) {
 	fileDes, err = os.OpenFile(root+"/resources/01/04", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
 	assert.Nil(err)
 
-	_, err = fmt.Fprintf(fileDes, `{"id":"0100000002","type":"invalid","rangeStart":0, "rangeEnd":10}`)
+	_, err = fmt.Fprintf(fileDes, `{"id":"0100000002","type":"invalid","rangeStart":0, "rangeEnd":10,"status": {}}`)
 	assert.Nil(err)
 
 	_, err = fs.Load()
@@ -253,7 +253,7 @@ func TestBadLoad2(t *testing.T) {
 	fileDes, err = os.OpenFile(root+"/resources/01/05", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
 	assert.Nil(err)
 
-	_, err = fmt.Fprintf(fileDes, `{"id":"0100000002","type":"Switch","rangeStart":0, "rangeEnd":10}`)
+	_, err = fmt.Fprintf(fileDes, `{"id":"0100000002","type":"Switch","rangeStart":0, "rangeEnd":10,"status": {}}`)
 	assert.Nil(err)
 
 	_, err = fs.Load()
