@@ -31,7 +31,12 @@ func TestFindUser(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	store := makeQueryStore(root, assert, makeUser(assert))
+	store := makeQueryStore(root, assert, nil)
+	assert.Nil(findUser(store, "email@domain"))
+
+	assert.Nil(os.RemoveAll(root))
+
+	store = makeQueryStore(root, assert, makeUser(assert))
 
 	assert.Nil(findUser(store, ""))
 	assert.NotNil(findUser(store, "email@domain"))
@@ -72,8 +77,10 @@ func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zeb
 	err := store.Initialize()
 	assert.Nil(err)
 
-	err = store.Create(user)
-	assert.Nil(err)
+	if user != nil {
+		err = store.Create(user)
+		assert.Nil(err)
+	}
 
 	return store
 }

@@ -166,8 +166,8 @@ func (s *Status) Validate(ctx context.Context) error {
 
 // DefaultStatus returns a Status object with starting values (i.e. healthy
 // resource in a free state, active, no user, and create time as right now).
-func DefaultStatus() Status {
-	return Status{
+func DefaultStatus() *Status {
+	return &Status{
 		Fault:       None,
 		Lease:       Free,
 		UsedBy:      "",

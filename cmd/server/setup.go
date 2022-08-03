@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zerologr"
+	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/store"
 	"github.com/rs/zerolog"
 	"gojini.dev/config"
@@ -22,6 +24,8 @@ func setupLogger(cfgStore *config.Store) context.Context {
 }
 
 func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
+	log := logr.FromContextOrDiscard(ctx)
+
 	storeCfg := struct {
 		Root string `json:"rootDir"`
 	}{Root: ""}
@@ -40,6 +44,12 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 
 	resAPI := NewResourceAPI(factory)
 	if e := resAPI.Initialize(storeCfg.Root); e != nil {
+		panic(e)
+	}
+
+	log.Info("zebra store initialized")
+
+	if e := initAdminUser(log, resAPI.Store, cfgStore); e != nil {
 		panic(e)
 	}
 
@@ -62,4 +72,20 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 			nextHandler.ServeHTTP(res, newReq)
 		})
 	}
+}
+
+func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) error {
+	user := new(auth.User)
+
+	if err := cfgStore.Get("admin", user); err != nil {
+		return err
+	}
+
+	if findUser(store, user.Email) == nil {
+		log.Info("creating admin user")
+
+		return store.Create(user)
+	}
+
+	return nil
 }
