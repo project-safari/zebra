@@ -129,7 +129,7 @@ func getEmptyLease() *Lease {
 		return nil
 	}
 
-	return NewLease(getUser(), d, make([]*ResourceReq, 0))
+	return NewLease(getUser().Email, d, make([]*ResourceReq, 0))
 }
 
 func getLease() *Lease {
@@ -153,7 +153,7 @@ func getLease() *Lease {
 		},
 	}
 
-	return NewLease(getUser(), d, resources)
+	return NewLease(getUser().Email, d, resources)
 }
 
 func getRes() zebra.Resource {
