@@ -26,6 +26,8 @@ func New() *cobra.Command {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 
 	rootCmd.AddCommand(NewConfigure())
+	rootCmd.AddCommand(NewLease())
+	rootCmd.AddCommand(NewShow())
 
 	return rootCmd
 }
