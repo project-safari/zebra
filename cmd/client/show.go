@@ -136,11 +136,11 @@ func printResList(t string, l *zebra.ResourceList) {
 		table.DefaultHeaderFormatter = func(format string, vals ...interface{}) string {
 			return strings.ToUpper(fmt.Sprintf(format, vals...))
 		}
-		tbl := table.New("Name", "Serial Number", "Board IP", "Model", "Group", "Owner")
+		tbl := table.New("Name", "Serial Number", "Board IP", "Model", "Group")
 
 		for _, res := range l.Resources {
 			s, _ := res.(*compute.Server)
-			tbl.AddRow(s.Name, s.SerialNumber, s.BoardIP, s.Model, s.GetLabels()["system.group"], s.Status.UsedBy)
+			tbl.AddRow(s.Name, s.SerialNumber, s.BoardIP, s.Model, s.GetLabels()["system.group"])
 		}
 
 		tbl.Print()
