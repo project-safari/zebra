@@ -7,8 +7,15 @@ import (
 	"time"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/auth"
 )
+
+func Type() zebra.Type {
+	return zebra.Type{
+		Name:        "Lease",
+		Description: "lease request from user",
+		Constructor: func() zebra.Resource { return new(Lease) },
+	}
+}
 
 type ResourceReq struct {
 	Type      string           `json:"type"`
@@ -47,7 +54,7 @@ func (r *ResourceReq) IsSatisfied() bool {
 }
 
 // Return a new lease pointer with default values.
-func NewLease(owner auth.User, dur time.Duration, req []*ResourceReq) *Lease {
+func NewLease(userEmail string, dur time.Duration, req []*ResourceReq) *Lease {
 	// Set default values, don't set activation time yet
 	l := &Lease{
 		lock:           sync.RWMutex{},
@@ -56,7 +63,7 @@ func NewLease(owner auth.User, dur time.Duration, req []*ResourceReq) *Lease {
 		Request:        req,
 		ActivationTime: time.Time{},
 	}
-	l.Status.UsedBy = owner.Email
+	l.Status.UsedBy = userEmail
 	l.Status.State = zebra.Inactive
 
 	return l
