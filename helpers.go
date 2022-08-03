@@ -4,6 +4,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const DefaultMaxDuration = 4
+
 func NewBaseResource(resType string, labels Labels) *BaseResource {
 	id := uuid.New().String()
 

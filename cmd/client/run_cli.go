@@ -23,19 +23,14 @@ func ShowUsr(cmd *cobra.Command, args []string) error {
 	manyUsr := map[string]*auth.User{}
 	usr := new(auth.User)
 
-	path := fmt.Sprintf("/login/%s", args[0])
-
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
+	p := fmt.Sprintf("/login/%s", args[0])
 
 	if len(args) == 0 {
-		if _, e := client.Get("/login", nil, manyUsr); e != nil {
+		if _, e := GetNetPaths(config, "/login", "users", manyUsr); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, usr); e != nil {
+		if _, e := GetNetPaths(config, p, "users", usr); e != nil {
 			return e
 		}
 
@@ -54,23 +49,18 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 	manyUsr := map[string]*auth.User{}
 	usr := new(auth.User)
 
-	path := fmt.Sprintf("/register/%s", args[0])
+	p := fmt.Sprintf("/register/%s", args[0])
 
 	if e != nil {
 		return e
 	}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/register", nil, manyUsr); e != nil {
+		if _, e := GetNetPaths(config, "/register", "registrations", manyUsr); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, usr); e != nil {
+		if _, e := GetNetPaths(config, p, "registrations", usr); e != nil {
 			return e
 		}
 
@@ -87,7 +77,7 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	vlans := map[string]*network.VLANPool{}
 	netName := args[0]
@@ -98,17 +88,12 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, vlans); e != nil {
+		if _, e := GetNetPaths(config, "/refresh", "vlans", vlans); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, vlan); e != nil {
+		if _, e := GetNetPaths(config, p, "vlans", vlan); e != nil {
 			return e
 		}
 		vlans[netName] = vlan
@@ -126,24 +111,19 @@ func ShowSw(cmd *cobra.Command, args []string) error {
 	swName := args[0]
 	sw := new(network.Switch)
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 	manySw := map[string]*network.Switch{}
 
 	if e != nil {
 		return e
 	}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manySw); e != nil {
+		if _, e := GetNetPaths(config, "/refresh", "switches", manySw); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, sw); e != nil {
+		if _, e := GetNetPaths(config, p, "switches", sw); e != nil {
 			return e
 		}
 
@@ -159,7 +139,7 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 	IPName := args[0]
 
 	pools := map[string]*network.IPAddressPool{}
@@ -169,17 +149,12 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, pools); e != nil {
+		if _, e := GetNetPaths(config, "/refresh", "ips", pools); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, addr); e != nil {
+		if _, e := GetNetPaths(config, p, "ips", addr); e != nil {
 			return e
 		}
 
@@ -196,7 +171,7 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	center := new(dc.Datacenter)
 	centName := args[0]
@@ -207,17 +182,12 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manyCenters); e != nil {
+		if _, e := GetDCPaths(config, "/refresh", "datacenters", manyCenters); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, center); e != nil {
+		if _, e := GetDCPaths(config, p, "datacenters", center); e != nil {
 			return e
 		}
 
@@ -230,7 +200,7 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 }
 
 func ShowLab(cmd *cobra.Command, args []string) error {
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 	labName := args[0]
 
 	configFile := cmd.Flag("config").Value.String()
@@ -244,17 +214,12 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manyLabs); e != nil {
+		if _, e := GetDCPaths(config, "/refresh", "labs", manyLabs); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, lab); e != nil {
+		if _, e := GetDCPaths(config, p, "labs", lab); e != nil {
 			return e
 		}
 
@@ -268,7 +233,7 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 
 func ShowRack(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	config, e := Load(configFile)
 
@@ -282,17 +247,12 @@ func ShowRack(cmd *cobra.Command, args []string) error {
 
 	rack := new(dc.Rack)
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manyRacks); e != nil {
+		if _, e := GetDCPaths(config, "/refresh", "racks", manyRacks); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, rack); e != nil {
+		if _, e := GetDCPaths(config, p, "racks", rack); e != nil {
 			return e
 		}
 
@@ -309,7 +269,7 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
@@ -320,17 +280,12 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 
 	manySrv := map[string]*compute.Server{}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manySrv); e != nil {
+		if _, e := GetComputePaths(config, "/refresh", "servers", manySrv); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, srv); e != nil {
+		if _, e := GetComputePaths(config, p, "servers", srv); e != nil {
 			return e
 		}
 
@@ -345,7 +300,7 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 func ShowESX(cmd *cobra.Command, args []string) error {
 	config, e := Load(cmd.Flag("config").Value.String())
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
@@ -356,17 +311,12 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 
 	esx := new(compute.ESX)
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manyESX); e != nil {
+		if _, e := GetComputePaths(config, "/refresh", "esxes", manyESX); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, esx); e != nil {
+		if _, e := GetComputePaths(config, p, "esxes", esx); e != nil {
 			return e
 		}
 
@@ -379,7 +329,7 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 }
 
 func ShowVC(cmd *cobra.Command, args []string) error {
-	path := fmt.Sprintf("/refresh/%s", args[0])
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	config, e := Load(cmd.Flag("config").Value.String())
 
@@ -392,17 +342,12 @@ func ShowVC(cmd *cobra.Command, args []string) error {
 	vcName := args[0]
 	manyVC := map[string]*compute.VCenter{}
 
-	client, err := NewClient(config)
-	if err != nil {
-		return err
-	}
-
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manyVC); e != nil {
+		if _, e := GetComputePaths(config, "/refresh", "vcenters", manyVC); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, vc); e != nil {
+		if _, e := GetComputePaths(config, p, "vcenters", vc); e != nil {
 			return e
 		}
 
@@ -422,24 +367,18 @@ func ShowVM(cmd *cobra.Command, args []string) error {
 
 	manyVM := map[string]*compute.VM{}
 
-	path := fmt.Sprintf("/refresh/%s", args[0])
-
-	if e != nil {
-		return e
-	}
-
-	client, e := NewClient(config)
+	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
 	}
 
 	if len(args) == 0 {
-		if _, e := client.Get("/refresh", nil, manyVM); e != nil {
+		if _, e := GetComputePaths(config, "/refresh", "vms", manyVM); e != nil {
 			return e
 		}
 	} else {
-		if _, e := client.Get(path, nil, vm); e != nil {
+		if _, e := GetComputePaths(config, p, "vms", vm); e != nil {
 			return e
 		}
 
@@ -475,7 +414,7 @@ func printSwitch(srv map[string]*network.Switch) table.Writer {
 
 func printLab(labs map[string]*dc.Lab) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "Type", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "Labels"})
 
 	for piece, lb := range labs {
 		data.AppendRow(table.Row{
@@ -483,7 +422,6 @@ func printLab(labs map[string]*dc.Lab) table.Writer {
 			fmt.Sprintf(lb.NamedResource.ID),
 			fmt.Sprintf(lb.NamedResource.Name),
 
-			fmt.Sprintf(lb.NamedResource.Type),
 			fmt.Sprintf("%s", lb.NamedResource.Labels),
 		})
 	}
@@ -493,7 +431,7 @@ func printLab(labs map[string]*dc.Lab) table.Writer {
 
 func printDC(dcs map[string]*dc.Datacenter) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "Type", "Address", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "Address", "Labels"})
 
 	for piece, dc := range dcs {
 		data.AppendRow(table.Row{
@@ -501,7 +439,6 @@ func printDC(dcs map[string]*dc.Datacenter) table.Writer {
 			fmt.Sprintf(dc.NamedResource.ID),
 			fmt.Sprintf(dc.NamedResource.Name),
 
-			fmt.Sprintf(dc.NamedResource.Type),
 			fmt.Sprintf(dc.Address),
 			fmt.Sprintf("%s", dc.NamedResource.Labels),
 		})
@@ -512,7 +449,7 @@ func printDC(dcs map[string]*dc.Datacenter) table.Writer {
 
 func printServer(servers map[string]*compute.Server) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "Board IP", "Type", "Model", "Credentials", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "Board IP", "Model", "Credentials", "Labels"})
 
 	for piece, s := range servers {
 		data.AppendRow(table.Row{
@@ -521,7 +458,6 @@ func printServer(servers map[string]*compute.Server) table.Writer {
 			fmt.Sprintf(s.NamedResource.Name),
 			s.BoardIP.String(),
 
-			fmt.Sprintf(s.NamedResource.Type),
 			fmt.Sprintf(s.Model),
 
 			fmt.Sprintf("%s", s.Credentials.Keys),
@@ -534,7 +470,7 @@ func printServer(servers map[string]*compute.Server) table.Writer {
 
 func printESX(manyEsx map[string]*compute.ESX) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "Server ID", "IP", "Type", "Credentials", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "Server ID", "IP", "Credentials", "Labels"})
 
 	for piece, esx := range manyEsx {
 		data.AppendRow(table.Row{
@@ -545,7 +481,6 @@ func printESX(manyEsx map[string]*compute.ESX) table.Writer {
 			fmt.Sprintf(esx.ServerID),
 			esx.IP.String(),
 
-			fmt.Sprintf(esx.NamedResource.Type),
 			fmt.Sprintf("%s", esx.Credentials.Keys),
 			fmt.Sprintf("%s", esx.NamedResource.Labels),
 		})
@@ -556,7 +491,7 @@ func printESX(manyEsx map[string]*compute.ESX) table.Writer {
 
 func printVC(manyVC map[string]*compute.VCenter) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "IP", "Type", "Credentials", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "IP", "Credentials", "Labels"})
 
 	for piece, vc := range manyVC {
 		data.AppendRow(table.Row{
@@ -565,7 +500,7 @@ func printVC(manyVC map[string]*compute.VCenter) table.Writer {
 
 			fmt.Sprintf(vc.NamedResource.Name),
 			vc.IP.String(),
-			fmt.Sprintf(vc.NamedResource.Type),
+
 			fmt.Sprintf("%s", vc.Credentials.Keys),
 			fmt.Sprintf("%s", vc.NamedResource.Labels),
 		})
@@ -577,7 +512,7 @@ func printVC(manyVC map[string]*compute.VCenter) table.Writer {
 func printVM(manyVM map[string]*compute.VM) table.Writer {
 	data := table.NewWriter()
 	data.AppendHeader(table.Row{
-		"ID", "Name", "IP", "Type", "Credentials",
+		"ID", "Name", "IP", "Credentials",
 		"ESXID", "VCenter ID", "Management IP", "Labels",
 	})
 
@@ -587,7 +522,6 @@ func printVM(manyVM map[string]*compute.VM) table.Writer {
 			fmt.Sprintf(vm.NamedResource.ID),
 
 			fmt.Sprintf(vm.NamedResource.Name),
-			fmt.Sprintf(vm.NamedResource.Type),
 			fmt.Sprintf("%s", vm.Credentials.Keys),
 			fmt.Sprintf(vm.ESXID),
 			fmt.Sprintf(vm.VCenterID),
@@ -601,7 +535,7 @@ func printVM(manyVM map[string]*compute.VM) table.Writer {
 
 func printRack(racks map[string]*dc.Rack) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "Status", "Type", "Row", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "Status", "Row", "Labels"})
 
 	for piece, rack := range racks {
 		data.AppendRow(table.Row{
@@ -609,7 +543,6 @@ func printRack(racks map[string]*dc.Rack) table.Writer {
 			fmt.Sprintf(rack.NamedResource.ID),
 			fmt.Sprintf(rack.NamedResource.Name),
 
-			fmt.Sprintf(rack.NamedResource.Type),
 			fmt.Sprintf(rack.Row),
 			fmt.Sprintf("%s", rack.NamedResource.Labels),
 		})
@@ -620,7 +553,7 @@ func printRack(racks map[string]*dc.Rack) table.Writer {
 
 func printUser(users map[string]*auth.User) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Name", "Status", "Type", "Password Hash", "Role", "Priviledges", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Name", "Status", "Password Hash", "Role", "Priviledges", "Labels"})
 
 	for piece, user := range users {
 		data.AppendRow(table.Row{
@@ -628,7 +561,6 @@ func printUser(users map[string]*auth.User) table.Writer {
 			fmt.Sprintf(user.NamedResource.ID),
 			fmt.Sprintf(user.NamedResource.Name),
 
-			fmt.Sprintf(user.NamedResource.Type),
 			fmt.Sprintf(user.PasswordHash),
 			fmt.Sprintf(user.Role.Name),
 
@@ -642,14 +574,14 @@ func printUser(users map[string]*auth.User) table.Writer {
 
 func printNets(vlans map[string]*network.VLANPool) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Status", "Type", "Range Start", "Range End", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Status", "Range Start", "Range End", "Labels"})
 
 	for piece, vlan := range vlans {
 		data.AppendRow(table.Row{
 			piece,
 			fmt.Sprintf(vlan.ID),
 			fmt.Sprintf(vlan.Status.UsedBy),
-			fmt.Sprintf(vlan.Type),
+
 			fmt.Sprintf("%010d", vlan.RangeStart),
 			fmt.Sprintf("%010d", vlan.RangeEnd),
 			fmt.Sprintf("%s", vlan.Labels),
@@ -661,14 +593,14 @@ func printNets(vlans map[string]*network.VLANPool) table.Writer {
 
 func printIP(vlans map[string]*network.IPAddressPool) table.Writer {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"ID", "Status", "Type", "Subnets", "Labels"})
+	data.AppendHeader(table.Row{"ID", "Status", "Subnets", "Labels"})
 
 	for piece, pool := range vlans {
 		data.AppendRow(table.Row{
 			piece,
 			fmt.Sprintf(pool.ID),
 			fmt.Sprintf(pool.Status.UsedBy),
-			fmt.Sprintf(pool.Type),
+
 			fmt.Sprintf("%s", pool.Subnets),
 			fmt.Sprintf("%s", pool.Labels),
 		})

@@ -76,7 +76,7 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 	})
 
 	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
-		Use:          "ip",
+		Use:          "ips",
 		Short:        "show zebra IP-Address-Pools",
 		RunE:         ShowIP,
 		Args:         cobra.MaximumNArgs(1),
