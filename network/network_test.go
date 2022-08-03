@@ -82,8 +82,6 @@ func TestIPAddressPool(t *testing.T) {
 
 	assert.Nil(pool.Validate(ctx))
 
-	assert.Nil(pool.Validate(ctx))
-
 	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
 	ipnet.Mask = ipnet.IP.DefaultMask()
 	pool.Subnets = append(pool.Subnets, ipnet)

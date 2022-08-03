@@ -33,10 +33,10 @@ var (
 // BaseResource must be embedded in all resource structs, ensuring each resource is
 // assigned an ID string.
 type BaseResource struct {
-	ID     string `json:"id"`
-	Type   string `json:"type"`
-	Labels Labels `json:"labels,omitempty"`
-	Status Status `json:"status,omitempty"`
+	ID     string  `json:"id"`
+	Type   string  `json:"type"`
+	Labels Labels  `json:"labels,omitempty"`
+	Status *Status `json:"status,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.
@@ -55,7 +55,11 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 		return err
 	}
 
-	return r.Status.Validate(ctx)
+	if r.Status != nil {
+		return r.Status.Validate(ctx)
+	}
+
+	return nil
 }
 
 // Return ID of BaseResource r.

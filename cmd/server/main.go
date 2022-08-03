@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 	"gojini.dev/config"
 	"gojini.dev/web"
@@ -25,19 +26,21 @@ func main() {
 	rootCmd.RunE = run
 	rootCmd.SilenceUsage = true
 	rootCmd.SetVersionTemplate(version + "\n")
-	rootCmd.Flags().StringP("config", "c", path.Join(
-		func() string {
-			s, _ := os.Getwd()
+	rootCmd.PersistentFlags().StringP("config", "c", cwd("server.json"),
+		"config file (default: $PWD/server.json)")
 
-			return s
-		}(), "server.json"),
-		"config file (default: $PWD/server.json",
-	)
+	rootCmd.AddCommand(NewInitCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func cwd(f string) string {
+	s, _ := os.Getwd()
+
+	return path.Join(s, f)
 }
 
 func run(cmd *cobra.Command, args []string) error {
@@ -54,6 +57,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 func startServer(cfgStore *config.Store) error {
 	appCtx := setupLogger(cfgStore)
+	log := logr.FromContextOrDiscard(appCtx)
 
 	serverCfg := new(web.Config)
 	if e := cfgStore.Get("server", serverCfg); e != nil {
@@ -61,6 +65,9 @@ func startServer(cfgStore *config.Store) error {
 	}
 
 	setup := setupAdapter(appCtx, cfgStore)
+
+	log.Info("setup completed")
+
 	login := loginAdapter()
 	register := registerAdapter()
 	auth := authAdapter()
@@ -75,6 +82,8 @@ func startServer(cfgStore *config.Store) error {
 	handler := web.Wrap(routes, setup, login, register, auth, refresh)
 
 	webServer := web.NewServer(serverCfg, handler)
+
+	log.Info("starting zebra server")
 
 	return webServer.Start(appCtx)
 }
