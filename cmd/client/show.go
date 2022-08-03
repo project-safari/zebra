@@ -4,9 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/compute"
+	"github.com/project-safari/zebra/lease"
+	"github.com/project-safari/zebra/store"
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var ErrShow = errors.New("error with show command")
@@ -17,10 +25,8 @@ func NewShow() *cobra.Command {
 		Short:        "show resources (filter by type)",
 		RunE:         showResources,
 		SilenceUsage: true,
-		Args:         cobra.MinimumNArgs(0),
+		Args:         cobra.MaximumNArgs(1),
 	}
-
-	showCmd.Flags().StringP("type", "t", "all", "resource type")
 
 	return showCmd
 }
@@ -36,14 +42,18 @@ func showResources(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	res := zebra.NewResourceMap(nil)
+	res := zebra.NewResourceMap(store.DefaultFactory())
 
 	resCode, err := client.Get("api/v1/resources", req, res)
 	if resCode != http.StatusOK {
 		return ErrShow
 	}
 
-	fmt.Println(res.MarshalJSON())
+	if err != nil {
+		return err
+	}
+
+	printResMap(res)
 
 	return err
 }
@@ -56,14 +66,28 @@ func makeShowReq(cmd *cobra.Command, args []string) (*Config, interface{}, error
 		return nil, nil, err
 	}
 
-	types, err := cmd.Flags().GetStringSlice("type")
-	if err != nil {
-		return nil, nil, err
-	}
+	types := args
 
 	// If all, make an empty request to show all resources.
-	if types[0] == "all" {
+	if len(types) == 0 || strings.ToLower(types[0]) == "all" {
 		types = []string{}
+	}
+
+	// Right now, manually change caps
+	for i, t := range types {
+		switch strings.ToLower(t) {
+		case "ipaddresspool":
+			types[i] = "IPAddressPool"
+		case "vlanpool":
+			types[i] = "VLANPool"
+			types[i] = "ESX"
+		case "vcenter":
+			types[i] = "VCenter"
+		case "vm":
+			types[i] = "VM"
+		default:
+			types[i] = cases.Title(language.AmericanEnglish).String(t)
+		}
 	}
 
 	qr := struct {
@@ -76,4 +100,63 @@ func makeShowReq(cmd *cobra.Command, args []string) (*Config, interface{}, error
 	}
 
 	return cfg, qr, nil
+}
+
+func printResMap(resMap *zebra.ResourceMap) {
+	first := true
+	for t, l := range resMap.Resources {
+		if first {
+			fmt.Println()
+		}
+
+		printResList(t, l)
+		fmt.Println()
+	}
+}
+
+func printResList(t string, l *zebra.ResourceList) {
+	switch t {
+	case "User":
+		fmt.Printf("-- USERS --\n\n")
+
+		table.DefaultHeaderFormatter = func(format string, vals ...interface{}) string {
+			return strings.ToUpper(fmt.Sprintf(format, vals...))
+		}
+		tbl := table.New("Name", "Email", "Role")
+
+		for _, res := range l.Resources {
+			u, _ := res.(*auth.User)
+			tbl.AddRow(u.Name, u.Email, u.Role.Name)
+		}
+
+		tbl.Print()
+	case "Server":
+		fmt.Printf("-- SERVERS --\n\n")
+
+		table.DefaultHeaderFormatter = func(format string, vals ...interface{}) string {
+			return strings.ToUpper(fmt.Sprintf(format, vals...))
+		}
+		tbl := table.New("Name", "Group", "Serial Number", "Board IP", "Model")
+
+		for _, res := range l.Resources {
+			s, _ := res.(*compute.Server)
+			tbl.AddRow(s.Name, s.GetLabels()["system.group"], s.SerialNumber, s.BoardIP, s.Model)
+		}
+
+		tbl.Print()
+	case "Lease":
+		fmt.Printf("-- LEASES --\n\n")
+
+		table.DefaultHeaderFormatter = func(format string, vals ...interface{}) string {
+			return strings.ToUpper(fmt.Sprintf(format, vals...))
+		}
+		tbl := table.New("Owner", "Request", "Duration", "Status")
+
+		for _, res := range l.Resources {
+			lease, _ := res.(*lease.Lease)
+			tbl.AddRow(lease.Status.UsedBy, lease.Request, lease.Duration, lease.Status.State)
+		}
+
+		tbl.Print()
+	}
 }

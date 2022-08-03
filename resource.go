@@ -112,7 +112,7 @@ func (r *NamedResource) Validate(ctx context.Context) error {
 // information to store for the authentication method).
 type Credentials struct {
 	NamedResource
-	Keys map[string]string
+	Keys map[string]string `json:"keys"`
 }
 
 // Validate returns an error if the given Credentials object has incorrect values.

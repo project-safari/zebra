@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrNoCACert     = errors.New("zebra CA certificate file is not conifugred")
+	ErrNoCACert     = errors.New("zebra CA certificate file is not configured")
 	ErrNoConfig     = errors.New("zebra config file is not specified")
 	ErrNoEmail      = errors.New("user email is not configured")
 	ErrNoPrivateKey = errors.New("user private key is not configured")

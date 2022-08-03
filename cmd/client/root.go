@@ -28,6 +28,8 @@ func New() *cobra.Command {
 	rootCmd.AddCommand(NewConfigure())
 	rootCmd.AddCommand(NewLease())
 	rootCmd.AddCommand(NewShow())
+	rootCmd.AddCommand(NewImport())
+	rootCmd.AddCommand(NewExport())
 
 	return rootCmd
 }
