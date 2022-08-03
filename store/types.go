@@ -5,6 +5,7 @@ import (
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/compute"
 	"github.com/project-safari/zebra/dc"
+	"github.com/project-safari/zebra/lease"
 	"github.com/project-safari/zebra/network"
 )
 
@@ -30,6 +31,9 @@ func DefaultFactory() zebra.ResourceFactory {
 
 	// zebra server resources
 	factory.Add(auth.UserType())
+
+	// zebra lease resource
+	factory.Add(lease.Type())
 
 	// Need to add all the known types here
 	return factory
