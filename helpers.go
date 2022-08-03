@@ -5,8 +5,6 @@ import (
 	"github.com/project-safari/zebra/status"
 )
 
-const DefaultMaxDuration = 4
-
 func NewBaseResource(resType string, labels Labels) *BaseResource {
 	id := GenerateID()
 

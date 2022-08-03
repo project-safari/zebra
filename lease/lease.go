@@ -11,6 +11,8 @@ import (
 	"github.com/project-safari/zebra/status"
 )
 
+const DefaultMaxDuration = 4
+
 type ResourceReq struct {
 	Type      string           `json:"type"`
 	Group     string           `json:"group"`
@@ -133,7 +135,7 @@ func (l *Lease) RequestList() []*ResourceReq {
 }
 
 func (l *Lease) Validate(ctx context.Context) error {
-	if l.Duration.Hours() > zebra.DefaultMaxDuration {
+	if l.Duration.Hours() > DefaultMaxDuration {
 		return ErrLeaseValid
 	}
 

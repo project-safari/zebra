@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/lease"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -40,7 +40,7 @@ func NewConfigure() *cobra.Command {
 		RunE:         configDefaults,
 		SilenceUsage: true,
 	}
-	defaultCmd.Flags().IntP("duration", "t", zebra.DefaultMaxDuration, "duration in hours")
+	defaultCmd.Flags().IntP("duration", "t", lease.DefaultMaxDuration, "duration in hours")
 	configCmd.AddCommand(defaultCmd)
 
 	return configCmd
@@ -108,7 +108,7 @@ func NewConfig() *Config {
 		Key:           nil,
 		CACert:        "",
 		Defaults: ConfigDefaults{
-			Duration: zebra.DefaultMaxDuration,
+			Duration: lease.DefaultMaxDuration,
 		},
 	}
 }
@@ -250,7 +250,7 @@ func configDefaults(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	if duration > zebra.DefaultMaxDuration {
+	if duration > lease.DefaultMaxDuration {
 		return ErrLeaseDuration
 	}
 
