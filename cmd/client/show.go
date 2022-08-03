@@ -13,19 +13,22 @@ zebra show networks
 zebra show switches
 zebra show racks
 zebra show labs
-zebra show data-centers
+zebra show esx
+
+zebra show datacenters
 zebra command will use the private RSA key that the user created
 before registration and authenticate so there is no need to login for the CLI
 all show commands will support label filters
 
 distributed among the following files:
+
 zebra_cli (command inventory)
 run_cli (runE functions)
 show_test (test file)
 */
 
 // create inventory of commands for the zebra cli.
-func NewZebra() *cobra.Command {
+func NewShow() *cobra.Command {
 	// default zebra command to show resources.
 	zebraCmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:   "show",
@@ -58,14 +61,14 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 	zebraCmd.AddCommand(
 		&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 			Use:          "vlans",
-			Short:        "show zebra switches",
+			Short:        "show zebra vlans",
 			RunE:         ShowVlan,
 			Args:         cobra.MaximumNArgs(1),
 			SilenceUsage: true,
 		})
 
 	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
-		Use:          "sws",
+		Use:          "switches",
 		Short:        "show zebra switches",
 		RunE:         ShowSw,
 		Args:         cobra.MaximumNArgs(1),
@@ -73,7 +76,7 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 	})
 
 	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
-		Use:          "ip",
+		Use:          "ips",
 		Short:        "show zebra IP-Address-Pools",
 		RunE:         ShowIP,
 		Args:         cobra.MaximumNArgs(1),
@@ -86,7 +89,7 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 // function to add show commands for dc resources to zebraCmd.
 func NewDCCmd(zebraCmd *cobra.Command) *cobra.Command {
 	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
-		Use:          "dc",
+		Use:          "datacenters",
 		Short:        "show datacenters",
 		RunE:         ShowDC,
 		SilenceUsage: true,
@@ -121,7 +124,7 @@ func NewSrvCmd(zebraCmd *cobra.Command) *cobra.Command {
 	})
 
 	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
-		Use:          "esx",
+		Use:          "esxs",
 		Short:        "show esx-servers",
 		RunE:         ShowESX,
 		Args:         cobra.MaximumNArgs(1),

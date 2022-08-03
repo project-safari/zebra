@@ -16,10 +16,10 @@ require (
 )
 
 require (
-	github.com/jedib0t/go-pretty/v6 v6.3.5 // indirect
+	github.com/jedib0t/go-pretty/v6 v6.3.5 
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	// gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -36,5 +36,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	gojini.dev/web v0.0.0-20220611200440-c2f6a400e1e0
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1
 )

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -122,7 +123,6 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 }
 
-/*
 func TestLabelsValidation(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -147,4 +147,16 @@ func TestLabelsValidation(t *testing.T) {
 	assert.NotNil(resTwo.Validate(context.Background()))
 	assert.Equal(zebra.ErrLabel, resTwo.Validate(context.Background()))
 }
-*/
+
+func TestNewCred(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	creds := zebra.NewCredential(pkg.Name(), labels)
+
+	assert.NotNil(creds)
+}

@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/filestore"
 	"github.com/project-safari/zebra/network"
@@ -52,16 +51,6 @@ func TestCreate(t *testing.T) {
 	// Store object again, should update
 	resource.RangeStart = 1
 	assert.Nil(fs.Create(resource))
-
-	// test error cases that remove or close from filestore.
-
-	f := new(os.File)
-	errs := multierror.Append(nil, err)
-	errC := filestore.CaseClose(f, errs)
-
-	errs = multierror.Append(errs, errC)
-
-	assert.NotNil(errs)
 }
 
 func TestLoad(t *testing.T) {

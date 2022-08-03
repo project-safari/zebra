@@ -14,13 +14,13 @@ import (
 
 func dcData() (map[string]*dc.Datacenter, *dc.Datacenter) {
 	this := make(map[string]*dc.Datacenter)
-	valDC := &dc.Datacenter{} //nolint:exhaustruct,exhaustivestruct
+	valDC := new(dc.Datacenter)
 
 	return this, valDC
 }
 
 func test() *cobra.Command {
-	testCmd := NewZebra()
+	testCmd := NewShow()
 
 	return testCmd
 }
@@ -64,7 +64,7 @@ func TestClient(t *testing.T) {
 	assert.Nil(err)
 	assert.NotNil(c)
 
-	cli, err := startClient(cfg)
+	cli, err := NewClient(cfg)
 
 	assert.Nil(err)
 
@@ -75,7 +75,7 @@ func TestNewZebraCommand(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	cmd := NewZebra()
+	cmd := NewShow()
 	assert.NotNil(cmd)
 }
 
