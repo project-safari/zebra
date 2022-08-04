@@ -13,6 +13,11 @@ import (
 	"github.com/project-safari/zebra/typestore"
 )
 
+func (rs *ResourceStore) Stop() {
+	rs.lock.Lock()
+	defer rs.lock.Unlock()
+}
+
 type ResourceStore struct {
 	lock        sync.RWMutex
 	StorageRoot string
@@ -104,8 +109,7 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 		return zebra.ErrInvalidResource
 	}
 
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+	rs.Stop()
 
 	err := rs.fs.Create(res)
 	if err != nil {
@@ -135,8 +139,7 @@ func (rs *ResourceStore) Delete(res zebra.Resource) error {
 		return zebra.ErrInvalidResource
 	}
 
-	rs.lock.Lock()
-	defer rs.lock.Unlock()
+	rs.Stop()
 
 	err := rs.fs.Delete(res)
 	if err != nil {

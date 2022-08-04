@@ -162,7 +162,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(rs.Initialize())
 
 	// Invalid resource, should fail
-	// assert.NotNil(rs.Create(nil))
+	assert.NotNil(rs.Create(nil))
 
 	// Valid resource, should pass
 	vlan := getVLAN()
@@ -174,6 +174,19 @@ func TestCreate(t *testing.T) {
 
 	// Duplicate resource, should update
 	assert.NotNil(rs.Create(vlan))
+
+	vlan2 := &network.VLANPool{
+		BaseResource: zebra.BaseResource{
+			ID:     "0100001",
+			Type:   "invalid",
+			Labels: nil,
+			Status: zebra.DefaultStatus(),
+		},
+		RangeStart: 0,
+		RangeEnd:   10,
+	}
+
+	assert.NotNil(rs.Create(vlan2))
 }
 
 func TestQueryLabel(t *testing.T) {
@@ -507,4 +520,18 @@ func TestQueryProperty(t *testing.T) {
 	resMap, err = rs.QueryProperty(zebra.Query{Op: 0x7, Key: "", Values: []string{""}})
 	assert.Nil(resMap)
 	assert.NotNil(err)
+}
+
+func TestStop(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	factory := zebra.Factory()
+	factory.Add(network.VLANPoolType())
+
+	rs := store.NewResourceStore("test", factory)
+
+	rs.Stop()
+
+	assert.NotNil(factory)
 }

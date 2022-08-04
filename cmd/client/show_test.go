@@ -440,3 +440,12 @@ func TestShowVM(t *testing.T) {
 
 	assert.NotNil(printed)
 }
+
+func TestShowTest(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	typed := GetType("VlanPool")
+
+	assert.NotNil(typed)
+}
