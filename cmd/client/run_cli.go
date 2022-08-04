@@ -26,17 +26,19 @@ func ShowUsr(cmd *cobra.Command, args []string) error {
 	p := fmt.Sprintf("/login/%s", args[0])
 
 	if len(args) == 0 {
-		if _, e := GetNetPaths(config, "/login", "users", manyUsr); e != nil {
+		if _, e := GetPath(config, "/login", GetType("user")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetNetPaths(config, p, "users", usr); e != nil {
+		if _, e := GetPath(config, p, usr); e != nil {
 			return e
 		}
 
 		manyUsr[usr.Name] = usr
 	}
 
+	// cannot use manyUsr (variable of type *zebra.ResourceMap)
+	// as map[string]*auth.User value in argument to
 	fmt.Println(printUser(manyUsr).Render())
 
 	return nil
@@ -56,11 +58,11 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetNetPaths(config, "/register", "registrations", manyUsr); e != nil {
+		if _, e := GetPath(config, "/register", GetType("user")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetNetPaths(config, p, "registrations", usr); e != nil {
+		if _, e := GetPath(config, p, usr); e != nil {
 			return e
 		}
 
@@ -89,13 +91,14 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetNetPaths(config, "/refresh", "vlans", vlans); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("VlanPool")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetNetPaths(config, p, "vlans", vlan); e != nil {
+		if _, e := GetPath(config, p, vlan); e != nil {
 			return e
 		}
+
 		vlans[netName] = vlan
 	}
 
@@ -119,11 +122,11 @@ func ShowSw(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetNetPaths(config, "/refresh", "switches", manySw); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("Switch")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetNetPaths(config, p, "switches", sw); e != nil {
+		if _, e := GetPath(config, p, sw); e != nil {
 			return e
 		}
 
@@ -150,11 +153,11 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetNetPaths(config, "/refresh", "ips", pools); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("IPAddressPool")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetNetPaths(config, p, "ips", addr); e != nil {
+		if _, e := GetPath(config, p, addr); e != nil {
 			return e
 		}
 
@@ -183,11 +186,11 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetDCPaths(config, "/refresh", "datacenters", manyCenters); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("Datacenter")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetDCPaths(config, p, "datacenters", center); e != nil {
+		if _, e := GetPath(config, p, center); e != nil {
 			return e
 		}
 
@@ -215,11 +218,11 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetDCPaths(config, "/refresh", "labs", manyLabs); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("Lab")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetDCPaths(config, p, "labs", lab); e != nil {
+		if _, e := GetPath(config, p, lab); e != nil {
 			return e
 		}
 
@@ -248,11 +251,11 @@ func ShowRack(cmd *cobra.Command, args []string) error {
 	rack := new(dc.Rack)
 
 	if len(args) == 0 {
-		if _, e := GetDCPaths(config, "/refresh", "racks", manyRacks); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("Rack")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetDCPaths(config, p, "racks", rack); e != nil {
+		if _, e := GetPath(config, p, rack); e != nil {
 			return e
 		}
 
@@ -281,11 +284,11 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 	manySrv := map[string]*compute.Server{}
 
 	if len(args) == 0 {
-		if _, e := GetComputePaths(config, "/refresh", "servers", manySrv); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("Server")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetComputePaths(config, p, "servers", srv); e != nil {
+		if _, e := GetPath(config, p, srv); e != nil {
 			return e
 		}
 
@@ -312,11 +315,11 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 	esx := new(compute.ESX)
 
 	if len(args) == 0 {
-		if _, e := GetComputePaths(config, "/refresh", "esxes", manyESX); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("ESX")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetComputePaths(config, p, "esxes", esx); e != nil {
+		if _, e := GetPath(config, p, esx); e != nil {
 			return e
 		}
 
@@ -343,11 +346,11 @@ func ShowVC(cmd *cobra.Command, args []string) error {
 	manyVC := map[string]*compute.VCenter{}
 
 	if len(args) == 0 {
-		if _, e := GetComputePaths(config, "/refresh", "vcenters", manyVC); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("VCenter")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetComputePaths(config, p, "vcenters", vc); e != nil {
+		if _, e := GetPath(config, p, vc); e != nil {
 			return e
 		}
 
@@ -374,11 +377,11 @@ func ShowVM(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetComputePaths(config, "/refresh", "vms", manyVM); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("vm")); e != nil {
 			return e
 		}
 	} else {
-		if _, e := GetComputePaths(config, p, "vms", vm); e != nil {
+		if _, e := GetPath(config, p, vm); e != nil {
 			return e
 		}
 
