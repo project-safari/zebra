@@ -56,7 +56,7 @@ func TestUser(t *testing.T) {
 	assert.NotNil(god.Validate(ctx))
 
 	god.PasswordHash = auth.HashPassword("youhaveachoice")
-	assert.Nil(god.Validate(ctx))
+	assert.NotNil(god.Validate(ctx)) // it will have an error because it does not have group label, so not nil.
 
 	adamKey, err := auth.Generate()
 	assert.Nil(err)

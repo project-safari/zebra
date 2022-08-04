@@ -339,11 +339,13 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
 		inVals = true
 	}
+	empty := zebra.EmptyType()
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).Interface()
-			vType, err := zebra.TypeChecker(val)
+			vType, err := zebra.TypeChecker(val, empty)
+
 			if err != nil {
 				return resMap, err
 			}

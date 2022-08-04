@@ -240,23 +240,14 @@ func TestPostResource(t *testing.T) {
 	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Update existing resource
-<<<<<<< HEAD
-	req = createRequest(assert, "POST", "/resources", string(body1))
-=======
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
->>>>>>> 6fa4313a028051cecd9a1774bbd9196383051fb0
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.NotEqual(http.StatusOK, rr.Code)
 
 	// Create resource with an invalid type, won't read properly
-<<<<<<< HEAD
-	body := `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
-	req = createRequest(assert, "POST", "/resources", body)
-=======
 	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
->>>>>>> 6fa4313a028051cecd9a1774bbd9196383051fb0
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
@@ -340,24 +331,14 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 	handler.ServeHTTP(rr, req)
 	assert.NotEqual(http.StatusOK, rr.Code)
 
-<<<<<<< HEAD
-	body2 := `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
-	req = createRequest(assert, "DELETE", "/resources", body2)
-=======
 	body = `{"lab":[{"id":"","type":"","name": "shravya's lab"}]}`
 	req = createRequest(assert, "DELETE", "/resources", body, myAPI)
->>>>>>> 6fa4313a028051cecd9a1774bbd9196383051fb0
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
-<<<<<<< HEAD
-	body2 = `{"lab":[{"id":"0","type":"Lab","name": "shravya's lab"}]}`
-	req = createRequest(assert, "DELETE", "/resources", body2)
-=======
 	body = `{"lab":[{"id":"0","type":"Lab","name": "shravya's lab"}]}`
 	req = createRequest(assert, "DELETE", "/resources", body, myAPI)
->>>>>>> 6fa4313a028051cecd9a1774bbd9196383051fb0
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)

@@ -15,6 +15,14 @@ func (t *Type) New() Resource {
 	return t.Constructor()
 }
 
+func EmptyType() Type {
+	return Type{
+		Name:        "",
+		Description: "",
+		Constructor: func() Resource { return nil },
+	}
+}
+
 type ResourceFactory interface {
 	New(string) Resource
 	Add(Type) ResourceFactory
@@ -93,14 +101,11 @@ func CopyResourceList(dest *ResourceList, src *ResourceList) {
 	copy(dest.Resources, src.Resources)
 }
 
-//Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not
-func TypeChecker(data interface{}) (Type, error) {
-	empty := Type{
-		Name:        "",
-		Description: "",
-		Constructor: func() Resource { return nil },
-	}
+// Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not
+func TypeChecker(data interface{}, empty Type) (Type, error) {
+
 	vType, err := json.Marshal(data)
+
 	if err != nil {
 		return empty, err
 	}
@@ -108,6 +113,7 @@ func TypeChecker(data interface{}) (Type, error) {
 	if err = json.Unmarshal(vType, &empty); err != nil {
 		return empty, err
 	}
+
 	return empty, nil
 }
 
@@ -135,7 +141,7 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 			return ErrTypeEmpty
 		}
 
-		vType, err := TypeChecker(vAny)
+		vType, err := TypeChecker(vAny, EmptyType())
 		if err != nil {
 			return ErrTypeEmpty
 		}
@@ -160,7 +166,6 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 		}
 
 		r.Resources = append(r.Resources, resource)
-
 	}
 
 	return nil
