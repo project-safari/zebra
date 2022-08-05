@@ -19,7 +19,7 @@ type ResourceReq struct {
 	Resources []zebra.Resource `json:"resources,omitempty"`
 }
 
-func LeaseType() zebra.Type {
+func GetLeaseType() zebra.Type {
 	return zebra.Type{
 		Name:        "Lease",
 		Description: "lease",
@@ -59,7 +59,7 @@ func NewLease(owner auth.User, dur time.Duration, req []*ResourceReq) *Lease {
 	// Set default values, don't set activation time yet
 	l := &Lease{
 		lock:           sync.RWMutex{},
-		BaseResource:   *zebra.NewBaseResource(LeaseType(), map[string]string{"system.group": "leases"}),
+		BaseResource:   *zebra.NewBaseResource(GetLeaseType(), map[string]string{"system.group": "leases"}),
 		Duration:       dur,
 		Request:        req,
 		ActivationTime: time.Time{},

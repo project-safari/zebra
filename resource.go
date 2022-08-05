@@ -3,6 +3,7 @@ package zebra
 import (
 	"context"
 	"errors"
+	"log"
 	"strings"
 	"unicode"
 )
@@ -80,6 +81,7 @@ func (r *BaseResource) GetLabels() Labels {
 
 // Special label validation to ensure all resources have group label.
 func (r *BaseResource) LabelsValidate() error {
+	log.Default().Printf("Checking Lables: %v", r.Labels)
 	if _, ok := r.Labels["system.group"]; !ok {
 		return ErrLabel
 	}

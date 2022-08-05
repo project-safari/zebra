@@ -340,12 +340,10 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 		inVals = true
 	}
 
-	empty := zebra.EmptyType()
-
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).Interface()
-			vType, err := zebra.TypeChecker(val, empty)
+			vType, err := zebra.TypeChecker(val)
 
 			if err != nil {
 				return resMap, err

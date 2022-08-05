@@ -102,7 +102,13 @@ func CopyResourceList(dest *ResourceList, src *ResourceList) {
 }
 
 // Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not.
-func TypeChecker(data interface{}, empty Type) (Type, error) {
+func TypeChecker(data interface{}) (Type, error) {
+	empty := Type{
+		Name:        "",
+		Description: "",
+		Constructor: func() Resource { return nil },
+	}
+
 	vType, err := json.Marshal(data)
 
 	if err != nil {
@@ -140,10 +146,11 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 			return ErrTypeEmpty
 		}
 
-		vType, err := TypeChecker(vAny, EmptyType())
+		vType, err := TypeChecker(vAny)
 		if err != nil {
 			return ErrTypeEmpty
 		}
+
 		resource := r.factory.New(vType.Name)
 
 		if resource == nil {

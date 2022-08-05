@@ -127,7 +127,7 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 				continue
 			}
 
-			vType, err := zebra.TypeChecker(resType, zebra.EmptyType())
+			vType, err := zebra.TypeChecker(resType)
 			if err != nil {
 				retErr = ErrNoType
 
