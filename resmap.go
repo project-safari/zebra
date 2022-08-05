@@ -101,9 +101,8 @@ func CopyResourceList(dest *ResourceList, src *ResourceList) {
 	copy(dest.Resources, src.Resources)
 }
 
-// Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not
+// Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not.
 func TypeChecker(data interface{}, empty Type) (Type, error) {
-
 	vType, err := json.Marshal(data)
 
 	if err != nil {

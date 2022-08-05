@@ -158,7 +158,7 @@ func getLease() *Lease {
 
 func getRes() zebra.Resource {
 	res := &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		BaseResource: *zebra.NewBaseResource(network.VLANPoolType(), nil),
 		RangeStart:   0,
 		RangeEnd:     10,
 	}
@@ -169,7 +169,7 @@ func getRes() zebra.Resource {
 func getUser() auth.User {
 	return auth.User{
 		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("User", nil),
+			BaseResource: *zebra.NewBaseResource(auth.UserType(), nil),
 			Name:         "shravya",
 		},
 		Email:        "shravya@cisco.com",
