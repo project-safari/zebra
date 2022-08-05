@@ -26,7 +26,7 @@ func ShowUsr(cmd *cobra.Command, args []string) error {
 	p := fmt.Sprintf("/login/%s", args[0])
 
 	if len(args) == 0 {
-		if _, e := GetPath(config, "/login", GetType("user")); e != nil {
+		if _, e := GetPath(config, "/login", GetType("User")); e != nil {
 			return e
 		}
 	} else {
@@ -58,7 +58,7 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetPath(config, "/register", GetType("user")); e != nil {
+		if _, e := GetPath(config, "/register", GetType("User")); e != nil {
 			return e
 		}
 	} else {
@@ -91,7 +91,7 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("VlanPool")); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("VLANPool")); e != nil {
 			return e
 		}
 	} else {
@@ -377,7 +377,7 @@ func ShowVM(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("vm")); e != nil {
+		if _, e := GetPath(config, "/refresh", GetType("VM")); e != nil {
 			return e
 		}
 	} else {

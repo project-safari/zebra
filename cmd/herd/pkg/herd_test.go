@@ -415,9 +415,6 @@ func TestCreateUser(t *testing.T) {
 
 	user := auth.NewUser(name, pkg.Email(name), pkg.Password(name), key, pkg.CreateLabels())
 	assert.NotNil(user)
-	assert.NotNil(user.Validate(context.Background()))
-
-	user.Labels.Add("system.group", "testGroup")
 	assert.Nil(user.Validate(context.Background()))
 }
 

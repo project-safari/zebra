@@ -13,7 +13,7 @@ var version string
 func New() *cobra.Command {
 	name := filepath.Base(os.Args[0])
 
-	rootCmd := &cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	rootCmd := &cobra.Command{
 		Use:     name,
 		Short:   "zebra resource reservation client",
 		Version: version + "\n",
@@ -26,7 +26,6 @@ func New() *cobra.Command {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 
 	rootCmd.AddCommand(NewConfigure())
-	rootCmd.AddCommand(NewShow())
 
 	return rootCmd
 }

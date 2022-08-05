@@ -7,7 +7,6 @@ require (
 	github.com/go-logr/zerologr v1.2.2
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/jedib0t/go-pretty/v6 v6.3.5
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cobra v1.5.0
@@ -17,6 +16,7 @@ require (
 )
 
 require (
+	github.com/jedib0t/go-pretty/v6 v6.3.6
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 )

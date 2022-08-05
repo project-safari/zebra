@@ -3,6 +3,7 @@ package main //nolint:testpackage
 import (
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/compute"
@@ -171,10 +172,21 @@ func TestShowVlan(t *testing.T) {
 
 	toPrint := make(map[string]*network.VLANPool)
 
+	assert.NotNil(toPrint)
+
 	name := args[0]
-	val := &network.VLANPool{} //nolint:exhaustruct,exhaustivestruct
+
+	val := &network.VLANPool{ //nolint:exhaustruct,exhaustivestruct
+		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		RangeStart:   0,
+		RangeEnd:     1,
+	}
+
+	assert.NotNil(val)
 
 	toPrint[name] = val
+
+	assert.NotNil(toPrint)
 
 	printed := printNets(toPrint)
 
@@ -187,7 +199,7 @@ func TestShowSw(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	args := []string{"sws", "test-case"}
+	args := []string{"switches", "test-case"}
 
 	netCmd := NewNetCmd(test())
 	rootCmd := New()
@@ -268,7 +280,7 @@ func TestShowESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	args := []string{"esx", "test-case"}
+	args := []string{"esxes", "test-case"}
 
 	esxCmd := NewSrvCmd(test())
 	rootCmd := New()
@@ -295,7 +307,7 @@ func TestShowDC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	args := []string{"dc", "test-case"}
+	args := []string{"datacenters", "test-case"}
 
 	dcCmd := NewDCCmd(test())
 	rootCmd := New()
@@ -405,7 +417,11 @@ func TestShowIP(t *testing.T) {
 	toPrint := make(map[string]*network.IPAddressPool)
 
 	name := args[0]
-	val := &network.IPAddressPool{} //nolint:exhaustruct,exhaustivestruct
+
+	val := &network.IPAddressPool{ //nolint:exhaustruct,exhaustivestruct
+		BaseResource: *zebra.NewBaseResource("IPAddressPool", nil),
+		Subnets:      pkg.CreateIPArr(3),
+	}
 
 	toPrint[name] = val
 
