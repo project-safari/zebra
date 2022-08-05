@@ -14,7 +14,7 @@ func GetType(typ string) *zebra.ResourceMap {
 
 	// (*factory).Add(*named)
 
-	(*factory).New(typ)
+	// (*factory).New(typ)
 
 	res := new(zebra.Resource)
 
