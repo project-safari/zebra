@@ -15,6 +15,8 @@ require (
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 )
 
+require golang.org/x/text v0.3.7
+
 require (
 	github.com/jedib0t/go-pretty/v6 v6.3.6
 	github.com/mattn/go-runewidth v0.0.13 // indirect

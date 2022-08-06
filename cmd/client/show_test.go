@@ -461,7 +461,13 @@ func TestShowTest(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	typed := GetType("VlanPool")
+	// try with full array.
+	args := []string{"VlanPool", "server", "esx", "vcenter", "dc", "racks", "labs", "user", "ip", "switch", "vm"}
+	typed := GetType(args)
 
 	assert.NotNil(typed)
+
+	// try with empty array.
+	typ := []string{}
+	assert.NotNil(GetType(typ))
 }

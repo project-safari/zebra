@@ -1,38 +1,69 @@
 package main
 
 import (
-	"path"
+	"strings"
 
 	"github.com/project-safari/zebra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-func GetType(typ string) *zebra.ResourceMap {
-	factory := new(zebra.ResourceFactory)
+func GetType(args []string) interface{} { //nolint:cyclop
+	typ := args
 
-	named := new(zebra.Type)
-	named.Name = typ
+	if len(typ) == 0 || strings.ToLower(typ[0]) == "all" {
+		typ = []string{}
+	}
 
-	// (*factory).Add(*named)
+	for i, t := range typ {
+		switch strings.ToLower(t) {
+		case "ipaddresspool", "ip", "ips", "ippool":
+			typ[i] = "IPAddressPool"
+		case "server", "servers":
+			typ[i] = "Server"
+		case "switch", "switches":
+			typ[i] = "Switch"
+		case "vlanpool", "vlan", "vlans":
+			typ[i] = "VLANPool"
+		case "esx", "esxes":
+			typ[i] = "ESX"
+		case "vcenter", "vcenters":
+			typ[i] = "VCenter"
+		case "vm", "vms", "VirtualMachine":
+			typ[i] = "VM"
+		case "dc", "datacenter", "datacenters":
+			typ[i] = "Datacenter"
+		case "lab", "labs":
+			typ[i] = "Lab"
+		case "rack", "racks":
+			typ[i] = "Rack"
+		default:
+			typ[i] = cases.Title(language.AmericanEnglish).String(t)
+		}
+	}
 
-	// (*factory).New(typ)
+	qr := struct {
+		IDs        []string      `json:"ids,omitempty"`
+		Types      []string      `json:"types,omitempty"`
+		Labels     []zebra.Query `json:"labels,omitempty"`
+		Properties []zebra.Query `json:"properties,omitempty"`
+	}{
+		Types: typ,
+	}
 
-	res := new(zebra.Resource)
-
-	mapped := zebra.NewResourceMap(*factory)
-
-	mapped.Add(*res, typ)
-
-	return mapped
+	return qr
 }
 
-func GetPath(config *Config, p string, resMap interface{}) (int, error) {
-	theRes := new(zebra.Resource)
+func GetPath(config *Config, resMap interface{}) (int, error) {
+	p := "api/v1/resources"
+
+	theRes := new(interface{})
 
 	client, err := NewClient(config)
 	if err != nil {
 		return 0, err
 	}
 
-	return client.Get(path.Join("resources", config.User, p),
-		theRes, resMap)
+	// clinet with path and resources
+	return client.Get(p, theRes, resMap)
 }
