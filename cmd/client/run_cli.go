@@ -27,7 +27,7 @@ func ShowUsr(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyUsr); e != nil {
 		return e
 	}
 
@@ -49,7 +49,7 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyUsr); e != nil {
 		return e
 	}
 
@@ -74,7 +74,7 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), vlans); e != nil {
 		return e
 	}
 
@@ -99,7 +99,7 @@ func ShowSw(cmd *cobra.Command, args []string) error {
 
 	manySw[swName] = sw
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manySw); e != nil {
 		return e
 	}
 
@@ -125,7 +125,7 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 	}
 
 	// pass args
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), pools); e != nil {
 		return e
 	}
 
@@ -151,7 +151,7 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyCenters); e != nil {
 		return e
 	}
 
@@ -176,7 +176,7 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 
 	manyLabs[labName] = lab
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyLabs); e != nil {
 		return e
 	}
 
@@ -202,7 +202,7 @@ func ShowRack(cmd *cobra.Command, args []string) error {
 
 	manyRacks[vcName] = rack
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyRacks); e != nil {
 		return e
 	}
 
@@ -228,7 +228,7 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 
 	manySrv[srvName] = srv
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manySrv); e != nil {
 		return e
 	}
 
@@ -251,7 +251,7 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 
 	manyESX[esxName] = esx
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyESX); e != nil {
 		return e
 	}
 
@@ -275,7 +275,7 @@ func ShowVC(cmd *cobra.Command, args []string) error {
 
 	manyVC[vcName] = vc
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyVC); e != nil {
 		return e
 	}
 
@@ -298,7 +298,7 @@ func ShowVM(cmd *cobra.Command, args []string) error {
 
 	manyVM[vcName] = vm
 
-	if _, e := GetPath(config, GetType(args)); e != nil {
+	if _, e := GetPath(config, GetType(args), manyVM); e != nil {
 		return e
 	}
 

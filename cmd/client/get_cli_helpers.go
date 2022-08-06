@@ -54,10 +54,10 @@ func GetType(args []string) interface{} { //nolint:cyclop
 	return qr
 }
 
-func GetPath(config *Config, resMap interface{}) (int, error) {
+func GetPath(config *Config, theRes interface{}, resMap interface{}) (int, error) {
 	p := "api/v1/resources"
 
-	theRes := new(interface{})
+	// theRes := new(interface{})
 
 	client, err := NewClient(config)
 	if err != nil {
