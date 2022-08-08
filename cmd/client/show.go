@@ -30,12 +30,12 @@ show_test (test file)
 // create inventory of commands for the zebra cli.
 func NewShow() *cobra.Command {
 	// default zebra command to show resources.
-	zebraCmd := &cobra.Command{ //nolint:exhauststruct,exhaustivestruct
+	zebraCmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:   "show",
 		Short: "show resources",
 	}
 
-	usrCmd := &cobra.Command{ //nolint:exhaustivestruct
+	usrCmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "users",
 		Short:        "show zebra users",
 		RunE:         ShowUsr,
@@ -43,7 +43,7 @@ func NewShow() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	usrCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct
+	usrCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "registrations",
 		Short:        "show zebra registrations",
 		RunE:         ShowReg,
@@ -59,7 +59,7 @@ func NewShow() *cobra.Command {
 // function to add show commands for network resources to zebraCmd.
 func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 	zebraCmd.AddCommand(
-		&cobra.Command{
+		&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 			Use:          "vlans",
 			Short:        "show zebra vlans",
 			RunE:         ShowVlan,
@@ -67,7 +67,7 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 			SilenceUsage: true,
 		})
 
-	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "switches",
 		Short:        "show zebra switches",
 		RunE:         ShowSw,
@@ -75,7 +75,7 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 		SilenceUsage: true,
 	})
 
-	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "ips",
 		Short:        "show zebra IP-Address-Pools",
 		RunE:         ShowIP,
@@ -88,14 +88,14 @@ func NewNetCmd(zebraCmd *cobra.Command) *cobra.Command {
 
 // function to add show commands for dc resources to zebraCmd.
 func NewDCCmd(zebraCmd *cobra.Command) *cobra.Command {
-	zebraCmd.AddCommand(&cobra.Command{
+	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "datacenters",
 		Short:        "show datacenters",
 		RunE:         ShowDC,
 		SilenceUsage: true,
 	})
 
-	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "labs",
 		Short:        "show labs",
 		RunE:         ShowLab,
@@ -103,7 +103,7 @@ func NewDCCmd(zebraCmd *cobra.Command) *cobra.Command {
 		SilenceUsage: true,
 	})
 
-	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "racks",
 		Short:        "show racks",
 		RunE:         ShowRack,
@@ -116,14 +116,14 @@ func NewDCCmd(zebraCmd *cobra.Command) *cobra.Command {
 
 // function to add show commands for server resources to zebraCmd.
 func NewSrvCmd(zebraCmd *cobra.Command) *cobra.Command {
-	zebraCmd.AddCommand(&cobra.Command{
+	zebraCmd.AddCommand(&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "servers",
 		Short:        "show servers",
 		RunE:         ShowServ,
 		SilenceUsage: true,
 	})
 
-	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "esxs",
 		Short:        "show esx-servers",
 		RunE:         ShowESX,
@@ -131,7 +131,7 @@ func NewSrvCmd(zebraCmd *cobra.Command) *cobra.Command {
 		SilenceUsage: true,
 	}))
 
-	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "vcenters",
 		Short:        "show vcenters",
 		RunE:         ShowVC,
@@ -139,7 +139,7 @@ func NewSrvCmd(zebraCmd *cobra.Command) *cobra.Command {
 		SilenceUsage: true,
 	}))
 
-	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustivestruct
+	zebraCmd.AddCommand((&cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "vms",
 		Short:        "show vms",
 		RunE:         ShowVM,

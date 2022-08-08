@@ -23,7 +23,7 @@ const (
 
 func main() {
 	name := filepath.Base(os.Args[0])
-	rootCmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct
+	rootCmd := &cobra.Command{
 		Use:          name,
 		Short:        "herd",
 		Version:      version + "\n",

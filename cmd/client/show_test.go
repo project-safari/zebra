@@ -120,7 +120,7 @@ func TestShowServer(t *testing.T) {
 	toPrint := make(map[string]*compute.Server)
 
 	name := args[0]
-	val := new(compute.Server)
+	val := &compute.Server{} //nolint:exhaustruct,exhaustivestruct
 
 	toPrint[name] = val
 
@@ -146,7 +146,7 @@ func TestShowVC(t *testing.T) {
 	toPrint := make(map[string]*compute.VCenter)
 
 	name := args[0]
-	val := new(compute.VCenter)
+	val := &compute.VCenter{} //nolint:exhaustruct,exhaustivestruct
 
 	toPrint[name] = val
 
@@ -176,10 +176,11 @@ func TestShowVlan(t *testing.T) {
 
 	name := args[0]
 
-	val := new(network.VLANPool)
-	val.BaseResource = *zebra.NewBaseResource("VLANPool", nil)
-	val.RangeStart = 0
-	val.RangeEnd = 1
+	val := &network.VLANPool{ //nolint:exhaustruct,exhaustivestruct
+		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		RangeStart:   0,
+		RangeEnd:     1,
+	}
 
 	assert.NotNil(val)
 
@@ -211,7 +212,7 @@ func TestShowSw(t *testing.T) {
 	toPrint := make(map[string]*network.Switch)
 
 	name := args[0]
-	val := new(network.Switch)
+	val := &network.Switch{} //nolint:exhaustruct,exhaustivestruct
 
 	toPrint[name] = val
 
@@ -237,7 +238,7 @@ func TestShowRack(t *testing.T) {
 	toPrint := make(map[string]*dc.Rack)
 
 	name := args[0]
-	val := new(dc.Rack)
+	val := &dc.Rack{} //nolint:exhaustruct,exhaustivestruct
 
 	toPrint[name] = val
 
@@ -264,7 +265,8 @@ func TestShowLab(t *testing.T) {
 	toPrint := make(map[string]*dc.Lab)
 
 	name := args[0]
-	val := new(dc.Lab)
+	val := &dc.Lab{} //nolint:exhaustruct,exhaustivestruct
+
 	toPrint[name] = val
 
 	printed := printLab(toPrint)
@@ -292,7 +294,8 @@ func TestShowESX(t *testing.T) {
 	toPrint := make(map[string]*compute.ESX)
 
 	name := args[0]
-	val := new(compute.ESX)
+	val := &compute.ESX{} //nolint:exhaustruct,exhaustivestruct
+
 	toPrint[name] = val
 
 	printed := printESX(toPrint)
@@ -377,7 +380,7 @@ func TestShowReg(t *testing.T) {
 	toPrint := make(map[string]*auth.User)
 
 	name := args[0]
-	val := new(auth.User)
+	val := &auth.User{} //nolint:exhaustruct,exhaustivestruct
 
 	val.Key = &auth.RsaIdentity{}
 	val.PasswordHash = pkg.Password("user2")
@@ -415,9 +418,10 @@ func TestShowIP(t *testing.T) {
 
 	name := args[0]
 
-	val := new(network.IPAddressPool)
-	val.BaseResource = *zebra.NewBaseResource("IPAddressPool", nil)
-	val.Subnets = pkg.CreateIPArr(3)
+	val := &network.IPAddressPool{ //nolint:exhaustruct,exhaustivestruct
+		BaseResource: *zebra.NewBaseResource("IPAddressPool", nil),
+		Subnets:      pkg.CreateIPArr(3),
+	}
 
 	toPrint[name] = val
 
@@ -444,7 +448,7 @@ func TestShowVM(t *testing.T) {
 	toPrint := make(map[string]*compute.VM)
 
 	name := args[0]
-	val := new(compute.VM)
+	val := &compute.VM{} //nolint:exhaustruct,exhaustivestruct
 
 	toPrint[name] = val
 
