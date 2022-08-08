@@ -89,3 +89,5 @@ fi
 rm -f *.csr
 
 trap cleanup EXIT
+
+# done
