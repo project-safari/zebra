@@ -17,7 +17,7 @@ var ErrCreateLease = errors.New("error creating resource")
 const DefaultResourceCount = 3
 
 func NewLease() *cobra.Command {
-	leaseCmd := &cobra.Command{ //nolint:exhaustivestruct
+	leaseCmd := &cobra.Command{
 		Use:          "lease",
 		Short:        "request a lease",
 		RunE:         leaseRequest,
@@ -67,7 +67,7 @@ func makeLeaseReq(cmd *cobra.Command, args []string) (*Config, *zebra.ResourceMa
 		return nil, nil, nil, err
 	}
 
-	req := &lease.ResourceReq{ //nolint:exhaustruct,exhaustivestruct
+	req := &lease.ResourceReq{
 		Type:  args[0],
 		Group: cmd.Flag("group").Value.String(),
 		Count: resCount,

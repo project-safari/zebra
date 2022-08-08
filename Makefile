@@ -95,3 +95,4 @@ clean:
 	-rm -rf ./simulator/*.csr
 	-rm -rf ./simulator/*.key
 	-rm -rf ./simulator/*.json
+	-rm -rf ./simulator/*.yaml

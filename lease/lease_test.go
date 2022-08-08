@@ -178,12 +178,3 @@ func getUser() auth.User {
 		Role:         nil,
 	}
 }
-
-func TestTyoe(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	hasType := Type()
-
-	assert.NotNil(hasType)
-}
