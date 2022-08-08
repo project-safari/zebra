@@ -13,60 +13,44 @@ import (
 
 // user info.
 func ShowUsr(cmd *cobra.Command, args []string) error {
+	usr := new(auth.User)
+
 	configFile := cmd.Flag("config").Value.String()
+
+	manyUsr := map[string]*auth.User{}
+
+	manyUsr[usr.Name] = usr
+
 	config, e := Load(configFile)
 
 	if e != nil {
 		return e
 	}
 
-	manyUsr := map[string]*auth.User{}
-	usr := new(auth.User)
-
-	p := fmt.Sprintf("/login/%s", args[0])
-
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/login", GetType("user")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, usr); e != nil {
-			return e
-		}
-
-		manyUsr[usr.Name] = usr
+	if _, e := GetPath(config, GetType(args), manyUsr); e != nil {
+		return e
 	}
 
-	// cannot use manyUsr (variable of type *zebra.ResourceMap)
-	// as map[string]*auth.User value in argument to
 	fmt.Println(printUser(manyUsr).Render())
 
 	return nil
 }
 
 func ShowReg(cmd *cobra.Command, args []string) error {
-	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
-
 	manyUsr := map[string]*auth.User{}
 	usr := new(auth.User)
 
-	p := fmt.Sprintf("/register/%s", args[0])
+	configFile := cmd.Flag("config").Value.String()
+	config, e := Load(configFile)
+
+	manyUsr[usr.Name] = usr
 
 	if e != nil {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/register", GetType("user")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, usr); e != nil {
-			return e
-		}
-
-		manyUsr[usr.Name] = usr
+	if _, e := GetPath(config, GetType(args), manyUsr); e != nil {
+		return e
 	}
 
 	fmt.Println(printUser(manyUsr).Render())
@@ -76,30 +60,22 @@ func ShowReg(cmd *cobra.Command, args []string) error {
 
 // network resources.
 func ShowVlan(cmd *cobra.Command, args []string) error {
-	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
-
-	p := fmt.Sprintf("/refresh/%s", args[0])
-
 	vlans := map[string]*network.VLANPool{}
 	netName := args[0]
 
 	vlan := new(network.VLANPool)
 
+	vlans[netName] = vlan
+
+	configFile := cmd.Flag("config").Value.String()
+	config, e := Load(configFile)
+
 	if e != nil {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("VlanPool")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, vlan); e != nil {
-			return e
-		}
-
-		vlans[netName] = vlan
+	if _, e := GetPath(config, GetType(args), vlans); e != nil {
+		return e
 	}
 
 	fmt.Println(printNets(vlans).Render())
@@ -108,29 +84,23 @@ func ShowVlan(cmd *cobra.Command, args []string) error {
 }
 
 func ShowSw(cmd *cobra.Command, args []string) error {
+	manySw := map[string]*network.Switch{}
+
 	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
 
 	swName := args[0]
 	sw := new(network.Switch)
 
-	p := fmt.Sprintf("/refresh/%s", args[0])
-	manySw := map[string]*network.Switch{}
+	config, e := Load(configFile)
 
 	if e != nil {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("Switch")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, sw); e != nil {
-			return e
-		}
+	manySw[swName] = sw
 
-		manySw[swName] = sw
+	if _, e := GetPath(config, GetType(args), manySw); e != nil {
+		return e
 	}
 
 	fmt.Println(printSwitch(manySw).Render())
@@ -140,28 +110,23 @@ func ShowSw(cmd *cobra.Command, args []string) error {
 
 func ShowIP(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
-	config, e := Load(configFile)
-
-	p := fmt.Sprintf("/refresh/%s", args[0])
-	IPName := args[0]
 
 	pools := map[string]*network.IPAddressPool{}
 	addr := new(network.IPAddressPool)
+
+	config, e := Load(configFile)
+
+	IPName := args[0]
+
+	pools[IPName] = addr
 
 	if e != nil {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("IPAddressPool")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, addr); e != nil {
-			return e
-		}
-
-		pools[IPName] = addr
+	// pass args
+	if _, e := GetPath(config, GetType(args), pools); e != nil {
+		return e
 	}
 
 	fmt.Println(printIP(pools).Render())
@@ -171,30 +136,23 @@ func ShowIP(cmd *cobra.Command, args []string) error {
 
 // datacenter.
 func ShowDC(cmd *cobra.Command, args []string) error {
+	center := new(dc.Datacenter)
+
+	manyCenters := map[string]*dc.Datacenter{}
+
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
 
-	p := fmt.Sprintf("/refresh/%s", args[0])
-
-	center := new(dc.Datacenter)
 	centName := args[0]
 
-	manyCenters := map[string]*dc.Datacenter{}
+	manyCenters[centName] = center
 
 	if e != nil {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("Datacenter")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, center); e != nil {
-			return e
-		}
-
-		manyCenters[centName] = center
+	if _, e := GetPath(config, GetType(args), manyCenters); e != nil {
+		return e
 	}
 
 	fmt.Println(printDC(manyCenters).Render())
@@ -203,13 +161,12 @@ func ShowDC(cmd *cobra.Command, args []string) error {
 }
 
 func ShowLab(cmd *cobra.Command, args []string) error {
-	p := fmt.Sprintf("/refresh/%s", args[0])
+	manyLabs := map[string]*dc.Lab{}
+
 	labName := args[0]
 
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
-
-	manyLabs := map[string]*dc.Lab{}
 
 	lab := new(dc.Lab)
 
@@ -217,16 +174,10 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("Lab")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, lab); e != nil {
-			return e
-		}
+	manyLabs[labName] = lab
 
-		manyLabs[labName] = lab
+	if _, e := GetPath(config, GetType(args), manyLabs); e != nil {
+		return e
 	}
 
 	fmt.Println(printLab(manyLabs).Render())
@@ -236,7 +187,6 @@ func ShowLab(cmd *cobra.Command, args []string) error {
 
 func ShowRack(cmd *cobra.Command, args []string) error {
 	configFile := cmd.Flag("config").Value.String()
-	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	config, e := Load(configFile)
 
@@ -250,16 +200,10 @@ func ShowRack(cmd *cobra.Command, args []string) error {
 
 	rack := new(dc.Rack)
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("Rack")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, rack); e != nil {
-			return e
-		}
+	manyRacks[vcName] = rack
 
-		manyRacks[vcName] = rack
+	if _, e := GetPath(config, GetType(args), manyRacks); e != nil {
+		return e
 	}
 
 	fmt.Println(printRack(manyRacks).Render())
@@ -269,30 +213,23 @@ func ShowRack(cmd *cobra.Command, args []string) error {
 
 // server.
 func ShowServ(cmd *cobra.Command, args []string) error {
+	srvName := args[0]
+
 	configFile := cmd.Flag("config").Value.String()
 	config, e := Load(configFile)
-
-	p := fmt.Sprintf("/refresh/%s", args[0])
 
 	if e != nil {
 		return e
 	}
 
-	srvName := args[0]
 	srv := new(compute.Server)
 
 	manySrv := map[string]*compute.Server{}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("Server")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, srv); e != nil {
-			return e
-		}
+	manySrv[srvName] = srv
 
-		manySrv[srvName] = srv
+	if _, e := GetPath(config, GetType(args), manySrv); e != nil {
+		return e
 	}
 
 	fmt.Println(printServer(manySrv).Render())
@@ -303,8 +240,6 @@ func ShowServ(cmd *cobra.Command, args []string) error {
 func ShowESX(cmd *cobra.Command, args []string) error {
 	config, e := Load(cmd.Flag("config").Value.String())
 
-	p := fmt.Sprintf("/refresh/%s", args[0])
-
 	if e != nil {
 		return e
 	}
@@ -314,16 +249,10 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 
 	esx := new(compute.ESX)
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("ESX")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, esx); e != nil {
-			return e
-		}
+	manyESX[esxName] = esx
 
-		manyESX[esxName] = esx
+	if _, e := GetPath(config, GetType(args), manyESX); e != nil {
+		return e
 	}
 
 	fmt.Println(printESX(manyESX).Render())
@@ -332,8 +261,6 @@ func ShowESX(cmd *cobra.Command, args []string) error {
 }
 
 func ShowVC(cmd *cobra.Command, args []string) error {
-	p := fmt.Sprintf("/refresh/%s", args[0])
-
 	config, e := Load(cmd.Flag("config").Value.String())
 
 	if e != nil {
@@ -342,19 +269,14 @@ func ShowVC(cmd *cobra.Command, args []string) error {
 
 	vc := new(compute.VCenter)
 
-	vcName := args[0]
 	manyVC := map[string]*compute.VCenter{}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("VCenter")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, vc); e != nil {
-			return e
-		}
+	vcName := args[0]
 
-		manyVC[vcName] = vc
+	manyVC[vcName] = vc
+
+	if _, e := GetPath(config, GetType(args), manyVC); e != nil {
+		return e
 	}
 
 	fmt.Println(printVC(manyVC).Render())
@@ -370,22 +292,14 @@ func ShowVM(cmd *cobra.Command, args []string) error {
 
 	manyVM := map[string]*compute.VM{}
 
-	p := fmt.Sprintf("/refresh/%s", args[0])
-
 	if e != nil {
 		return e
 	}
 
-	if len(args) == 0 {
-		if _, e := GetPath(config, "/refresh", GetType("VM")); e != nil {
-			return e
-		}
-	} else {
-		if _, e := GetPath(config, p, vm); e != nil {
-			return e
-		}
+	manyVM[vcName] = vm
 
-		manyVM[vcName] = vm
+	if _, e := GetPath(config, GetType(args), manyVM); e != nil {
+		return e
 	}
 
 	fmt.Println(printVM(manyVM).Render())

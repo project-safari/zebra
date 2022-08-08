@@ -25,3 +25,5 @@ zebra-server
 zebra
 herd
 simulator-store/
+zebra-simulator.json
+admin.yaml

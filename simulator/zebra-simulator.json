@@ -1,13 +1,28 @@
 {
-    "store": {
-        "rootDir": "./simulator/simulator-store"
+  "store": {
+    "rootDir": "/Users/eachim/Desktop/zebra_test_coverage/cmd/server/zebra-store"
+  },
+  "server": {
+    "address": "tcp://127.0.0.1:443",
+    "tls": {
+      "caCertFile": "",
+      "certFile": "/Users/eachim/Desktop/zebra_test_coverage/cmd/server/zebra-server.crt",
+      "keyFile": "/Users/eachim/Desktop/zebra_test_coverage/cmd/server/zebra-server.key"
+    }
+  },
+  "authKey": "blee",
+  "admin": {
+    "id": "82fc4355-8836-4081-a218-e1a54862402a",
+    "type": "User",
+    "name": "eachim",
+    "key": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAwMPZAsfbjHRvE2RXK1Fxv5ZTpyyrMVkfNJER3fse6/HemBTcxB+b\nRF6/u53hWOXU9uVrPK8v/sR99BHdC4/r2Zx1hmvHybcfcW4TZ/GQlZkyIsNVQC7d\neggCpGiazZJDfKv+alf4rrXhgRqxt6HHms9Jdv8jaEMzsZdaqJIQ6sfYDuqO5Xly\nKIOCILO3aeiF+JH2VRztKl685MGzMZ1bfVpCItJ3RLr0+9pOZBTBY8O/M4sWKhgW\nm8GV2o2KCdd0DwlPNqQTIKkMM4chj6HYzUG6X/VcVkGWAjHszpcLcxat4pdnD6Mi\n5kzMuE+tOi/8m82OYAvu3C9y4i0FjC7pRQIDAQAB\n-----END RSA PUBLIC KEY-----\n",
+    "passwordHash": "$2a$10$6wUUL78MIZDtsZv7xMRlYeZwDyFEmZi5nA6N/CqA6Ub0idWzqNV3i",
+    "role": {
+      "name": "admin",
+      "privileges": [
+        ":c,r,u,d"
+      ]
     },
-    "server": {
-        "address": "tcp://127.0.0.1:6666",
-        "tls": {
-            "certFile": "./simulator/zebra-server.crt",
-            "keyFile": "./simulator/zebra-server.key"
-        }
-    },
-    "authKey": "abracadabra"
+    "email": "admin@zebra.project-safari.io"
+  }
 }

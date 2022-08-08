@@ -17,7 +17,7 @@ const ReadOnly = 0o600
 var ErrLeaseDuration = errors.New("lease duration cannot be more that 4 hours")
 
 func NewConfigure() *cobra.Command {
-	configCmd := &cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd := &cobra.Command{
 		Use:          "config",
 		Short:        "customize zebra client",
 		RunE:         showConfig,
@@ -27,14 +27,14 @@ func NewConfigure() *cobra.Command {
 	// add config command
 	addConfigCommands(configCmd)
 
-	configCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd.AddCommand(&cobra.Command{
 		Use:          "public-key",
 		Short:        "show current user public key",
 		RunE:         showLocalKey,
 		SilenceUsage: true,
 	})
 
-	defaultCmd := &cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	defaultCmd := &cobra.Command{
 		Use:          "defaults",
 		Short:        "configure default values",
 		RunE:         configDefaults,
@@ -47,14 +47,14 @@ func NewConfigure() *cobra.Command {
 }
 
 func addConfigCommands(configCmd *cobra.Command) {
-	configCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd.AddCommand(&cobra.Command{
 		Use:   "init",
 		Short: "initialize default configuration, with server address",
 		RunE:  initConfig,
 		Args:  cobra.ExactArgs(1),
 	})
 
-	configCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd.AddCommand(&cobra.Command{
 		Use:          "user",
 		Short:        "zebra user name, default: $USER",
 		RunE:         configUser,
@@ -62,7 +62,7 @@ func addConfigCommands(configCmd *cobra.Command) {
 		SilenceUsage: true,
 	})
 
-	configCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd.AddCommand(&cobra.Command{
 		Use:          "ca-cert",
 		Short:        "zebra CA cert file",
 		RunE:         configCACert,
@@ -70,7 +70,7 @@ func addConfigCommands(configCmd *cobra.Command) {
 		SilenceUsage: true,
 	})
 
-	configCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd.AddCommand(&cobra.Command{
 		Use:          "server",
 		Short:        "zebra server address",
 		RunE:         configServer,
@@ -78,7 +78,7 @@ func addConfigCommands(configCmd *cobra.Command) {
 		SilenceUsage: true,
 	})
 
-	configCmd.AddCommand(&cobra.Command{ //nolint:exhaustivestruct,exhaustruct
+	configCmd.AddCommand(&cobra.Command{
 		Use:          "email",
 		Short:        "zebra user email address",
 		RunE:         configEmail,

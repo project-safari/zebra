@@ -3,6 +3,7 @@ package main //nolint:testpackage
 import (
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/compute"
@@ -119,7 +120,7 @@ func TestShowServer(t *testing.T) {
 	toPrint := make(map[string]*compute.Server)
 
 	name := args[0]
-	val := &compute.Server{} //nolint:exhaustruct,exhaustivestruct
+	val := new(compute.Server)
 
 	toPrint[name] = val
 
@@ -145,7 +146,7 @@ func TestShowVC(t *testing.T) {
 	toPrint := make(map[string]*compute.VCenter)
 
 	name := args[0]
-	val := &compute.VCenter{} //nolint:exhaustruct,exhaustivestruct
+	val := new(compute.VCenter)
 
 	toPrint[name] = val
 
@@ -171,10 +172,20 @@ func TestShowVlan(t *testing.T) {
 
 	toPrint := make(map[string]*network.VLANPool)
 
+	assert.NotNil(toPrint)
+
 	name := args[0]
-	val := &network.VLANPool{} //nolint:exhaustruct,exhaustivestruct
+
+	val := new(network.VLANPool)
+	val.BaseResource = *zebra.NewBaseResource("VLANPool", nil)
+	val.RangeStart = 0
+	val.RangeEnd = 1
+
+	assert.NotNil(val)
 
 	toPrint[name] = val
+
+	assert.NotNil(toPrint)
 
 	printed := printNets(toPrint)
 
@@ -187,7 +198,7 @@ func TestShowSw(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	args := []string{"sws", "test-case"}
+	args := []string{"switches", "test-case"}
 
 	netCmd := NewNetCmd(test())
 	rootCmd := New()
@@ -200,7 +211,7 @@ func TestShowSw(t *testing.T) {
 	toPrint := make(map[string]*network.Switch)
 
 	name := args[0]
-	val := &network.Switch{} //nolint:exhaustruct,exhaustivestruct
+	val := new(network.Switch)
 
 	toPrint[name] = val
 
@@ -226,7 +237,7 @@ func TestShowRack(t *testing.T) {
 	toPrint := make(map[string]*dc.Rack)
 
 	name := args[0]
-	val := &dc.Rack{} //nolint:exhaustruct,exhaustivestruct
+	val := new(dc.Rack)
 
 	toPrint[name] = val
 
@@ -253,8 +264,7 @@ func TestShowLab(t *testing.T) {
 	toPrint := make(map[string]*dc.Lab)
 
 	name := args[0]
-	val := &dc.Lab{} //nolint:exhaustruct,exhaustivestruct
-
+	val := new(dc.Lab)
 	toPrint[name] = val
 
 	printed := printLab(toPrint)
@@ -268,7 +278,7 @@ func TestShowESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	args := []string{"esx", "test-case"}
+	args := []string{"esxes", "test-case"}
 
 	esxCmd := NewSrvCmd(test())
 	rootCmd := New()
@@ -282,8 +292,7 @@ func TestShowESX(t *testing.T) {
 	toPrint := make(map[string]*compute.ESX)
 
 	name := args[0]
-	val := &compute.ESX{} //nolint:exhaustruct,exhaustivestruct
-
+	val := new(compute.ESX)
 	toPrint[name] = val
 
 	printed := printESX(toPrint)
@@ -295,7 +304,7 @@ func TestShowDC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	args := []string{"dc", "test-case"}
+	args := []string{"datacenters", "test-case"}
 
 	dcCmd := NewDCCmd(test())
 	rootCmd := New()
@@ -368,7 +377,7 @@ func TestShowReg(t *testing.T) {
 	toPrint := make(map[string]*auth.User)
 
 	name := args[0]
-	val := &auth.User{} //nolint:exhaustruct,exhaustivestruct
+	val := new(auth.User)
 
 	val.Key = &auth.RsaIdentity{}
 	val.PasswordHash = pkg.Password("user2")
@@ -405,7 +414,10 @@ func TestShowIP(t *testing.T) {
 	toPrint := make(map[string]*network.IPAddressPool)
 
 	name := args[0]
-	val := &network.IPAddressPool{} //nolint:exhaustruct,exhaustivestruct
+
+	val := new(network.IPAddressPool)
+	val.BaseResource = *zebra.NewBaseResource("IPAddressPool", nil)
+	val.Subnets = pkg.CreateIPArr(3)
 
 	toPrint[name] = val
 
@@ -432,7 +444,7 @@ func TestShowVM(t *testing.T) {
 	toPrint := make(map[string]*compute.VM)
 
 	name := args[0]
-	val := &compute.VM{} //nolint:exhaustruct,exhaustivestruct
+	val := new(compute.VM)
 
 	toPrint[name] = val
 
@@ -445,7 +457,13 @@ func TestShowTest(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	typed := GetType("VlanPool")
+	// try with full array.
+	args := []string{"VlanPool", "server", "esx", "vcenter", "dc", "racks", "labs", "user", "ip", "switch", "vm"}
+	typed := GetType(args)
 
 	assert.NotNil(typed)
+
+	// try with empty array.
+	typ := []string{}
+	assert.NotNil(GetType(typ))
 }

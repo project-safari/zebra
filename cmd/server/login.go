@@ -82,7 +82,11 @@ func makeCookie(jwt string) *http.Cookie {
 
 func findUser(store zebra.Store, email string) *auth.User {
 	resMap := store.QueryType([]string{"User"})
+
 	users := resMap.Resources["User"]
+	if users == nil {
+		return nil
+	}
 
 	for _, u := range users.Resources {
 		user, ok := u.(*auth.User)

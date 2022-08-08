@@ -20,6 +20,9 @@ func TestConfig(t *testing.T) {
 
 	defer func() { assert.Nil(os.Remove(testCfgFile)) }()
 
+	argLock.Lock()
+	defer argLock.Unlock()
+
 	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "config")
 
 	assert.Nil(execRootCmd())

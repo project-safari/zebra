@@ -82,8 +82,6 @@ func TestIPAddressPool(t *testing.T) {
 
 	assert.Nil(pool.Validate(ctx))
 
-	assert.Nil(pool.Validate(ctx))
-
 	ipnet := net.IPNet{IP: net.ParseIP("192.0.2.1"), Mask: nil}
 	ipnet.Mask = ipnet.IP.DefaultMask()
 	pool.Subnets = append(pool.Subnets, ipnet)
@@ -129,7 +127,7 @@ func TestVLANPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 }
 
-func TestVlan(t *testing.T) {
+func TestNewVlan(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -137,25 +135,11 @@ func TestVlan(t *testing.T) {
 
 	labels = pkg.GroupLabels(labels, "group")
 
-	vlan := network.NewVlanPool(1, 100, labels)
-
-	assert.NotNil(vlan)
+	newV := network.NewVlanPool(1, 100, labels)
+	assert.NotNil(newV)
 }
 
-func TestPool(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	labels := pkg.CreateLabels()
-
-	labels = pkg.GroupLabels(labels, "group")
-
-	vlan := network.NewIPAddressPool(pkg.CreateIPArr(3), labels)
-
-	assert.NotNil(vlan)
-}
-
-func TestNewSw(t *testing.T) {
+func TestNewSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -164,8 +148,18 @@ func TestNewSw(t *testing.T) {
 	labels = pkg.GroupLabels(labels, "group")
 
 	arr := []string{pkg.Serials(), pkg.Models(), pkg.Name()}
+	newV := network.NewSwitch(arr, pkg.Ports(), net.IP("123.111.001"), labels)
+	assert.NotNil(newV)
+}
 
-	vlan := network.NewSwitch(arr, pkg.Ports(), net.IP("123.111.001"), labels)
+func TestNewIP(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
 
-	assert.NotNil(vlan)
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	newV := network.NewIPAddressPool(pkg.CreateIPArr(3), labels)
+	assert.NotNil(newV)
 }
