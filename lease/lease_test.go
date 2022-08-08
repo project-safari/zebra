@@ -7,6 +7,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/compute"
 	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
@@ -57,7 +58,7 @@ func TestBadResources(t *testing.T) {
 	l := getEmptyLease()
 	l.Request = []*ResourceReq{
 		{
-			Type:  "VLANPool",
+			Type:  network.VLANPoolType(),
 			Group: "sj-building-20",
 			Name:  "blah blah give a name",
 			Count: 1,
@@ -140,13 +141,13 @@ func getLease() *Lease {
 
 	resources := []*ResourceReq{
 		{
-			Type:  "Server",
+			Type:  compute.ServerType(),
 			Group: "san-jose-building-14",
 			Name:  "linux blah blah",
 			Count: 2,
 		},
 		{
-			Type:  "VM",
+			Type:  compute.VMType(),
 			Group: "san-jose-building-18",
 			Name:  "virtual",
 			Count: 1,

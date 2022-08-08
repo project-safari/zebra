@@ -11,7 +11,7 @@ import (
 )
 
 type ResourceReq struct {
-	Type      string           `json:"type"`
+	Type      zebra.Type       `json:"type"`
 	Group     string           `json:"group"`
 	Name      string           `json:"name"`
 	Count     int              `json:"count"`

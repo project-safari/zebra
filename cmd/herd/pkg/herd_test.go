@@ -2,6 +2,7 @@ package pkg_test
 
 import (
 	"context"
+	"log"
 	"net"
 	"reflect"
 	"testing"
@@ -19,6 +20,7 @@ func verifyType(assert *assert.Assertions, t string, resources []zebra.Resource)
 	for _, r := range resources {
 		assert.NotNil(r)
 		assert.Equal(t, r.GetType().Name)
+		log.Default().Printf("Lables Before Validation: %v", r.GetLabels())
 		assert.Nil(r.Validate(context.Background()))
 	}
 }

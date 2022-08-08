@@ -15,14 +15,6 @@ func (t *Type) New() Resource {
 	return t.Constructor()
 }
 
-func EmptyType() Type {
-	return Type{
-		Name:        "",
-		Description: "",
-		Constructor: func() Resource { return nil },
-	}
-}
-
 type ResourceFactory interface {
 	New(string) Resource
 	Add(Type) ResourceFactory
