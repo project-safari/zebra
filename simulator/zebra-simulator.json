@@ -1,22 +1,22 @@
 {
   "store": {
-    "rootDir": "/Users/eachim/Desktop/zebra_test_coverage/cmd/server/zebra-store"
+    "rootDir": "./simulator/simulator-store"
   },
   "server": {
-    "address": "tcp://127.0.0.1:443",
+    "address": "tcp://127.0.0.1:6666",
     "tls": {
       "caCertFile": "",
-      "certFile": "/Users/eachim/Desktop/zebra_test_coverage/cmd/server/zebra-server.crt",
-      "keyFile": "/Users/eachim/Desktop/zebra_test_coverage/cmd/server/zebra-server.key"
+      "certFile": "./simulator/zebra-server.crt",
+      "keyFile": "./simulator/zebra-server.key"
     }
   },
-  "authKey": "blee",
+  "authKey": "AvadaKedavra",
   "admin": {
-    "id": "82fc4355-8836-4081-a218-e1a54862402a",
+    "id": "ef46a1b1-3240-46ce-a881-d1c92e2db9e0",
     "type": "User",
     "name": "eachim",
-    "key": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAwMPZAsfbjHRvE2RXK1Fxv5ZTpyyrMVkfNJER3fse6/HemBTcxB+b\nRF6/u53hWOXU9uVrPK8v/sR99BHdC4/r2Zx1hmvHybcfcW4TZ/GQlZkyIsNVQC7d\neggCpGiazZJDfKv+alf4rrXhgRqxt6HHms9Jdv8jaEMzsZdaqJIQ6sfYDuqO5Xly\nKIOCILO3aeiF+JH2VRztKl685MGzMZ1bfVpCItJ3RLr0+9pOZBTBY8O/M4sWKhgW\nm8GV2o2KCdd0DwlPNqQTIKkMM4chj6HYzUG6X/VcVkGWAjHszpcLcxat4pdnD6Mi\n5kzMuE+tOi/8m82OYAvu3C9y4i0FjC7pRQIDAQAB\n-----END RSA PUBLIC KEY-----\n",
-    "passwordHash": "$2a$10$6wUUL78MIZDtsZv7xMRlYeZwDyFEmZi5nA6N/CqA6Ub0idWzqNV3i",
+    "key": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEA1iYIzeb4ybSNYvjMHTH54+HOMIVHZgQZVxrmmzq+3JTPeoXJhge8\nB5rsF1puWSt8MUQ2sprMitND0ytwl7SH0PgMhPoCQXmm2Unbd6gmw7pjz0qMTiI2\nrwWw5veaZ/Xl4xZt5HWoJw+Emcb7VzjqNUaUj1e8afr1W1p8BgZ4smd1ar0kgiNq\nSDdNicIJz+unzLi8Y+iuxg5aW5JeTe3q+TpJuHO+sq/muHq3vQrkBjSxOxpvv11H\nCgwNs6c7HC4VcmyMUspcw2uLnOtcDQVY8DXOfiMBOqPTP9DZCkZAZUproDy4gfwV\nN/YgyCaQWrHBFZBTyG2bV6QRXoI6eKV5XQIDAQAB\n-----END RSA PUBLIC KEY-----\n",
+    "passwordHash": "$2a$10$GaLxlZY6YIN8SyouArpREOdUTIwVpCmje/6MEEfEzcssH7h6a0I8y",
     "role": {
       "name": "admin",
       "privileges": [
