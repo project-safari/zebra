@@ -38,4 +38,5 @@ require (
 	gojini.dev/web v0.0.0-20220611200440-c2f6a400e1e0
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
 	gopkg.in/yaml.v3 v3.0.1
+
 )
