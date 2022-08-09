@@ -277,8 +277,8 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 		},
 	}
 
-	assert.NotNil(myAPI.Store.Create(lab1))
-	assert.NotNil(myAPI.Store.Create(lab2))
+	assert.Nil(myAPI.Store.Create(lab1))
+	assert.Nil(myAPI.Store.Create(lab2))
 
 	lab1.Labels = pkg.CreateLabels()
 	lab2.Labels = pkg.CreateLabels()
