@@ -41,11 +41,65 @@ func TestRegister(t *testing.T) {
 	assert.NotNil(execRootCmd())
 }
 
+func TestApprove(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	argLock.Lock()
+	defer argLock.Unlock()
+
+	cfg := createConfig(assert)
+
+	os.Args = append([]string{"zebra"}, "approve")
+
+	assert.NotNil(execRootCmd())
+
+	os.Args = append([]string{"zebra"}, "-c", "../../simulator/admin.yaml", "approve", "blah")
+
+	assert.NotNil(execRootCmd())
+
+	assert.Nil(cfg.Save(testCfgFile))
+
+	defer func() { assert.Nil(os.Remove(testCfgFile)) }()
+
+	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "approve", "blah")
+
+	assert.NotNil(execRootCmd())
+}
+
+func TestReject(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	argLock.Lock()
+	defer argLock.Unlock()
+
+	cfg := createConfig(assert)
+
+	os.Args = append([]string{"zebra"}, "reject")
+
+	assert.NotNil(execRootCmd())
+
+	os.Args = append([]string{"zebra"}, "-c", "../../simulator/admin.yaml", "reject", "blah")
+
+	assert.NotNil(execRootCmd())
+
+	assert.Nil(cfg.Save(testCfgFile))
+
+	defer func() { assert.Nil(os.Remove(testCfgFile)) }()
+
+	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "reject", "blah")
+
+	assert.NotNil(execRootCmd())
+}
+
 func createConfig(assert *assert.Assertions) *Config {
 	cfg := NewConfig()
 	assert.NotNil(cfg)
 
-	cfg.Email = "test@zebra.project-safafi.io"
+	cfg.Email = "test@zebra.project-safafi"
 	key, err := auth.Load(testUserKeyFile)
 	assert.Nil(err)
 

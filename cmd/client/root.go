@@ -29,6 +29,8 @@ func New() *cobra.Command {
 	rootCmd.AddCommand(NewLease())
 	rootCmd.AddCommand(NewShow())
 	rootCmd.AddCommand(NewRegistration())
+	rootCmd.AddCommand(Approve())
+	rootCmd.AddCommand(Reject())
 
 	return rootCmd
 }
