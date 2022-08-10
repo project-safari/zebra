@@ -102,8 +102,10 @@ func respondWithClaims(ctx context.Context, res http.ResponseWriter,
 	claims *auth.Claims, authKey string,
 ) {
 	resData := &struct {
-		JWT string `json:"jwt"`
-	}{JWT: claims.JWT(authKey)}
+		JWT   string     `json:"jwt"`
+		Role  *auth.Role `json:"role"`
+		Email string     `json:"email"`
+	}{JWT: claims.JWT(authKey), Role: claims.Role, Email: claims.Email}
 
 	http.SetCookie(res, makeCookie(resData.JWT))
 	writeJSON(ctx, res, resData)
