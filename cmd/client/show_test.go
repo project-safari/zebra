@@ -66,6 +66,7 @@ func TestClient(t *testing.T) {
 	assert.NotNil(cli)
 }
 
+// tests for adding new show command(s).
 func TestNewZebraCommand(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -93,6 +94,7 @@ func TestShowRes(t *testing.T) {
 	assert.NotNil(res)
 }
 
+// showing lease status and information.
 func TestShowLease(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -111,7 +113,7 @@ func TestShowLease(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// tests for server resource types.
+// tests for server resource types (server, esx, vcenter, vm).
 func TestShowServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -184,7 +186,7 @@ func TestShowVM(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// tests for dc resource types.
+// tests for dc resource types (datacenter, lab, rack).
 func TestShowDatacenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -239,7 +241,7 @@ func TestShowRack(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// tests for network resources.
+// tests for network resources (switch, vlan, ip-address).
 func TestShowSwitches(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -163,7 +163,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(rs.Initialize())
 
 	// Invalid resource, should fail
-	// assert.NotNil(rs.Create(nil))
+	assert.NotNil(rs.Create(nil))
 
 	// Valid resource, should pass
 	vlan := getVLAN()
@@ -512,19 +512,3 @@ func TestQueryProperty(t *testing.T) {
 	assert.Nil(resMap)
 	assert.NotNil(err)
 }
-
-/*
-func TestStop(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
-
-	rs := store.NewResourceStore("test", factory)
-
-	rs.Stop()
-
-	assert.NotNil(factory)
-}
-*/

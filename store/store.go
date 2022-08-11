@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 	"sync"
@@ -12,6 +13,8 @@ import (
 	"github.com/project-safari/zebra/labelstore"
 	"github.com/project-safari/zebra/typestore"
 )
+
+var ErrNilResource = errors.New("nil resource not allowed")
 
 type ResourceStore struct {
 	lock        sync.RWMutex
@@ -100,6 +103,10 @@ func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
 }
 
 func (rs *ResourceStore) Create(res zebra.Resource) error {
+	if res == nil {
+		return ErrNilResource
+	}
+
 	if err := res.Validate(context.Background()); err != nil {
 		return err
 	}
