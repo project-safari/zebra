@@ -116,6 +116,15 @@ func (r *RsaIdentity) UnmarshalText(text []byte) error {
 	return ErrUnknownPEMBlock
 }
 
+func (r *RsaIdentity) String() string {
+	b, e := r.MarshalText()
+	if e != nil {
+		return ""
+	}
+
+	return string(b)
+}
+
 // NewRsaIdentity returns a new identity with spefied keys.
 func NewRsaIdentity(pri *rsa.PrivateKey) *RsaIdentity {
 	return &RsaIdentity{

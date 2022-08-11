@@ -43,6 +43,8 @@ func TestNewRsaIdentity(t *testing.T) {
 	assert.NotNil(b)
 	assert.Nil(x.UnmarshalText(b))
 
+	assert.NotEmpty(henkPub.String())
+
 	henkPub2 := henkPub.Public()
 
 	b, e = henkPub2.MarshalText()
@@ -69,6 +71,8 @@ func TestUnmarshalErrors(t *testing.T) {
 		Headers: nil,
 		Bytes:   nil,
 	})
+
+	assert.Empty(auth.Empty().String())
 
 	henk, err := auth.Generate()
 	assert.Nil(err)
