@@ -80,7 +80,7 @@ func TestLoad(t *testing.T) {
 	assert.Nil(err)
 
 	resources, err := fs.Load()
-	assert.NotNil(err)
+	assert.Nil(err)
 	assert.NotNil(resources)
 }
 
@@ -117,7 +117,7 @@ func TestDelete(t *testing.T) {
 	assert.True(os.IsNotExist(err))
 
 	// Try to delete res that doesn't exist, should succeed anyways
-	assert.Nil(fs.Delete(resource))
+	assert.NotNil(fs.Delete(resource))
 }
 
 func TestClearStore(t *testing.T) {

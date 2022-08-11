@@ -13,6 +13,12 @@ func NewBaseResource(resType string, labels Labels) *BaseResource {
 		resType = "BaseResource"
 	}
 
+	if labels == nil {
+		labels = Labels{"system.group": "default"}
+	} else if labels["system.group"] == "" {
+		labels.Add("system.group", "default")
+	}
+
 	return &BaseResource{
 		ID:     id,
 		Type:   resType,

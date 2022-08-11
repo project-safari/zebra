@@ -205,7 +205,7 @@ func (f *FileStore) Delete(res zebra.Resource) error {
 
 	// attempt to delete resource that does not exist, just return nil
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		return nil
+		return err
 	}
 
 	if err := syscall.Unlink(path); err != nil {
