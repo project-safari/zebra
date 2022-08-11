@@ -255,30 +255,20 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 
 	lab1 := &dc.Lab{
 		NamedResource: zebra.NamedResource{
-			BaseResource: zebra.BaseResource{
-				ID:     "10000001",
-				Type:   "Lab",
-				Labels: nil,
-				Status: zebra.DefaultStatus(),
-			},
-			Name: "Lab1",
+			BaseResource: *zebra.NewBaseResource("Lab", nil),
+			Name:         "Lab1",
 		},
 	}
 
 	lab2 := &dc.Lab{
 		NamedResource: zebra.NamedResource{
-			BaseResource: zebra.BaseResource{
-				ID:     "10000002",
-				Type:   "Lab",
-				Labels: nil,
-				Status: zebra.DefaultStatus(),
-			},
-			Name: "Lab2",
+			BaseResource: *zebra.NewBaseResource("Lab", nil),
+			Name:         "Lab2",
 		},
 	}
 
-	assert.NotNil(myAPI.Store.Create(lab1))
-	assert.NotNil(myAPI.Store.Create(lab2))
+	assert.Nil(myAPI.Store.Create(lab1))
+	assert.Nil(myAPI.Store.Create(lab2))
 
 	lab1.Labels = pkg.CreateLabels()
 	lab2.Labels = pkg.CreateLabels()

@@ -11,10 +11,17 @@ import (
 // validation and label selection methods.
 type Resource interface {
 	Validate(ctx context.Context) error
+
+	// get the status for resources to see if active or not.
+	GetStatus() *Status
+
 	GetID() string
 	GetType() string
 	GetLabels() Labels
+	GetName() string
 }
+
+const ShortIDSize = 7
 
 var (
 	ErrNameEmpty   = errors.New("name is empty")
@@ -62,6 +69,20 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 	return nil
 }
 
+// GetName returns the short ID of the resource.
+func (r *BaseResource) GetName() string {
+	if len(r.ID) < ShortIDSize {
+		return r.ID
+	}
+
+	return r.ID[:ShortIDSize]
+}
+
+// Return Status of BaseResource r.
+func (r *BaseResource) GetStatus() *Status {
+	return r.Status
+}
+
 // Return ID of BaseResource r.
 func (r *BaseResource) GetID() string {
 	return r.ID
@@ -105,6 +126,10 @@ func (r *NamedResource) Validate(ctx context.Context) error {
 	}
 
 	return r.BaseResource.Validate(ctx)
+}
+
+func (r *NamedResource) GetName() string {
+	return r.Name
 }
 
 // Credentials represents a named resource that has a set of keys (where each key is

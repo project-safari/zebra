@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -74,7 +73,6 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 	newuser := createNewUser(registryData.Name, registryData.Email, registryData.Password, registryData.Key)
 
 	if err := store.Create(newuser); err != nil {
-		fmt.Println(err)
 		log.Error(err, "user cant be stored", "user", registryData.Name)
 		res.WriteHeader(http.StatusInternalServerError)
 
