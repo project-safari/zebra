@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,6 +27,7 @@ func TestBaseResource(t *testing.T) {
 
 	res.ID = "ab"
 	assert.NotNil(res.Validate(ctx))
+	assert.Equal("ab", res.GetName())
 
 	res.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
@@ -33,9 +35,13 @@ func TestBaseResource(t *testing.T) {
 	res.Type = "BaseResource"
 	assert.NotNil(res.Validate(ctx))
 
+	res.Labels.Add("system.group", "test")
+
+	assert.Nil(res.Validate(ctx))
 	assert.Equal(res.ID, res.GetID())
 	assert.Equal(res.Type, res.GetType())
 	assert.True(res.GetLabels().HasKey("key"))
+	assert.Equal(res.ID[:7], res.GetName())
 }
 
 // TestBaseResource tests the *NamedResource Validate function with a pass case
@@ -66,6 +72,7 @@ func TestNamedResource(t *testing.T) {
 
 	res.Name = "jasmine"
 	assert.NotNil(res.Validate(ctx))
+	assert.Equal("jasmine", res.GetName())
 
 	assert.True(res.GetLabels().HasKey("key"))
 }
@@ -143,6 +150,36 @@ func TestLabelsValidation(t *testing.T) {
 
 	resTwo := zebra.NewBaseResource("", mapTwo)
 
-	assert.NotNil(resTwo.Validate(context.Background()))
-	assert.Equal(zebra.ErrLabel, resTwo.Validate(context.Background()))
+	assert.Nil(resTwo.Validate(context.Background()))
+}
+
+func TestNewCred(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	creds := zebra.NewCredential(pkg.Name(), labels)
+
+	assert.NotNil(creds)
+}
+
+func TestGettingStatus(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	ctx := context.Background()
+	res := &zebra.NamedResource{
+		BaseResource: zebra.BaseResource{
+			ID:     "",
+			Type:   "Switch",
+			Labels: zebra.Labels{"key": "value"},
+			Status: zebra.DefaultStatus(),
+		},
+		Name: "",
+	}
+	assert.NotNil(res.Validate(ctx))
+	assert.NotNil(res.GetStatus())
 }

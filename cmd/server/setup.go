@@ -76,6 +76,8 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 
 func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) error {
 	user := new(auth.User)
+	user.Status = zebra.DefaultStatus()
+	user.Status.State = zebra.Active
 
 	if err := cfgStore.Get("admin", user); err != nil {
 		return err

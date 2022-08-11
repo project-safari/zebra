@@ -119,7 +119,7 @@ func (r *RData) Body() io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBuffer(v))
 }
 
-func TestRegistry(t *testing.T) {
+func TestRegister(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
@@ -158,6 +158,16 @@ func TestRegistry(t *testing.T) {
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusCreated, rr.Code)
+
+	// Re-register should fail
+	req, err = http.NewRequestWithContext(ctx, "POST", "/register", nil)
+	req.Body = data.Body()
+
+	assert.Nil(err)
+
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusForbidden, rr.Code)
 
 	testForward(assert, h)
 }

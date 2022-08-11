@@ -36,7 +36,7 @@ func makeStore(assert *assert.Assertions, root string) zebra.Store {
 		l.Type = "Lab"
 		l.BaseResource = *zebra.NewBaseResource("Lab", labels)
 
-		assert.NotNil(s.Create(l))
+		assert.Nil(s.Create(l))
 	}
 
 	return s
