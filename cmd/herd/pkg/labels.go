@@ -14,7 +14,8 @@ const NumLabels = 10
 
 func CreateLabels() zebra.Labels {
 	many := RandNum(NumLabels)
-	codes := make(zebra.Labels, many)
+	codes := make(zebra.Labels, many+1)
+	codes.Add("system.group", "default")
 
 	colors := []string{
 		"red", "yellow", "green",

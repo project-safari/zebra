@@ -169,3 +169,58 @@ func TestVM(t *testing.T) {
 	machine.Type = "machine"
 	assert.NotNil(machine.Validate(ctx))
 }
+
+// test for vcenter generator.
+func TestNewVCenter(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	vc := compute.NewVCenter(pkg.Name(), net.IP("123.111.001"), labels)
+
+	assert.NotNil(vc)
+}
+
+func TestNewServer(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	arr := []string{pkg.Serials(), pkg.Models(), pkg.Name()}
+	srv := compute.NewServer(arr, net.IP("123.111.001"), labels)
+
+	assert.NotNil(srv)
+}
+
+func TestNewESX(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	esx := compute.NewESX(pkg.Name(), pkg.SelectServer(), net.IP("123.111.001"), labels)
+
+	assert.NotNil(esx)
+}
+
+func TestNewVM(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	arr := []string{pkg.Name(), pkg.SelectESX(), pkg.SelectVcenter()}
+	vm := compute.NewVM(arr, net.IP("123.111.001"), labels)
+
+	assert.NotNil(vm)
+}

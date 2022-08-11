@@ -171,7 +171,7 @@ func DefaultStatus() *Status {
 		Fault:       None,
 		Lease:       Free,
 		UsedBy:      "",
-		State:       Active,
+		State:       Inactive,
 		CreatedTime: time.Now(),
 	}
 }

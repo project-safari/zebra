@@ -1,4 +1,4 @@
-// Package network_test tests structs and functions pertaining to network resources
+/// Package network_test tests structs and functions pertaining to network resources
 // outlined in the network package.
 package network_test
 
@@ -125,4 +125,41 @@ func TestVLANPool(t *testing.T) {
 
 	pool.Type = "test123"
 	assert.NotNil(pool.Validate(ctx))
+}
+
+func TestNewVlan(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	newV := network.NewVlanPool(1, 100, labels)
+	assert.NotNil(newV)
+}
+
+func TestNewSwitch(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	arr := []string{pkg.Serials(), pkg.Models(), pkg.Name()}
+	newV := network.NewSwitch(arr, pkg.Ports(), net.IP("123.111.001"), labels)
+	assert.NotNil(newV)
+}
+
+func TestNewIP(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	newV := network.NewIPAddressPool(pkg.CreateIPArr(3), labels)
+	assert.NotNil(newV)
 }

@@ -57,7 +57,7 @@ func TestLab(t *testing.T) {
 	lab.Name = "sher"
 
 	lab.Labels = pkg.CreateLabels()
-	assert.NotNil(lab.Validate(ctx))
+	assert.Nil(lab.Validate(ctx))
 
 	lab.Labels = pkg.GroupLabels(lab.Labels, "oneGroup")
 	assert.Nil(lab.Validate(ctx))
@@ -85,4 +85,40 @@ func TestRack(t *testing.T) {
 
 	rack.Type = "test3"
 	assert.NotNil(rack.Validate(ctx))
+}
+
+func TestNewDc(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	dataC := dc.NewDatacenter(pkg.Addresses(), pkg.Name(), labels)
+	assert.NotNil(dataC)
+}
+
+func TestNewLab(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	dataC := dc.NewLab(pkg.Name(), labels)
+	assert.NotNil(dataC)
+}
+
+func TestNewRack(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	labels := pkg.CreateLabels()
+
+	labels = pkg.GroupLabels(labels, "group")
+
+	dataC := dc.NewRack(pkg.Name(), pkg.Rows(), labels)
+	assert.NotNil(dataC)
 }

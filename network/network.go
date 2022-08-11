@@ -4,6 +4,7 @@ package network
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/project-safari/zebra"
@@ -125,6 +126,10 @@ func (v *VLANPool) Validate(ctx context.Context) error {
 	}
 
 	return v.BaseResource.Validate(ctx)
+}
+
+func (v *VLANPool) String() string {
+	return fmt.Sprintf("%d-%d", v.RangeStart, v.RangeEnd)
 }
 
 // create new network resources.
