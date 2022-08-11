@@ -15,7 +15,6 @@ func TestNewBaseResource(t *testing.T) {
 	assert.NotNil(br)
 	assert.NotEmpty(br.ID)
 	assert.True(br.Type == "BaseResource")
-	assert.True(br.Labels == nil)
 
 	labels := zebra.Labels{"owner": "shravya"}
 

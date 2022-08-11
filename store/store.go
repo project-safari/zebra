@@ -100,8 +100,8 @@ func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
 }
 
 func (rs *ResourceStore) Create(res zebra.Resource) error {
-	if res == nil || res.Validate(context.Background()) != nil {
-		return zebra.ErrInvalidResource
+	if err := res.Validate(context.Background()); err != nil {
+		return err
 	}
 
 	rs.lock.Lock()
@@ -130,30 +130,30 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	return nil
 }
 
-func (rs *ResourceStore) Delete(res zebra.Resource) error {
-	if res == nil || res.Validate(context.Background()) != nil {
+func (rs *ResourceStore) Delete(resource zebra.Resource) error {
+	if resource == nil || resource.Validate(context.Background()) != nil {
 		return zebra.ErrInvalidResource
 	}
 
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
 
-	err := rs.fs.Delete(res)
+	err := rs.fs.Delete(resource)
 	if err != nil {
 		return err
 	}
 
-	err = rs.ids.Delete(res)
+	err = rs.ids.Delete(resource)
 	if err != nil {
 		return err
 	}
 
-	err = rs.ls.Delete(res)
+	err = rs.ls.Delete(resource)
 	if err != nil {
 		return err
 	}
 
-	err = rs.ts.Delete(res)
+	err = rs.ts.Delete(resource)
 	if err != nil {
 		return err
 	}
