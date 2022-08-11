@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"time"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/compute"
 	"github.com/project-safari/zebra/dc"
+	"github.com/project-safari/zebra/lease"
 	"github.com/project-safari/zebra/network"
 	"github.com/project-safari/zebra/store"
 	"github.com/spf13/cobra"
@@ -659,6 +661,28 @@ func printLeases(leases []zebra.Resource) {
 	})
 
 	// print the table here.
+	for _, s := range leases {
+		if l, ok := s.(*lease.Lease); ok {
+			status := l.GetStatus()
+			if status != nil && status.State == zebra.Active {
+				tw.AppendRow(table.Row{
+					l.Status.UsedBy,
+					l.Duration,
+					l.ActivationTime,
+					time.Until(l.ActivationTime.Add(l.Duration)),
+					state(l),
+				})
+			} else {
+				tw.AppendRow(table.Row{
+					l.Status.UsedBy,
+					l.Duration,
+					"--",
+					"--",
+					state(l),
+				})
+			}
+		}
+	}
 
 	fmt.Println(tw.Render())
 }
