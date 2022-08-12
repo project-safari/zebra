@@ -87,7 +87,7 @@ func TestBadRefreshRequest(t *testing.T) {
 	assert.NotNil(req)
 
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusInternalServerError, rr.Code)
+	assert.Equal(http.StatusUnauthorized, rr.Code)
 
 	rr = httptest.NewRecorder()
 	claims := auth.NewClaims("zebra", "a", nil, "email@domain")
@@ -97,5 +97,5 @@ func TestBadRefreshRequest(t *testing.T) {
 	assert.NotNil(req)
 
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusInternalServerError, rr.Code)
+	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
