@@ -23,7 +23,7 @@ func refreshAdapter() web.Adapter {
 			jwtClaims, ok := ctx.Value(ClaimsCtxKey).(*auth.Claims)
 			if !ok {
 				log.Error(nil, "claims not in context")
-				res.WriteHeader(http.StatusInternalServerError)
+				res.WriteHeader(http.StatusUnauthorized)
 
 				return
 			}
@@ -31,7 +31,7 @@ func refreshAdapter() web.Adapter {
 			authKey, ok := ctx.Value(AuthCtxKey).(string)
 			if !ok {
 				log.Error(nil, "authKey not in context")
-				res.WriteHeader(http.StatusInternalServerError)
+				res.WriteHeader(http.StatusUnauthorized)
 
 				return
 			}
