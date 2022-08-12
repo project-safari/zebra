@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// constant values for keys to be used in tests.
 const (
 	authKey   = "abracadabra"
 	jiniWords = "youGetThreewishes!"

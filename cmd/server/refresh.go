@@ -8,6 +8,11 @@ import (
 	"gojini.dev/web"
 )
 
+// function to refresh the web adapter.
+//
+// if everything succeeds, it creates a new token and cookie for the refreshed session.
+//
+// returns web.Adapter.
 func refreshAdapter() web.Adapter {
 	return func(nextHandler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {

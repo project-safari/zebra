@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// tests for routeHandler().
 func TestRoutes(t *testing.T) {
 	t.Parallel()
 

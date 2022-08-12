@@ -46,6 +46,7 @@ func TestAuthAdapter(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
+// tests for the rsa key.
 func TestRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -126,6 +127,7 @@ func TestJWT(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// tests for case with an incorrect rsa key.
 func TestBadRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -5,7 +5,9 @@ import (
 	"github.com/project-safari/zebra/dc"
 )
 
-// generate datacenter info.
+// function to generate datacenter info.
+//
+// returns an array of type zebra.Resource.
 func GenerateDatacenter(numDC int) []zebra.Resource {
 	datacent := make([]zebra.Resource, 0, numDC)
 

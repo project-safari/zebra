@@ -34,6 +34,7 @@ func TestAddresses(t *testing.T) {
 	assert.NotEmpty(addr)
 }
 
+// tests for setting the IP address.
 func TestSetIP(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -44,6 +45,7 @@ func TestSetIP(t *testing.T) {
 	assert.NotEmpty(samples)
 }
 
+// tests for creating an array of IP addresses.
 func TestCreateIPArr(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -67,6 +69,7 @@ func TestPorts(t *testing.T) {
 	assert.NotNil(prt)
 }
 
+// tests for generating a model name.
 func TestModel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -78,6 +81,7 @@ func TestModel(t *testing.T) {
 	assert.NotEqual(model, " ")
 }
 
+// tests for generating a serial code.
 func TestSerials(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -88,6 +92,7 @@ func TestSerials(t *testing.T) {
 	assert.NotEqual(ser, " ")
 }
 
+// tests for generation of row.
 func TestRows(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -107,6 +112,7 @@ func TestSelectServer(t *testing.T) {
 	assert.NotNil(srv)
 }
 
+// tests for generating / selecting an ID for esx servers.
 func TestSelectESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -115,6 +121,7 @@ func TestSelectESX(t *testing.T) {
 	assert.NotNil(esx)
 }
 
+// tests for generating / selecting an ID for vcenters.
 func TestSelectVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -132,6 +139,7 @@ func TestUser(t *testing.T) {
 	assert.NotNil(user)
 }
 
+// tests for gereration of default passwords.
 func TestPass(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -141,6 +149,7 @@ func TestPass(t *testing.T) {
 	assert.Equal("person123", pwd)
 }
 
+// test for users' names.
 func TestName(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -177,6 +186,7 @@ func TestRandData(t *testing.T) {
 	assert.Empty(test2Arr)
 }
 
+// tests for generation of random data for sample executions.
 func TestRandNum(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -185,6 +195,8 @@ func TestRandNum(t *testing.T) {
 }
 
 // tests for Vlan generation.
+//
+// #1 - creating the vlan.
 func TestCreateVlanPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -199,6 +211,9 @@ func TestCreateVlanPool(t *testing.T) {
 	assert.NotEmpty(VlanPool)
 }
 
+// tests for Vlan generation.
+//
+// #2 - generating the vlan.
 func TestGenerateVlan(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -211,6 +226,8 @@ func TestGenerateVlan(t *testing.T) {
 }
 
 // tests for switch generation.
+//
+// #1 - creating the switch.
 func TestCreateSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -222,6 +239,9 @@ func TestCreateSwitch(t *testing.T) {
 	assert.NotEmpty(sw)
 }
 
+// tests for switch generation.
+//
+// #2 - generating the switch.
 func TestGenerateSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -234,6 +254,8 @@ func TestGenerateSwitch(t *testing.T) {
 }
 
 // tests for IPAddress generation.
+//
+// #1 - creating the IPAddressPool.
 func TestCreateIPPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -244,6 +266,9 @@ func TestCreateIPPool(t *testing.T) {
 	assert.NotEmpty(pool)
 }
 
+// tests for IPAddress generation.
+//
+// #2 - generating the IPAddressPool.
 func TestGenerateIPAddressPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -255,6 +280,8 @@ func TestGenerateIPAddressPool(t *testing.T) {
 }
 
 // tests for datacenter generation.
+//
+// #1 - creating the datacenter.
 func TestCreateDatacenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -265,6 +292,9 @@ func TestCreateDatacenter(t *testing.T) {
 	assert.NotEmpty(datacent)
 }
 
+// tests for datacenter generation.
+//
+// #2 - generating the datacenter.
 func TestGenerateDatacenterl(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -277,6 +307,8 @@ func TestGenerateDatacenterl(t *testing.T) {
 }
 
 // tests for lab generation.
+//
+// #1 - creating the lab.
 func TestCreateLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -287,6 +319,9 @@ func TestCreateLab(t *testing.T) {
 	assert.NotEmpty(lab)
 }
 
+// tests for lab generation.
+//
+// #2 - generating the lab.
 func TestGenerateLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -298,6 +333,8 @@ func TestGenerateLab(t *testing.T) {
 }
 
 // tests for rack generation.
+//
+// #1 - creating the rack.
 func TestCreateRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -307,6 +344,9 @@ func TestCreateRack(t *testing.T) {
 	assert.NotEmpty(rack)
 }
 
+// tests for rack generation.
+//
+// #2 - generating the rack.
 func TestGenerateRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -318,6 +358,8 @@ func TestGenerateRack(t *testing.T) {
 }
 
 // tests for vcenter generation.
+//
+// #1 - creating the vcenter.
 func TestCreateVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -328,6 +370,9 @@ func TestCreateVCenter(t *testing.T) {
 	assert.Equal("VCenter", vc.GetType())
 }
 
+// tests for vcenter generation.
+//
+// #2 - generating the vcenter.
 func TestGenerateVC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -340,6 +385,8 @@ func TestGenerateVC(t *testing.T) {
 }
 
 // tests for esx generation.
+//
+// #1 - creaing the esx.
 func TestCreateESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -349,6 +396,9 @@ func TestCreateESX(t *testing.T) {
 	assert.NotEmpty(vc)
 }
 
+// tests for esx generation.
+//
+// #2 - generating the esx.
 func TestGenerateESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -361,6 +411,8 @@ func TestGenerateESX(t *testing.T) {
 }
 
 // tests for server generation.
+//
+// #1 - creating the server.
 func TestCreateServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -371,6 +423,9 @@ func TestCreateServer(t *testing.T) {
 	assert.NotEmpty(server)
 }
 
+// tests for server generation.
+//
+// #2 - generating the server.
 func TestGenerateServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -383,6 +438,8 @@ func TestGenerateServer(t *testing.T) {
 }
 
 // tests for vm generation.
+//
+// #1 - creating the vm.
 func TestCreateVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -393,6 +450,9 @@ func TestCreateVM(t *testing.T) {
 	assert.NotEmpty(vm)
 }
 
+// tests for vm generation.
+//
+// #2 - generating the vm.
 func TestGenerateVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -404,6 +464,8 @@ func TestGenerateVM(t *testing.T) {
 }
 
 // tests for user info generation.
+//
+// #1 - creating the user.
 func TestCreateUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -418,6 +480,9 @@ func TestCreateUser(t *testing.T) {
 	assert.Nil(user.Validate(context.Background()))
 }
 
+// tests for user info generation.
+//
+// #2 - generating the user.
 func TestGenerateUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -429,6 +494,8 @@ func TestGenerateUser(t *testing.T) {
 }
 
 // tests for credential info generation.
+//
+// #1 - creating the credential info.
 func TestCreateCredential(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -438,6 +505,9 @@ func TestCreateCredential(t *testing.T) {
 	assert.NotEmpty(credentials)
 }
 
+// tests for credential info generation.
+//
+// #2 - generating the credential info.
 func TestGenerateCredential(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

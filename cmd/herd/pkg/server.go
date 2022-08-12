@@ -7,7 +7,9 @@ import (
 	"github.com/project-safari/zebra/compute"
 )
 
-// generate server resources.
+// function to generate server resources.
+//
+// returns an array of type zebra.Resource.
 func GenerateServer(numServers int) []zebra.Resource {
 	servers := make([]zebra.Resource, 0, numServers)
 

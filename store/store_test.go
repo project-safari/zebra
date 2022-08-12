@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// mock function to create a VLANPool to use in tests.
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
 		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
@@ -20,6 +21,7 @@ func getVLAN() *network.VLANPool {
 	}
 }
 
+// mock function to create a Lab to use in tests.
 func getLab() *dc.Lab {
 	br := *zebra.NewBaseResource("Lab", nil)
 
@@ -31,6 +33,7 @@ func getLab() *dc.Lab {
 	}
 }
 
+// mock function to create a ResourceMap to use in tests.
 func getResMap() *zebra.ResourceMap {
 	// make 10 resources and add them to list
 	resMap := zebra.NewResourceMap(nil)
@@ -42,6 +45,7 @@ func getResMap() *zebra.ResourceMap {
 	return resMap
 }
 
+// test for a new store.
 func TestNewResourceStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -53,6 +57,7 @@ func TestNewResourceStore(t *testing.T) {
 	assert.NotNil(store.NewResourceStore(root, nil))
 }
 
+// test for store initialization.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -66,6 +71,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(rs.Initialize())
 }
 
+// test for store wiping.
 func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -80,6 +86,7 @@ func TestWipe(t *testing.T) {
 	assert.Nil(rs.Wipe())
 }
 
+// test for deleting the store.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -147,6 +154,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(1, len(resources.Resources))
 }
 
+// test for creation.
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -177,6 +185,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(rs.Create(vlan))
 }
 
+// test for querring the labels.
 func TestQueryLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -217,6 +226,7 @@ func TestQueryLabel(t *testing.T) {
 	assert.NotNil(err)
 }
 
+// tests for varied querries.
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -243,6 +253,7 @@ func TestQuery(t *testing.T) {
 	assert.NotNil(resources.Resources["VLANPool"])
 }
 
+// tests for querring the uuid.
 func TestQueryUUID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -276,6 +287,7 @@ func TestQueryUUID(t *testing.T) {
 	assert.Nil(resources.Resources["VLANPool"])
 }
 
+// tests for querring the type.
 func TestQueryType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -314,6 +326,7 @@ func TestQueryType(t *testing.T) {
 	assert.NotNil(resources.Resources["VLANPool"])
 }
 
+// tests for filtering by uuid.
 func TestFilterUUID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -332,6 +345,7 @@ func TestFilterUUID(t *testing.T) {
 	assert.Equal(id, resMap.Resources["VLANPool"].Resources[0].GetID())
 }
 
+// tests for filtering by type.
 func TestFilterType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -354,6 +368,7 @@ func TestFilterType(t *testing.T) {
 	assert.Equal(0, len(resMap.Resources))
 }
 
+// tests for filtering by label.
 func TestFilterLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -391,6 +406,7 @@ func TestFilterLabel(t *testing.T) {
 	assert.Equal(0, len(resMap.Resources))
 }
 
+// tests for filtering by property.
 func TestFilterProperty(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -427,6 +443,7 @@ func TestFilterProperty(t *testing.T) {
 	assert.Equal(0, len(resMap.Resources))
 }
 
+// tests for clear.
 func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -456,6 +473,7 @@ func TestClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
+// tests for querring by property.
 func TestQueryProperty(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

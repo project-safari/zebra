@@ -42,6 +42,7 @@ func TestDatacenter(t *testing.T) {
 	assert.NotNil(labType)
 }
 
+// test lab data.
 func TestLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -87,6 +88,7 @@ func TestRack(t *testing.T) {
 	assert.NotNil(rack.Validate(ctx))
 }
 
+// test for datacenter generation.
 func TestNewDc(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -99,6 +101,7 @@ func TestNewDc(t *testing.T) {
 	assert.NotNil(dataC)
 }
 
+// test for lab generation.
 func TestNewLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -111,6 +114,7 @@ func TestNewLab(t *testing.T) {
 	assert.NotNil(dataC)
 }
 
+// test for rack generation.
 func TestNewRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

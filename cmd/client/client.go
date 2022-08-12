@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// potential errors with the configuration.
 var (
 	ErrNoCACert     = errors.New("zebra CA certificate file is not conifugred")
 	ErrNoConfig     = errors.New("zebra config file is not specified")
@@ -21,6 +22,7 @@ var (
 	ErrNoPrivateKey = errors.New("user private key is not configured")
 )
 
+// a struct for client data, it contains the configuration, the http client, and the http header.
 type Client struct {
 	cfg *Config
 	c   *http.Client

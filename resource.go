@@ -23,6 +23,7 @@ type Resource interface {
 
 const ShortIDSize = 7
 
+// this is a type of error that can occur in a rsource.
 var (
 	ErrNameEmpty   = errors.New("name is empty")
 	ErrIDEmpty     = errors.New("id is empty")

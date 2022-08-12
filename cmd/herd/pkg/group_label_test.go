@@ -8,6 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// tests for generation of system.group labels.
+//
+// the tested function generates system.group labels if the given resource does not have any such labels.
 func TestGroupLabel(t *testing.T) {
 	t.Parallel()
 

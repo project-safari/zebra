@@ -127,6 +127,7 @@ func TestVLANPool(t *testing.T) {
 	assert.NotNil(pool.Validate(ctx))
 }
 
+// test for vlan generation.
 func TestNewVlan(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -139,6 +140,7 @@ func TestNewVlan(t *testing.T) {
 	assert.NotNil(newV)
 }
 
+// test for switch generation.
 func TestNewSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -152,6 +154,7 @@ func TestNewSwitch(t *testing.T) {
 	assert.NotNil(newV)
 }
 
+// test for IPAddressPool generation.
 func TestNewIP(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

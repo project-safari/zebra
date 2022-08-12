@@ -14,8 +14,13 @@ import (
 	"github.com/project-safari/zebra/typestore"
 )
 
+// ErrNilResource prevents nil resources from being created.
 var ErrNilResource = errors.New("nil resource not allowed")
 
+// ResourceStore is a struct used for creation of new resource stores.
+// a resource store contains a lock, a root path for storage,
+// a  zebra.ResourceFactory,
+// and pointers to filestore.FileStore, idstore.IDStore, typestore.TypeStore.
 type ResourceStore struct {
 	lock        sync.RWMutex
 	StorageRoot string
@@ -26,6 +31,9 @@ type ResourceStore struct {
 	ts          *typestore.TypeStore
 }
 
+// function uses the ResourceStore struct to generate a new resource store.
+// takes in a string to the root path and a  zebra.ResourceFactory.
+// returns a pointer to ResourceStore.
 func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore {
 	return &ResourceStore{
 		lock:        sync.RWMutex{},
@@ -38,6 +46,7 @@ func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore
 	}
 }
 
+// operation function on ResourceStore: initialization.
 func (rs *ResourceStore) Initialize() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
@@ -59,6 +68,7 @@ func (rs *ResourceStore) Initialize() error {
 	return nil
 }
 
+// operation function on ResourceStore: wiping.
 func (rs *ResourceStore) Wipe() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
@@ -71,6 +81,7 @@ func (rs *ResourceStore) Wipe() error {
 	return nil
 }
 
+// operation function on ResourceStore: clearing.
 func (rs *ResourceStore) Clear() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
@@ -102,6 +113,7 @@ func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
 	return rs.ts.Load()
 }
 
+// operation function on ResourceStore: create.
 func (rs *ResourceStore) Create(res zebra.Resource) error {
 	if res == nil {
 		return ErrNilResource
@@ -137,6 +149,7 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	return nil
 }
 
+// operation function on ResourceStore: delete.
 func (rs *ResourceStore) Delete(resource zebra.Resource) error {
 	if resource == nil || resource.Validate(context.Background()) != nil {
 		return zebra.ErrInvalidResource
@@ -245,6 +258,8 @@ func (rs *ResourceStore) QueryProperty(query zebra.Query) (*zebra.ResourceMap, e
 	return rs.propertyMatch(query, false)
 }
 
+// function to check for matches in properties.
+// returns a pointer to zebra.ResourceMap and an error where appropriate (or nil otherwise).
 func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.ResourceMap, error) {
 	resMap, err := rs.ts.Load()
 	if err != nil {

@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+// Status is a struct that sets the status of a resource.
+//
+// It should contain a fault, a lease,
+// a string that represents a user's name, a state, and the time when it was created.
 type Status struct {
 	Fault       Fault     `json:"fault"`
 	Lease       Lease     `json:"lease"`
@@ -15,12 +19,14 @@ type Status struct {
 	CreatedTime time.Time `json:"createdTime"`
 }
 
+// set types for Fault, Lease, State.
 type (
 	Fault uint8
 	Lease uint8
 	State uint8
 )
 
+// default values to be used for status.
 const (
 	None Fault = iota
 	Minor
@@ -41,6 +47,7 @@ const (
 
 const Unknown = "unknown"
 
+// errors that can occur in a lease or resource state.
 var (
 	ErrFault       = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
 	ErrLease       = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
@@ -81,6 +88,7 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
+// function that deals with lease status.
 func (l Lease) String() string {
 	strs := map[Lease]string{Leased: "leased", Free: "free", Setup: "setup"}
 	lstr, ok := strs[l]
@@ -113,6 +121,7 @@ func (l *Lease) UnmarshalText(data []byte) error {
 	return nil
 }
 
+// function that deals with state status.
 func (s State) String() string {
 	strs := map[State]string{Active: "active", Inactive: "inactive"}
 	sstr, ok := strs[s]

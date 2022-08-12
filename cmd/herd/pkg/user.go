@@ -6,6 +6,8 @@ import (
 )
 
 // generate some user info.
+//
+// returns an array of type zebra.Resource.
 func GenerateUser(numUsr int) []zebra.Resource {
 	users := make([]zebra.Resource, 0, numUsr)
 

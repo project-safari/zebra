@@ -9,16 +9,34 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+//  ErrSerialEmpty is for empty serial number.
+//  errorsfor empty resource fields.
+// serials, IP addresses, model names, esx ID, VC ID, server ID should not be empty.
 var ErrSerialEmpty = errors.New("serial number is nil")
 
+//  ErrIPEmpty is for empty IP.
+//  error for empty resource fields.
+// serials, IP addresses, model names, esx ID, VC ID, server ID should not be empty.
 var ErrIPEmpty = errors.New("ip address is nil")
 
+//  ErrModelEmpty is for empty model name.
+//  error for empty resource fields.
+// serials, IP addresses, model names, esx ID, VC ID, server ID should not be empty.
 var ErrModelEmpty = errors.New("model is empty")
 
+//   ErrESXEmpty is for empty ESX ID.
+//  errors for empty resource fields.
+// serials, IP addresses, model names, esx ID, VC ID, server ID should not be empty.
 var ErrESXEmpty = errors.New("ESX id is empty")
 
+//  ErrVCenterEmpty  is for empty VCenter ID.
+//  error for empty resource fields.
+// serials, IP addresses, model names, esx ID, VC ID, server ID should not be empty.
 var ErrVCenterEmpty = errors.New("VCenter id is empty")
 
+//  ErrServerIDEmtpy  is for empty Server ID.
+//  error for empty resource fields.
+// serials, IP addresses, model names, esx ID, VC ID, server ID should not be empty.
 var ErrServerIDEmtpy = errors.New("server id is empty")
 
 func ServerType() zebra.Type {
@@ -167,6 +185,9 @@ func (v *VM) Validate(ctx context.Context) error {
 }
 
 // create new resources.
+// function to create a new server given a name, an IP.net IP address, and labels.
+// uses a base resource and the keys to return a vcenter's data.
+// returns a pointer to  compute.VCenter struct.
 func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 	namedRes := new(zebra.NamedResource)
 
@@ -191,6 +212,9 @@ func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 	return ret
 }
 
+// function to create a new server given a serial number, a model name, labels, and a name.
+// uses a base resource and the keys to return a server's data.
+// returns a pointer to  compute.Server struct.
 func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 	named := new(zebra.NamedResource)
 
@@ -215,6 +239,9 @@ func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 	return ret
 }
 
+// function to create a new esx given a name, a server ID, an net.IP address, and labels.
+// uses a base resource and the keys to return an esx server's data.
+// returns a pointer to compute.ESX struct.
 func NewESX(name string, serverID string, ip net.IP, labels zebra.Labels) *ESX {
 	namedRes := new(zebra.NamedResource)
 
@@ -240,6 +267,9 @@ func NewESX(name string, serverID string, ip net.IP, labels zebra.Labels) *ESX {
 	return ret
 }
 
+// function to create a new vm given a name, an esx ID, a vcenter ID, an net.IP address, and labels.
+// uses a base resource and the keys to return a vm's data.
+// returns a pointer to compute.VM struct.
 func NewVM(arr []string, ip net.IP, labels zebra.Labels) *VM {
 	namedRes := new(zebra.NamedResource)
 	cred := new(zebra.Credentials)

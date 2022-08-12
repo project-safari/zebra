@@ -11,6 +11,15 @@ import (
 	"gojini.dev/web"
 )
 
+// function to create a login adapter.
+//
+// function reads the json file, finds the user, and authenticates him. her with the respective password.
+//
+// if no user of type (*auth.User) is found, or the email is nivalid, log error "no user found".
+//
+// if user exists, but authentication fails, log error "user auth failed".
+//
+// returns web.Adapter.
 func loginAdapter() web.Adapter {
 	return func(nextHandler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -71,6 +80,7 @@ func loginAdapter() web.Adapter {
 	}
 }
 
+// function to make the cookies.
 func makeCookie(jwt string) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Name = "jwt"
@@ -80,6 +90,11 @@ func makeCookie(jwt string) *http.Cookie {
 	return cookie
 }
 
+// function to find the user.
+//
+// this function will be used in loginAdapter() to ensure that the user exists.
+//
+// returns *auth.User.
 func findUser(store zebra.Store, email string) *auth.User {
 	resMap := store.QueryType([]string{"User"})
 
@@ -98,6 +113,7 @@ func findUser(store zebra.Store, email string) *auth.User {
 	return nil
 }
 
+// function for response data from login.
 func respondWithClaims(ctx context.Context, res http.ResponseWriter,
 	claims *auth.Claims, authKey string,
 ) {

@@ -25,6 +25,8 @@ func authAdapter() web.Adapter {
 	}
 }
 
+// function to provide user info.
+// returns 2 strings: the user and his/her token.
 func creds(r *http.Request) (string, string) {
 	user := r.Header.Get("Zebra-Auth-User")
 	token := r.Header.Get("Zebra-Auth-Token")
@@ -33,6 +35,9 @@ func creds(r *http.Request) (string, string) {
 	return user, string(bt)
 }
 
+// function to create claims and set them into a request.
+//
+// this function uses valid context (with resources in context), user, and token.
 func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 	ctx := req.Context()
 	log := logr.FromContextOrDiscard(ctx)

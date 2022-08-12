@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// test for initialization of thr command for the zebra server.
 func TestInitCmd(t *testing.T) {
 	t.Parallel()
 

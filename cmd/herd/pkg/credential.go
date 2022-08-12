@@ -2,7 +2,9 @@ package pkg
 
 import "github.com/project-safari/zebra"
 
-// generate some credentials.
+// function to generate some credentials.
+//
+// returns an array of type *zebra.Credentials.
 func GenerateCredential(numCrds int) []*zebra.Credentials {
 	credentials := make([]*zebra.Credentials, 0, numCrds)
 

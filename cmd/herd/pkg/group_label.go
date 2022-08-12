@@ -10,7 +10,13 @@ func GroupLabels(l zebra.Labels, groupValue string) zebra.Labels {
 	return groupLabel
 }
 
-// group Value based on resource type.
+// function to generate group Value based on resource type.
+//
+// this function will be used for gereration of sample.group labels for resources that lack such labels.
+//
+// returns a string that contains a group value.
+//
+// group value could be a geographic location, a building name/number, a user type or role.
 func GroupVal(resource zebra.Resource) string {
 	groupSamples := []string{
 		"Americas", "admins", "Building15",

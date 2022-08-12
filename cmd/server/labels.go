@@ -7,6 +7,7 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+// function for handling the lables, caching the labels, writing to file.
 func handleLabels() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()

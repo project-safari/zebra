@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// test to create new resource map and use it in creation of a new idstore.
 func TestNewIDStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -17,6 +18,7 @@ func TestNewIDStore(t *testing.T) {
 	assert.NotNil(idstore.NewIDStore(resMap))
 }
 
+// test for init of idstore.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -29,6 +31,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(rs.Initialize())
 }
 
+// test for wiping of idstore.
 func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -42,6 +45,7 @@ func TestWipe(t *testing.T) {
 	assert.Nil(rs.Wipe())
 }
 
+// test for clearing the idstore.
 func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -68,6 +72,7 @@ func TestClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
+// test of loading for the idstore.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

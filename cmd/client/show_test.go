@@ -20,6 +20,7 @@ func test() *cobra.Command {
 	return showCmd
 }
 
+// tests for the client.
 func TestClient(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -114,6 +115,8 @@ func TestShowLease(t *testing.T) {
 }
 
 // tests for server resource types (server, esx, vcenter, vm).
+
+//  tests for server commands.
 func TestShowServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -132,6 +135,7 @@ func TestShowServer(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for esx commands.
 func TestShowESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -150,6 +154,7 @@ func TestShowESX(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for vc commands.
 func TestShowVC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -168,6 +173,7 @@ func TestShowVC(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for vm commands.
 func TestShowVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -187,6 +193,8 @@ func TestShowVM(t *testing.T) {
 }
 
 // tests for dc resource types (datacenter, lab, rack).
+
+//  tests for datacenter commands.
 func TestShowDatacenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -205,6 +213,7 @@ func TestShowDatacenter(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for lab commands.
 func TestShowLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -223,6 +232,7 @@ func TestShowLab(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for rack commands.
 func TestShowRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -242,6 +252,8 @@ func TestShowRack(t *testing.T) {
 }
 
 // tests for network resources (switch, vlan, ip-address).
+
+//  tests for switch commands.
 func TestShowSwitches(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -260,6 +272,7 @@ func TestShowSwitches(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for vlan commands.
 func TestShowVlans(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -278,6 +291,7 @@ func TestShowVlans(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for IPAddressPool commands.
 func TestShowPools(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -297,6 +311,8 @@ func TestShowPools(t *testing.T) {
 }
 
 // tests for user resources (user data, registrations, key).
+
+//  tests for user commands.
 func TestShowUsers(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -315,6 +331,7 @@ func TestShowUsers(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for registration commands.
 func TestShowRegistrations(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -333,6 +350,7 @@ func TestShowRegistrations(t *testing.T) {
 	assert.NotNil(res)
 }
 
+//  tests for  printing resources.
 func TestPrintResources(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
@@ -478,6 +496,7 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 	printResources(allMap)
 }
 
+//  tests for  printing servers.
 func TestPrintServers(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -506,6 +525,7 @@ func TestPrintServers(t *testing.T) {
 	printServers(listed)
 }
 
+//  tests for  printing esx.
 func TestPrintESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -533,6 +553,7 @@ func TestPrintESX(t *testing.T) {
 	printESX(listed)
 }
 
+//  tests for  printing vcs.
 func TestPrintVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -560,6 +581,7 @@ func TestPrintVCenter(t *testing.T) {
 	printVCenters(listed)
 }
 
+//  tests for  printing vms.
 func TestPrintVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -587,6 +609,7 @@ func TestPrintVM(t *testing.T) {
 	printVM(listed)
 }
 
+//  tests for  printing vlans.
 func TestPrintVlan(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -615,6 +638,7 @@ func TestPrintVlan(t *testing.T) {
 	printVlans(listed)
 }
 
+//  tests for  printing switches.
 func TestPrintSwitches(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -642,6 +666,7 @@ func TestPrintSwitches(t *testing.T) {
 	printSwitches(listed)
 }
 
+//  tests for  printing IPAddressPools.
 func TestPrintIPPools(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -670,6 +695,7 @@ func TestPrintIPPools(t *testing.T) {
 	printIPs(listed)
 }
 
+//  tests for  printing datacenters.
 func TestPrintDC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -697,6 +723,7 @@ func TestPrintDC(t *testing.T) {
 	printDatacenters(listed)
 }
 
+//  tests for  printing labs.
 func TestPrintlabs(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -724,6 +751,7 @@ func TestPrintlabs(t *testing.T) {
 	printLabs(listed)
 }
 
+//  tests for  printing racks.
 func TestPrintRacks(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -751,6 +779,7 @@ func TestPrintRacks(t *testing.T) {
 	printRacks(listed)
 }
 
+//  tests for  printing leases.
 func TestPrintLeases(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -773,6 +802,7 @@ func TestPrintLeases(t *testing.T) {
 	printLeases(*l)
 }
 
+//  tests for  printing users.
 func TestPrintUsers(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -801,6 +831,7 @@ func TestPrintUsers(t *testing.T) {
 	printUsers(listed)
 }
 
+//  tests for  expected behavior.
 func TestBehavior(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

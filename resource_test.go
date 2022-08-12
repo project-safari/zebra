@@ -129,6 +129,7 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 }
 
+// tests for validation of labels.
 func TestLabelsValidation(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -153,6 +154,7 @@ func TestLabelsValidation(t *testing.T) {
 	assert.Nil(resTwo.Validate(context.Background()))
 }
 
+// tests for creation of new credentials.
 func TestNewCred(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -166,6 +168,7 @@ func TestNewCred(t *testing.T) {
 	assert.NotNil(creds)
 }
 
+// tests for getting the status of a resource and validating that resource.
 func TestGettingStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

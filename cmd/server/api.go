@@ -11,6 +11,7 @@ import (
 	"github.com/project-safari/zebra/store"
 )
 
+// resource api is a struct that contains a fzebra.ResourceFactory and a zebra.Store.
 type ResourceAPI struct {
 	factory zebra.ResourceFactory
 	Store   zebra.Store
@@ -23,6 +24,7 @@ type QueryRequest struct {
 	Properties []zebra.Query `json:"properties,omitempty"`
 }
 
+// ErrQueryRequest returns an error message if the GET request has an invalid body.
 var ErrQueryRequest = errors.New("invalid GET query request body")
 
 func (qr *QueryRequest) Validate(ctx context.Context) error {
@@ -98,6 +100,8 @@ func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
 	return nil
 }
 
+// function to handle querries.
+// this function helps log the info and write the response in a json file, or return if an error occurs.
 func handleQuery() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()

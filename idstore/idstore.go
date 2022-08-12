@@ -4,6 +4,7 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+// IDStore struct contains a zebra.ResourceFactory and a map of zebra.Resource.
 type IDStore struct {
 	factory   zebra.ResourceFactory
 	resources map[string]zebra.Resource

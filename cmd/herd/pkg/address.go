@@ -18,7 +18,8 @@ func Addresses() string {
 	return theAdr
 }
 
-// create IP arr.
+// create IP arr to use in generation of data for resources that need arrays of ip addresses.
+// returns an array of net.IPNet.
 func CreateIPArr(ipNum int) []net.IPNet {
 	netArr := make([]net.IPNet, 0, ipNum)
 
@@ -30,7 +31,7 @@ func CreateIPArr(ipNum int) []net.IPNet {
 	return netArr
 }
 
-// this array will help set possible sample IP addresses.
+// this function will help set possible sample IP addresses, returns a string array.
 func IPsamples() []string {
 	SampleIPAddr := []string{
 		"1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4",
@@ -40,6 +41,8 @@ func IPsamples() []string {
 	return SampleIPAddr
 }
 
+// function to generate random ip addresses.
+// returns a net.IP address.
 func RandIP() net.IP {
 	ipAddr := RandData(IPsamples())
 

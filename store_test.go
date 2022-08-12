@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// test for store validation.
 func TestValidateStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

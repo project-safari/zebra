@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// sample command to use in go testts for zebra commands.
 func mockCmd() *cobra.Command {
 	cmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct
 		Use:          "Name",
@@ -48,6 +49,7 @@ func mockCmd() *cobra.Command {
 	return cmd
 }
 
+// tests for initialization.
 func TestInit(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -57,6 +59,7 @@ func TestInit(t *testing.T) {
 	assert.Nil(os.RemoveAll("test_store"))
 }
 
+// tests for the filestore.
 func TestFileStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -77,6 +80,7 @@ func TestFileStore(t *testing.T) {
 	assert.Nil(ret)
 }
 
+// tests for the init value.
 func TestInitVal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -88,6 +92,7 @@ func TestInitVal(t *testing.T) {
 	assert.True(vals > 0)
 }
 
+// tests for generation of the store.
 func TestGenerateStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -101,6 +106,7 @@ func TestGenerateStore(t *testing.T) {
 	assert.True(len(res) > 0)
 }
 
+// tests for the run function.
 func TestRun(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -110,4 +116,13 @@ func TestRun(t *testing.T) {
 	exec := run(mockCmd(), arr)
 
 	assert.Nil(exec)
+}
+
+// test for the overall behavior of zebra commands.
+func TestBehavior(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	assert.NotNil(mockCmd())
+	main()
 }

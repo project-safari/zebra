@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// tests for creation of new users.
 func TestCreateNewUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -39,6 +40,7 @@ func TestCreateNewUser(t *testing.T) {
 	assert.NotNil(user.PasswordHash)
 }
 
+// tests for updating of existing users.
 func TestUpdateUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -64,6 +66,7 @@ func TestUpdateUser(t *testing.T) {
 	assert.NotEqual(oldpassword, user.PasswordHash)
 }
 
+// tests for deleting existing users.
 func TestDeleteUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -172,6 +175,7 @@ func TestRegister(t *testing.T) {
 	testForward(assert, h)
 }
 
+// tests for user that has no key.
 func TestNoKeyUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -202,6 +206,7 @@ func TestNoKeyUser(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 }
 
+// tests for requests on the same user.
 func TestSameUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -234,6 +239,7 @@ func TestSameUser(t *testing.T) {
 	assert.Equal(http.StatusForbidden, rr.Code)
 }
 
+// tests for invalid requests.
 func TestBadRequest(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -269,6 +275,7 @@ func TestBadRequest(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// test for deleting only on user from the store.
 func TestDelete1User(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

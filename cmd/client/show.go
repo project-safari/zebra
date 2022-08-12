@@ -18,6 +18,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ErrQuery returns an error message if there is an error in querring the server.
+//
+// error usually occurs when http status is not ok (i.e. when http.StatusOK  =/= 200).
 var ErrQuery = errors.New("server query failed")
 
 type QueryRequest struct {

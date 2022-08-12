@@ -7,6 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// various tests for labels.
+// include tests for matching equality / inequality of labels.
+// matching existence of a label key.
+// tests are performed for ovarious quantities labels in the labels map.
 func TestLabels(t *testing.T) {
 	t.Parallel()
 

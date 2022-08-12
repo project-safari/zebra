@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// function to create a a resource store to be used in the tests.
 func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	s := store.NewResourceStore(root, store.DefaultFactory())
 	assert.Nil(s.Initialize())
@@ -42,6 +43,7 @@ func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	return s
 }
 
+// function to create an http request to be used in the tests.
 func makeLabelRequest(assert *assert.Assertions, resources *ResourceAPI, labels ...string) *http.Request {
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 	ctx = context.WithValue(ctx, AuthCtxKey, authKey)
@@ -59,6 +61,7 @@ func makeLabelRequest(assert *assert.Assertions, resources *ResourceAPI, labels 
 	return req
 }
 
+// test for a request with invalid / incorrect label.
 func TestBadLabelReq(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -90,6 +93,7 @@ func TestBadLabelReq(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 }
 
+// tests where all labels are used.
 func TestAllLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -114,6 +118,7 @@ func TestAllLabels(t *testing.T) {
 	assert.Equal(rr.Code, http.StatusOK)
 }
 
+// tests where label request is successful.
 func TestLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

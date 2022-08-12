@@ -1,6 +1,6 @@
 package pkg
 
-// create user roles.
+// function to create user roles.
 func User() string {
 	nameList := []string{
 		"user1",

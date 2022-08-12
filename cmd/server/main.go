@@ -22,6 +22,9 @@ func main() {
 	}
 }
 
+// function that executes the command.
+// this function adds the initialization command to the root command.
+// will be used in main to complete server execution.
 func execRootCmd() error {
 	name := filepath.Base(os.Args[0])
 	rootCmd := new(cobra.Command)
@@ -45,12 +48,16 @@ func execRootCmd() error {
 	return err
 }
 
+// for path.
+// returns a string containing the path.
 func cwd(f string) string {
 	s, _ := os.Getwd()
 
 	return path.Join(s, f)
 }
 
+// function to start the server once the server configuration is loaded.
+// returns an error.
 func run(cmd *cobra.Command, args []string) error {
 	// Load server configuration
 	cfgFile := cmd.Flag("config").Value.String()
@@ -63,6 +70,9 @@ func run(cmd *cobra.Command, args []string) error {
 	return startServer(cfgStore)
 }
 
+// function to start the server, given a *config.Store.
+// will be used in run.
+// returns an error.
 func startServer(cfgStore *config.Store) error {
 	appCtx := setupLogger(cfgStore)
 	log := logr.FromContextOrDiscard(appCtx)

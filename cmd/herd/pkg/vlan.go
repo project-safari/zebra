@@ -7,7 +7,9 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-// generate vlan resources.
+// function to generate vlan resources.
+//
+// returns an array of type zebra.Resource.
 func GenerateVlanPool(numVlans int) []zebra.Resource {
 	delta := math.MaxUint16 / uint16(numVlans)
 

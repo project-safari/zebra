@@ -31,6 +31,8 @@ func NewLabelStore(resources *zebra.ResourceMap) *LabelStore {
 	return labelstore
 }
 
+// function that makes a map of labels, given a pointer to zebra.ResourceMap.
+// returns map[string]*zebra.ResourceMap.
 func makeLabelMap(resources *zebra.ResourceMap) map[string]*zebra.ResourceMap {
 	labelMap := make(map[string]*zebra.ResourceMap)
 
@@ -60,6 +62,7 @@ func (ls *LabelStore) Wipe() error {
 	return nil
 }
 
+// clear the label store and return nill if no error, otherwise return the error.
 func (ls *LabelStore) Clear() error {
 	ls.resources = make(map[string]*zebra.ResourceMap)
 	ls.uuids = make(map[string]zebra.Resource)

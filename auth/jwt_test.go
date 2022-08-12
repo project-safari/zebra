@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// test for claims functions.
 func TestClaims(t *testing.T) {
 	t.Parallel()
 
@@ -19,6 +20,7 @@ func TestClaims(t *testing.T) {
 	role := &auth.Role{"boy", []*auth.Priv{crud}}
 	claims := auth.NewClaims("zebra", "adam", role, "email@domain")
 
+	// test operations on claims.
 	assert.True(claims.Create("anything"))
 	assert.True(claims.Read("anything"))
 	assert.True(claims.Write("anything"))

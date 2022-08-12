@@ -1,5 +1,6 @@
 package main
 
+// set constant values for ctx.
 type CtxKey string
 
 const (

@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// constant values to be used in commands and in sample resource generation.
 const (
 	version             = "unknown"
 	DefaultResourceSize = 100
@@ -116,6 +117,9 @@ func intVal(cmd *cobra.Command, flag string) int {
 	return i
 }
 
+// initialize the store.
+//
+// takes in a string for the path (root directory) and returns *filestore.Filestore.
 func initStore(rootDir string) *filestore.FileStore {
 	fs := filestore.NewFileStore(rootDir, store.DefaultFactory())
 	if e := fs.Initialize(); e != nil {

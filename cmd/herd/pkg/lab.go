@@ -5,6 +5,9 @@ import (
 	"github.com/project-safari/zebra/dc"
 )
 
+// function for lab generation.
+//
+// returns an array of type zebra.Resource.
 func GenerateLab(numLabs int) []zebra.Resource {
 	labs := make([]zebra.Resource, 0, numLabs)
 

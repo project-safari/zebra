@@ -92,6 +92,9 @@ func (r *Rack) Validate(ctx context.Context) error {
 }
 
 // create new dc resources.
+// function to create a new datacenter given an address, a name, and labels.
+// uses a base resource to return a datacenter's data.
+// returns a pointer to dc.Datacenter struct.
 func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter {
 	named := new(zebra.NamedResource)
 
@@ -108,6 +111,9 @@ func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter
 	return ret
 }
 
+// function to create a new  lab given a name and labels.
+// uses a base resource to return a lab's data.
+// returns a pointer to dc.Lab struct.
 func NewLab(name string, labels zebra.Labels) *Lab {
 	namedR := new(zebra.NamedResource)
 
@@ -122,6 +128,9 @@ func NewLab(name string, labels zebra.Labels) *Lab {
 	return ret
 }
 
+// function to create a new rack given a name, a row, and labels.
+// uses a base resource to return a racks's data.
+// returns a pointer to dc.Rack struct.
 func NewRack(name string, rows string, labels zebra.Labels) *Rack {
 	namedRes := new(zebra.NamedResource)
 

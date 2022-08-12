@@ -22,16 +22,28 @@ type FileStore struct {
 	factory     zebra.ResourceFactory
 }
 
+// ErrTypeInvalid  happens if the resource type is invalid.
+// errors for invalid cases.
 var ErrTypeInvalid = errors.New("resource type invalid")
 
+// ErrFolderInvalid happens if the folder is invalid.
+// errors for invalid cases.
 var ErrFolderInvalid = errors.New("folder invalid")
 
+// ErrFileInvalid  happens if the file is invalid.
+// errors for invalid cases.
 var ErrFileInvalid = errors.New("file invalid")
 
+// ErrTypeUnpack happens when the resource type has issues.
+// errors for type.
 var ErrTypeUnpack = errors.New("unpack failed, resource type error")
 
+// ErrNoType happens when the resource has no type.
+// errors for type.
 var ErrNoType = errors.New("resource has no type field")
 
+// ErrFactoryNil happens when the resource's factory is empty (nil).
+// errors for the factory.
 var ErrFactoryNil = errors.New("resource factory is nil for filestore")
 
 // Return new FileStore pointer set with storageRoot root, lock, and map of type
@@ -43,14 +55,16 @@ func NewFileStore(root string, resourceFactory zebra.ResourceFactory) *FileStore
 	}
 }
 
-// Initialize store given path. Path is relative to current file location.
-// If folders already exist, do nothing (existing store is unchanged).
+// Initialize the store.
+// this function implements the actual initialization on a filestore.
+// returns error or nil if the initialization succeeds.
 func (f *FileStore) Initialize() error {
 	return f.init()
 }
 
-// init implements the store initialization. This function must never be called
-// without holding the write lock.
+// init implements the store initialization.
+// it uses the path to the filestore resource folder.
+// This function must never be called without holding the write lock.
 func (f *FileStore) init() error {
 	location := f.filestoreResourcesPath()
 	err := os.MkdirAll(location, os.ModePerm)
@@ -238,14 +252,14 @@ func (f *FileStore) unpackResource(contents []byte, resType string) (zebra.Resou
 	return res, nil
 }
 
-// Return file path given resource.
+// Return file path given a resource.
 func (f *FileStore) resourcesFilePath(res zebra.Resource) string {
 	resID := res.GetID()
 
 	return path.Join(f.storageRoot, "resources", resID[:2], resID[2:])
 }
 
-// Return folder path given resource.
+// Return folder path given a resource.
 func (f *FileStore) resourcesFolderPath(res zebra.Resource) string {
 	resID := res.GetID()
 

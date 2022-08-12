@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// function to add a new Switch to use in tests.
 func TestAddNew(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -20,6 +21,7 @@ func TestAddNew(t *testing.T) {
 	assert.Nil(f.New("random"))
 }
 
+// function to create a new ResourceList.
 func TestNewResourceList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -27,6 +29,7 @@ func TestNewResourceList(t *testing.T) {
 	assert.NotNil(zebra.NewResourceList(nil))
 }
 
+// function to copy a ResourceList.
 func TestCopyResourceList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -110,6 +113,7 @@ func TestErrorMarshalUnmarshal(t *testing.T) {
 	assert.NotNil(resMap.UnmarshalJSON([]byte(`{"VLANPool":[{"id":"0100000001", "type":123}]}`)))
 }
 
+// function to create a new ResourceMap.
 func TestNewResourceMap(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -117,6 +121,7 @@ func TestNewResourceMap(t *testing.T) {
 	assert.NotNil(zebra.NewResourceMap(nil))
 }
 
+// function to copy a ResourceMap.
 func TestCopyResourceMap(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -136,6 +141,7 @@ func TestCopyResourceMap(t *testing.T) {
 	assert.Equal(1, len(resB.Resources["IPAddressPool"].Resources))
 }
 
+// function to get a factory given a ResourceMap.
 func TestGetFactory(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -153,6 +159,7 @@ func TestGetFactory(t *testing.T) {
 	assert.NotNil(resA.GetFactory())
 }
 
+// test for adding to resMap and checking the length.
 func TestAdd(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -169,6 +176,7 @@ func TestAdd(t *testing.T) {
 	assert.NotNil(len(resA.Resources["Switch"].Resources) == 1)
 }
 
+// test for adding to resMap, checking the length, and deleting.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

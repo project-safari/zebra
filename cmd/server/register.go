@@ -11,6 +11,13 @@ import (
 	"gojini.dev/web"
 )
 
+// function for registration requests.
+//
+// it uses a http.Handler for the http request and write the response.
+//
+// returns the register handler if the http request was for register.
+//
+// returns web.Adapter.
 func registerAdapter() web.Adapter {
 	return func(nextHandler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -26,6 +33,7 @@ func registerAdapter() web.Adapter {
 	}
 }
 
+// function that is used in the register adapter to complete the registry.
 func registerHandler(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	log := logr.FromContextOrDiscard(ctx)
@@ -83,6 +91,8 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 	log.Info("Registry succeeded", "user", registryData.Name)
 }
 
+// function to be used in registerHandler for the response.
+// it marshals the data for the new user,sets Trailers, and sends the ttp header response.
 func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *auth.User) {
 	bytes, err := json.Marshal(newuser)
 	if err != nil {
@@ -100,6 +110,9 @@ func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *auth.Us
 	}
 }
 
+// function will be used in registerHandler to create a user given the name, email, password, and rsa key.
+//
+// function returns a new auth.User with the passed data (of type *auth.User).
 func createNewUser(name string, email string, password string, key *auth.RsaIdentity) *auth.User {
 	labels := zebra.Labels{}
 	labels.Add("system.group", "users")
@@ -118,6 +131,9 @@ func createNewUser(name string, email string, password string, key *auth.RsaIden
 	return newuser
 }
 
+// function will be used in createNewUser to set the default role for each new user.
+//
+// returns *auth.Role, given an array of priviledges of type []*auth.Priv.
 func DefaultRole() *auth.Role {
 	read, _ := auth.NewPriv("", false, true, false, false)
 	role := &auth.Role{
@@ -128,6 +144,7 @@ func DefaultRole() *auth.Role {
 	return role
 }
 
+// function to delet the user from the store.
 func deleteUser(u *auth.User, store zebra.Store) error {
 	if err := store.Delete(u); err != nil {
 		return err
@@ -136,6 +153,9 @@ func deleteUser(u *auth.User, store zebra.Store) error {
 	return nil
 }
 
+// function to change the password for a user.
+//
+// it must be given a user of type *auth.User and a password of type string.
 func changePassword(u *auth.User, newpass string) {
 	u.PasswordHash = auth.HashPassword(newpass)
 }

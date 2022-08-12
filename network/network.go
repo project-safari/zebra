@@ -133,6 +133,9 @@ func (v *VLANPool) String() string {
 }
 
 // create new network resources.
+// function to create a new server given a start range number, an end range number, and labels.
+// uses a base resource to return a VlanPool's data.
+// returns a pointer to network.VLANPool struct.
 func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
 	theRes := zebra.NewBaseResource("VLANPool", labels)
 	ret := &VLANPool{
@@ -144,6 +147,12 @@ func NewVlanPool(start uint16, end uint16, labels zebra.Labels) *VLANPool {
 	return ret
 }
 
+// function to create a new Switch given a  serial number, a model name,
+// a name, a port number, a net.IP address, and labels.
+//
+// uses a base resource return a IPAddressPool's data.
+//
+// returns a pointer to  network.IPAddressPool struct.
 func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switch {
 	theRes := zebra.NewBaseResource("Switch", labels)
 
@@ -172,6 +181,9 @@ func NewSwitch(arr []string, port uint32, ip net.IP, labels zebra.Labels) *Switc
 	return ret
 }
 
+// function to create a new IPAddressPool given a  net.IPNet array and labels.
+// uses a base resource to return a IPAddressPool's data.
+// returns a pointer to network.IPAddressPool struct.
 func NewIPAddressPool(netArr []net.IPNet, labels zebra.Labels) *IPAddressPool {
 	theRes := zebra.NewBaseResource("IPAddressPool", labels)
 

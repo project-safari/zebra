@@ -5,7 +5,9 @@ import (
 	"github.com/project-safari/zebra/dc"
 )
 
-// generate rack.
+// function to generate rack.
+//
+// returns an array of type zebra.Resource.
 func GenerateRack(numRacks int) []zebra.Resource {
 	racks := make([]zebra.Resource, 0, numRacks)
 	rows := Rows()

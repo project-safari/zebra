@@ -5,7 +5,9 @@ import (
 	"github.com/project-safari/zebra/compute"
 )
 
-// generate VM resources.
+// function to generate VM resources.
+//
+// returns an array of type zebra.Resource.
 func GenerateVM(numVM int) []zebra.Resource {
 	VMarr := make([]zebra.Resource, 0, numVM)
 

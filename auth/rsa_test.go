@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// tests for new rsa keys.
 func TestNewRsaIdentity(t *testing.T) {
 	t.Parallel()
 
@@ -53,6 +54,7 @@ func TestNewRsaIdentity(t *testing.T) {
 	assert.Nil(x.UnmarshalText(b))
 }
 
+// tests for potential errors.
 func TestUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -105,6 +107,7 @@ func TestUnmarshalErrors(t *testing.T) {
 	assert.NotNil(x.UnmarshalText(badType))
 }
 
+// tests for encryption/decryption.
 func TestEncrypt(t *testing.T) {
 	t.Parallel()
 
@@ -149,7 +152,7 @@ func TestEncryptionNeverTheSame(t *testing.T) {
 
 	assert := assert.New(t)
 
-	// Even when using the same public key, the encrypted messages are never the same
+	// Even when using the same public key, the encrypted messages should never be the same.
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	assert.Nil(err)
 
@@ -180,8 +183,8 @@ func TestEncryptionNeverTheSame(t *testing.T) {
 
 	erik := auth.NewRsaIdentity(priv)
 
-	// Added a couple of the same Identities at the end, just to prove that the
-	// encrypted outcome differs each time.
+	// Although the Identities at the end are the same,
+	// the encrypted outcome differs each time.
 	identities := []*auth.RsaIdentity{henk, jaap, joop, koos, kees, erik, erik, erik, erik}
 
 	priv, err = rsa.GenerateKey(rand.Reader, 2048)
@@ -221,7 +224,7 @@ func TestEncryptDecrypt(t *testing.T) {
 
 	// a message from Henk to Ingrid
 	msg := []byte("Die uitkeringstrekkers pikken al onze banen in.")
-	// Lets encrypt it, we want to sent it to Ingrid, thus, we use her public key.
+	// To encrypt the message that needs to be sent it to Ingrid, Ingrid's public key is used.
 	encryptedMessage, err := henk.Encrypt(msg, ingrid.PublicKey())
 	assert.Nil(err)
 
@@ -247,7 +250,7 @@ func TestEncryptDecryptMyself(t *testing.T) {
 	// a message from Henk
 	msg := []byte("Subsidized, dat is toch iets dat je krijgt als je eigenlijk niet goed genoeg bent?")
 
-	// Lets encrypt it, we want to sent it to self, thus, we need our public key.
+	// To encrypt the message that needs to be sent it to us, our public key is used.
 	encryptedMessage, err := henk.Encrypt(msg, nil)
 	assert.Nil(err)
 
@@ -258,6 +261,7 @@ func TestEncryptDecryptMyself(t *testing.T) {
 	assert.True(bytes.Equal(plainTextMessage, msg))
 }
 
+// tests for key signatures.
 func TestSignVerify(t *testing.T) {
 	t.Parallel()
 
@@ -294,8 +298,8 @@ func TestSignVerify(t *testing.T) {
 	err = hans.Verify(msg, sig, henk.PublicKey())
 	assert.Nil(err)
 
-	// Let's see if we can break the signature verification
-	// (1) changing the message
+	// test to see if the signature verification can be broken,
+	// (1) changing the message.
 	err = hans.Verify([]byte("Wilders is een opruier"), sig, henk.PublicKey())
 	assert.NotNil(err)
 
@@ -311,6 +315,7 @@ func TestSignVerify(t *testing.T) {
 	assert.Equal(auth.ErrNoPrivateKey, err)
 }
 
+// tests for loading of files for keys / identities.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 

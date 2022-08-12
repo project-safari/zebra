@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// mock function that helps with making a query request, to be used in tests.
 func makeQueryRequest(assert *assert.Assertions, resources *ResourceAPI, q *QueryRequest) *http.Request {
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/resources", nil)
@@ -32,6 +33,7 @@ func makeQueryRequest(assert *assert.Assertions, resources *ResourceAPI, q *Quer
 	return req
 }
 
+// testing the query using an http handler and ensuring that the response is as expected.
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -103,6 +105,7 @@ func TestEmptyQuery(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// tests for invalid or incorrect queries.
 func TestBadQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -159,6 +162,7 @@ func TestBadQuery(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// test the query function with an invalid query.
 func TestInvalidQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -198,6 +202,7 @@ func TestInvalidQuery(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// test for the creation of a new resource api.
 func TestNew(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -205,6 +210,7 @@ func TestNew(t *testing.T) {
 	assert.NotNil(NewResourceAPI(nil))
 }
 
+// test for initialization.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -219,6 +225,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(api.Initialize(root))
 }
 
+// test for posting the resource.
 func TestPostResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -264,6 +271,7 @@ func TestPostResource(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// test for deliting the resource.
 func TestDeleteResource(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
@@ -352,6 +360,7 @@ func TestValidateQueries(t *testing.T) {
 	assert.Nil(validateQueries(qs[:1]))
 }
 
+// test for the applyFunc.
 func TestApplyFunc(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -373,6 +382,7 @@ func TestApplyFunc(t *testing.T) {
 	assert.NotNil(applyFunc(resMap, f))
 }
 
+// mock function to create requests for testing.
 func createRequest(assert *assert.Assertions, method string, url string,
 	body string, api *ResourceAPI,
 ) *http.Request {

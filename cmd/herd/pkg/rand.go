@@ -5,7 +5,11 @@ import (
 	"encoding/binary"
 )
 
-// random selection from lists.
+// function that provides random selection from lists.
+//
+// takes in a string array to select from.
+//
+// returns a randomly selscted string from the array.
 func RandData(res []string) string {
 	length := len(res)
 
@@ -16,7 +20,11 @@ func RandData(res []string) string {
 	return typ
 }
 
-// random numbers.
+// function for random numbers.
+//
+// takes in a integer that represents the maximum number to be genertaed.
+//
+// returns a random uint32 pseudo-random number.
 func RandNum(length int) uint32 {
 	four := 4
 

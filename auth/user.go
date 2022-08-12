@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// potential errors with user credentials.
 var (
 	ErrKeyEmpty      = errors.New("ssh key is empty")
 	ErrPasswordEmpty = errors.New("password hash is empty")
@@ -61,26 +62,32 @@ func (u *User) AuthenticatePassword(password string) error {
 	return nil
 }
 
+// crud operation function for user: create, returns boolean.
 func (u *User) Create(resource string) bool {
 	return u.Role.Create(resource)
 }
 
+// crud operation function for user: read, returns boolean.
 func (u *User) Read(resource string) bool {
 	return u.Role.Read(resource)
 }
 
+// operation function for user: write, returns boolean.
 func (u *User) Write(resource string) bool {
 	return u.Role.Write(resource)
 }
 
+// crud operation function for user: delete, returns boolean.
 func (u *User) Delete(resource string) bool {
 	return u.Role.Delete(resource)
 }
 
+// crud operation function for user: update, returns boolean.
 func (u *User) Update(resource string) bool {
 	return u.Role.Update(resource)
 }
 
+// function to create a hash for the password, returns string version of that hashed password.
 func HashPassword(password string) string {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 

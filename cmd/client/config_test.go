@@ -7,8 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// a config file that will be used for go tests.
 const testCfgFile = "./test_config.yaml"
 
+// testing configgurations.
+// includes tests for init config, user config, email config, server config.
+// certificate authority config, and default values config (i.e. duration).
 func TestConfig(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

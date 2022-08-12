@@ -14,6 +14,11 @@ import (
 
 const ReadWriteOnly = 0o600
 
+// new command that initializes and creates default server configs for the zebra tool.
+//
+// has flags for: store, addresss, cert, key, user, password, auth-key.
+//
+// returns *cobra.Command with these setups.
 func NewInitCmd() *cobra.Command {
 	initCmd := new(cobra.Command)
 
@@ -40,6 +45,11 @@ func NewInitCmd() *cobra.Command {
 	return initCmd
 }
 
+// this is a nested struct with configurations for store and server, as well as Authkey, and admin users.
+//
+// the structs nested inside of this struct are store and server
+//
+// the store contains a root of type string, and the server an address of type string and a tsl of type *web.TSL.
 type ServerConfig struct {
 	Store struct {
 		Root string `json:"rootDir"`
@@ -55,6 +65,11 @@ type ServerConfig struct {
 	Admin *auth.User `json:"admin"`
 }
 
+// function to initialize the server.
+//
+// writes to file using ioutil.WriteFile.
+//
+// returns an error.
 func initServer(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 
@@ -83,6 +98,7 @@ func initServer(cmd *cobra.Command, args []string) error {
 	return ioutil.WriteFile(cfgFile, data, ReadWriteOnly)
 }
 
+// function for admin user configuration(s).
 func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
 	userConfig := cmd.Flag("user").Value.String()
 	cfg := &struct {
