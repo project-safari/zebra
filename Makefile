@@ -32,7 +32,6 @@ simulator-setup: bin
 	./zebra -c ./simulator/admin.yaml config email admin@zebra.project-safari.io
 	./zebra -c ./simulator/admin.yaml config ca-cert ./simulator/zebra-ca.crt
 	./zebra-server -c ./simulator/zebra-simulator.json init --auth-key "AvadaKedavra" --user="./simulator/admin.yaml" --password "Riddikulus" --cert "./simulator/zebra-server.crt" --key "./simulator/zebra-server.key" -a "tcp://127.0.0.1:6666" --store="./simulator/simulator-store"
-	sed -i '8d' ./simulator/zebra-simulator.json
 	sed -i 's/ravi/admin/g' ./simulator/admin.yaml
 
 .PHONY: check-licenses
