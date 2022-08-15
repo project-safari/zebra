@@ -53,18 +53,18 @@ func TestQuery(t *testing.T) {
 
 	req := makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusOK)
+	assert.Equal(http.StatusOK, rr.Code)
 
 	qr.IDs = []string{"0100000001"}
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusOK)
+	assert.Equal(http.StatusOK, rr.Code)
 
 	qr.IDs = []string{}
 	qr.Types = []string{"VLANPool"}
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusOK)
+	assert.Equal(http.StatusOK, rr.Code)
 
 	qr.Types = []string{}
 	qr.Labels = []zebra.Query{
@@ -73,7 +73,34 @@ func TestQuery(t *testing.T) {
 	}
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusOK)
+	assert.Equal(http.StatusOK, rr.Code)
+}
+
+func TestEmptyQuery(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	root := "testemptyquery"
+
+	defer func() { os.RemoveAll(root) }()
+
+	api := NewResourceAPI(store.DefaultFactory())
+	assert.Nil(api.Initialize(root))
+
+	h := handleQuery()
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, nil)
+	})
+
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, api)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/resources", nil)
+	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte("")))
+
+	assert.Nil(err)
+	assert.NotNil(req)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusOK, rr.Code)
 }
 
 func TestBadQuery(t *testing.T) {
@@ -99,14 +126,14 @@ func TestBadQuery(t *testing.T) {
 	qr.Types = []string{"VLANPool"}
 	req := makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// Cannot have both Types and Properties
 	qr.IDs = []string{}
 	qr.Properties = []zebra.Query{{Op: zebra.MatchEqual, Key: "test", Values: []string{"test"}}}
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// Cannot have Labels with anything else
 	qr.Properties = []zebra.Query{}
@@ -116,20 +143,20 @@ func TestBadQuery(t *testing.T) {
 	}
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// Must have valid label queries
 	qr.Types = []string{}
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// Must have valid property queries
 	qr.Properties = qr.Labels
 	qr.Labels = nil
 	req = makeQueryRequest(assert, api, qr)
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
 func TestInvalidQuery(t *testing.T) {
@@ -168,7 +195,7 @@ func TestInvalidQuery(t *testing.T) {
 
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(rr.Code, http.StatusBadRequest)
+	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
 func TestNew(t *testing.T) {
