@@ -113,7 +113,7 @@ func handleQuery() httprouter.Handle {
 		qr := new(QueryRequest)
 
 		// Read request, return error if applicable
-		if err := readJSON(ctx, req, qr); err != nil {
+		if err := readJSON(ctx, req, qr); err != nil && !errors.Is(err, ErrEmptyBody) {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be queried, could not read request")
 
