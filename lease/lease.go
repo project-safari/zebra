@@ -2,6 +2,7 @@ package lease
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
 	"time"
@@ -9,6 +10,8 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/status"
 )
+
+const DefaultMaxDuration = 4
 
 func Type() zebra.Type {
 	return zebra.Type{
@@ -32,7 +35,7 @@ type Lease struct {
 	lock           sync.RWMutex
 	Duration       time.Duration  `json:"duration"`
 	Request        []*ResourceReq `json:"request"`
-	ActivationTime time.Time      `json:"activationTime"`
+	ActivationTime time.Time      `json:"activationTime,omitempty"`
 }
 
 var (
@@ -41,6 +44,10 @@ var (
 )
 
 func (r *ResourceReq) Assign(res zebra.Resource) error {
+	if err := res.GetStatus().SetLeased(); err != nil {
+		return err
+	}
+
 	if r.Resources == nil {
 		r.Resources = make([]zebra.Resource, 0)
 	}
@@ -55,7 +62,7 @@ func (r *ResourceReq) IsSatisfied() bool {
 }
 
 // Return a new lease pointer with default values.
-func NewLease(userEmail string, dur time.Duration, req []*ResourceReq) *Lease {
+func NewLease(email string, dur time.Duration, req []*ResourceReq) *Lease {
 	// Set default values, don't set activation time yet
 	l := &Lease{
 		lock:           sync.RWMutex{},
@@ -64,7 +71,7 @@ func NewLease(userEmail string, dur time.Duration, req []*ResourceReq) *Lease {
 		Request:        req,
 		ActivationTime: time.Time{},
 	}
-	l.Status.SetUser(userEmail)
+	l.Status.SetUser(email)
 	l.Status.Deactivate()
 
 	return l
@@ -80,14 +87,12 @@ func (l *Lease) Owner() string {
 
 // Activate lease.
 func (l *Lease) Activate() error {
-	// Check that lease has been satisfied and activate only then
-	// If it's not, throw error
-	if !l.IsSatisfied() {
-		return ErrLeaseActivate
-	}
-
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	if !l.isSatisfied() {
+		return ErrLeaseActivate
+	}
 
 	l.ActivationTime = time.Now()
 	l.Status.Activate()
@@ -107,6 +112,11 @@ func (l *Lease) IsSatisfied() bool {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
+	return l.isSatisfied()
+}
+
+// Must hold lock when calling this function.
+func (l *Lease) isSatisfied() bool {
 	for _, r := range l.Request {
 		if !r.IsSatisfied() {
 			return false
@@ -140,7 +150,10 @@ func (l *Lease) RequestList() []*ResourceReq {
 }
 
 func (l *Lease) Validate(ctx context.Context) error {
-	if l.Duration.Hours() > zebra.DefaultMaxDuration {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	if l.Duration.Hours() > DefaultMaxDuration {
 		return ErrLeaseValid
 	}
 
@@ -153,4 +166,29 @@ func (l *Lease) Validate(ctx context.Context) error {
 	}
 
 	return l.BaseResource.Validate(ctx)
+}
+
+func (l *Lease) MarshalJSON() ([]byte, error) {
+	return json.Marshal(l)
+}
+
+func (l *Lease) UnmarshalJSON(data []byte) error {
+	lease := &struct {
+		zebra.BaseResource
+		Duration       time.Duration  `json:"duration"`
+		Request        []*ResourceReq `json:"request"`
+		ActivationTime time.Time      `json:"activationTime,omitempty"`
+	}{}
+
+	if err := json.Unmarshal(data, lease); err != nil {
+		return err
+	}
+
+	l.BaseResource = lease.BaseResource
+	l.Duration = lease.Duration
+	l.Request = lease.Request
+	l.ActivationTime = lease.ActivationTime
+	l.lock = sync.RWMutex{}
+
+	return nil
 }

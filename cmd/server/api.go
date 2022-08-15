@@ -148,7 +148,7 @@ func handleQuery() httprouter.Handle {
 		// Filter further based on label queries
 		for _, q := range qr.Labels {
 			// Can safely ignore error because we have already validated the query
-			resources, _ = store.FilterLabel(q, resources)
+			resources, _ = zebra.FilterLabel(q, resources)
 		}
 
 		log.Info("successfully queried resources")

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"reflect"
-	"strings"
 	"sync"
 
 	"github.com/project-safari/zebra"
@@ -255,7 +254,7 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
+			val := zebra.FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
 			inList := zebra.IsIn(val, query.Values)
 
 			if inVals && inList {
@@ -267,105 +266,4 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 	}
 
 	return retMap, nil
-}
-
-// Filter given map by uuids.
-func FilterUUID(uuids []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
-
-	for t, l := range resMap.Resources {
-		for _, res := range l.Resources {
-			if zebra.IsIn(res.GetID(), uuids) {
-				retMap.Add(res, t)
-			}
-		}
-	}
-
-	return retMap, nil
-}
-
-// Filter given map by types.
-func FilterType(types []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
-	f := resMap.GetFactory()
-	retMap := zebra.NewResourceMap(f)
-
-	for _, t := range types {
-		l, ok := resMap.Resources[t]
-		if !ok {
-			continue
-		}
-
-		copyL := zebra.NewResourceList(f)
-
-		zebra.CopyResourceList(copyL, l)
-		retMap.Resources[t] = copyL
-	}
-
-	return retMap, nil
-}
-
-// Filter given map by label name and val.
-func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
-	if err := query.Validate(); err != nil {
-		return resMap, err
-	}
-
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
-
-	inVals := false
-
-	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
-		inVals = true
-	}
-
-	for t, l := range resMap.Resources {
-		for _, res := range l.Resources {
-			labels := res.GetLabels()
-			matchIn := labels.MatchIn(query.Key, query.Values...)
-
-			if (inVals && matchIn) || (!inVals && !matchIn) {
-				retMap.Add(res, t)
-			}
-		}
-	}
-
-	return retMap, nil
-}
-
-// Filter given map by property name (case insensitive) and val.
-func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
-	if err := query.Validate(); err != nil {
-		return resMap, err
-	}
-
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
-
-	inVals := false
-
-	if query.Op == zebra.MatchEqual || query.Op == zebra.MatchIn {
-		inVals = true
-	}
-
-	for t, l := range resMap.Resources {
-		for _, res := range l.Resources {
-			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-			matchIn := zebra.IsIn(val, query.Values)
-
-			if (inVals && matchIn) || (!inVals && !matchIn) {
-				retMap.Add(res, t)
-			}
-		}
-	}
-
-	return retMap, nil
-}
-
-// Ignore case in returning value of given field.
-func FieldByName(v reflect.Value, field string) reflect.Value {
-	field = strings.ToLower(field)
-
-	return v.FieldByNameFunc(
-		func(found string) bool {
-			return strings.ToLower(found) == field
-		})
 }
