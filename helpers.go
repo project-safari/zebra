@@ -2,6 +2,7 @@ package zebra
 
 import (
 	"github.com/google/uuid"
+	"github.com/project-safari/zebra/status"
 )
 
 const DefaultMaxDuration = 4
@@ -23,7 +24,7 @@ func NewBaseResource(resType string, labels Labels) *BaseResource {
 		ID:     id,
 		Type:   resType,
 		Labels: labels,
-		Status: DefaultStatus(),
+		Status: status.DefaultStatus(),
 	}
 }
 

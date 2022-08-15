@@ -9,6 +9,7 @@ import (
 	"github.com/project-safari/zebra/compute"
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -351,9 +352,9 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 	assert.NotNil(resMap)
 
 	rack := new(dc.Rack)
-	rack.Status = new(zebra.Status)
+	rack.Status = new(status.Status)
 
-	rack.Status.UsedBy = pkg.Name()
+	rack.Status.SetUser(pkg.Name())
 
 	resMap.Add(rack, "Rack")
 
@@ -366,25 +367,25 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 	assert.NotNil(bigMap)
 
 	addr := new(network.IPAddressPool)
-	addr.Status = new(zebra.Status)
+	addr.Status = new(status.Status)
 
-	addr.Status.UsedBy = pkg.Name()
+	addr.Status.SetUser(pkg.Name())
 
 	bigMap.Add(addr, "IPAddressPool")
 
 	vlan := new(network.VLANPool)
 
-	vlan.Status = new(zebra.Status)
+	vlan.Status = new(status.Status)
 
-	vlan.Status.UsedBy = pkg.Name()
+	vlan.Status.SetUser(pkg.Name())
 
 	bigMap.Add(vlan, "VLANPool")
 
 	sw := new(network.Switch)
 
-	sw.Status = new(zebra.Status)
+	sw.Status = new(status.Status)
 
-	sw.Status.UsedBy = pkg.Name()
+	sw.Status.SetUser(pkg.Name())
 
 	bigMap.Add(sw, "Switch")
 
@@ -397,81 +398,81 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 	assert.NotNil(allMap)
 
 	addr2 := new(network.IPAddressPool)
-	addr2.Status = new(zebra.Status)
+	addr2.Status = new(status.Status)
 
-	addr2.Status.UsedBy = pkg.Name()
+	addr2.Status.SetUser(pkg.Name())
 
 	allMap.Add(addr2, "IPAddressPool")
 
 	vlan2 := new(network.VLANPool)
-	vlan2.Status = new(zebra.Status)
+	vlan2.Status = new(status.Status)
 
-	vlan2.Status.UsedBy = pkg.Name()
+	vlan2.Status.SetUser(pkg.Name())
 
 	allMap.Add(vlan2, "VLANPool")
 
 	sw2 := new(network.Switch)
-	sw2.Status = new(zebra.Status)
+	sw2.Status = new(status.Status)
 
-	sw2.Status.UsedBy = pkg.Name()
+	sw2.Status.SetUser(pkg.Name())
 
 	allMap.Add(sw2, "Switch")
 
 	center := new(dc.Datacenter)
-	center.Status = new(zebra.Status)
+	center.Status = new(status.Status)
 
-	center.Status.UsedBy = pkg.Name()
+	center.Status.SetUser(pkg.Name())
 
 	allMap.Add(center, "Datacenter")
 
 	rack2 := new(dc.Rack)
-	rack2.Status = new(zebra.Status)
+	rack2.Status = new(status.Status)
 
-	rack2.Status.UsedBy = pkg.Name()
+	rack2.Status.SetUser(pkg.Name())
 
 	allMap.Add(rack, "Rack")
 
 	lab := new(dc.Lab)
-	lab.Status = new(zebra.Status)
+	lab.Status = new(status.Status)
 
-	lab.Status.UsedBy = pkg.Name()
+	lab.Status.SetUser(pkg.Name())
 
 	allMap.Add(lab, "Lab")
 
 	vc := new(compute.VCenter)
-	vc.Status = new(zebra.Status)
+	vc.Status = new(status.Status)
 
-	vc.Status.UsedBy = pkg.Name()
+	vc.Status.SetUser(pkg.Name())
 
 	allMap.Add(vc, "VCenter")
 
 	vm := new(compute.VM)
-	vm.Status = new(zebra.Status)
+	vm.Status = new(status.Status)
 
-	vm.Status.UsedBy = pkg.Name()
+	vm.Status.SetUser(pkg.Name())
 
 	allMap.Add(vm, "VM")
 
 	srv := new(compute.Server)
-	srv.Status = new(zebra.Status)
+	srv.Status = new(status.Status)
 
-	srv.Status.UsedBy = pkg.Name()
+	srv.Status.SetUser(pkg.Name())
 
 	allMap.Add(srv, "S")
 
 	eserver := new(compute.ESX)
-	eserver.Status = new(zebra.Status)
+	eserver.Status = new(status.Status)
 
-	eserver.Status.UsedBy = pkg.Name()
+	eserver.Status.SetUser(pkg.Name())
 
 	allMap.Add(eserver, "esx")
 
 	usr := new(auth.User)
 	usr.Role = new(auth.Role)
 
-	usr.Status = new(zebra.Status)
+	usr.Status = new(status.Status)
 
-	usr.Status.UsedBy = pkg.Name()
+	usr.Status.SetUser(pkg.Name())
 
 	allMap.Add(usr, "person")
 
@@ -493,9 +494,9 @@ func TestPrintServers(t *testing.T) {
 
 	server := new(compute.Server)
 
-	server.Status = new(zebra.Status)
+	server.Status = new(status.Status)
 
-	server.Status.UsedBy = pkg.Name()
+	server.Status.SetUser(pkg.Name())
 
 	resMap.Add(server, "Server")
 
@@ -520,9 +521,9 @@ func TestPrintESX(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	eserver := new(compute.ESX)
-	eserver.Status = new(zebra.Status)
+	eserver.Status = new(status.Status)
 
-	eserver.Status.UsedBy = pkg.Name()
+	eserver.Status.SetUser(pkg.Name())
 
 	resMap.Add(eserver, "ESX")
 
@@ -547,9 +548,9 @@ func TestPrintVCenter(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	v := new(compute.VCenter)
-	v.Status = new(zebra.Status)
+	v.Status = new(status.Status)
 
-	v.Status.UsedBy = pkg.Name()
+	v.Status.SetUser(pkg.Name())
 
 	resMap.Add(v, "VCenter")
 
@@ -574,9 +575,9 @@ func TestPrintVM(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	machine := new(compute.VM)
-	machine.Status = new(zebra.Status)
+	machine.Status = new(status.Status)
 
-	machine.Status.UsedBy = pkg.Name()
+	machine.Status.SetUser(pkg.Name())
 
 	resMap.Add(machine, "VM")
 
@@ -602,9 +603,9 @@ func TestPrintVlan(t *testing.T) {
 
 	vlan := new(network.VLANPool)
 
-	vlan.Status = new(zebra.Status)
+	vlan.Status = new(status.Status)
 
-	vlan.Status.UsedBy = pkg.Name()
+	vlan.Status.SetUser(pkg.Name())
 
 	resMap.Add(vlan, "VLANPool")
 
@@ -629,9 +630,9 @@ func TestPrintSwitches(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	sw := new(network.Switch)
-	sw.Status = new(zebra.Status)
+	sw.Status = new(status.Status)
 
-	sw.Status.UsedBy = pkg.Name()
+	sw.Status.SetUser(pkg.Name())
 
 	resMap.Add(sw, "Switch")
 
@@ -657,9 +658,9 @@ func TestPrintIPPools(t *testing.T) {
 
 	pool := new(network.IPAddressPool)
 
-	pool.Status = new(zebra.Status)
+	pool.Status = new(status.Status)
 
-	pool.Status.UsedBy = pkg.Name()
+	pool.Status.SetUser(pkg.Name())
 
 	resMap.Add(pool, "ips")
 
@@ -684,9 +685,9 @@ func TestPrintDC(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	dc := new(dc.Datacenter)
-	dc.Status = new(zebra.Status)
+	dc.Status = new(status.Status)
 
-	dc.Status.UsedBy = pkg.Name()
+	dc.Status.SetUser(pkg.Name())
 
 	resMap.Add(dc, "Datacenter")
 
@@ -711,9 +712,9 @@ func TestPrintlabs(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	lb := new(dc.Lab)
-	lb.Status = new(zebra.Status)
+	lb.Status = new(status.Status)
 
-	lb.Status.UsedBy = pkg.Name()
+	lb.Status.SetUser(pkg.Name())
 
 	resMap.Add(lb, "Lab")
 
@@ -738,9 +739,9 @@ func TestPrintRacks(t *testing.T) {
 	resMap := zebra.NewResourceMap(*fact)
 
 	r := new(dc.Rack)
-	r.Status = new(zebra.Status)
+	r.Status = new(status.Status)
 
-	r.Status.UsedBy = pkg.Name()
+	r.Status.SetUser(pkg.Name())
 
 	resMap.Add(r, "Rack")
 
@@ -790,7 +791,7 @@ func TestPrintUsers(t *testing.T) {
 
 	usr.Role = new(auth.Role)
 
-	usr.Status = new(zebra.Status)
+	usr.Status = new(status.Status)
 
 	resMap.Add(usr, "User")
 

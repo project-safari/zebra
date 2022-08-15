@@ -14,6 +14,7 @@ import (
 	"github.com/project-safari/zebra/dc"
 	"github.com/project-safari/zebra/lease"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/project-safari/zebra/store"
 	"github.com/spf13/cobra"
 )
@@ -425,7 +426,10 @@ func showPublicKey(cmd *cobra.Command, args []string) error {
 
 func state(r zebra.Resource) string {
 	if s := r.GetStatus(); s != nil {
-		return s.State.String()
+		state := new(status.ActivityState)
+		*state = s.State()
+
+		return state.String()
 	}
 
 	return "--"
@@ -433,7 +437,7 @@ func state(r zebra.Resource) string {
 
 func usedBy(r zebra.Resource) string {
 	if s := r.GetStatus(); s != nil {
-		return s.UsedBy
+		return s.UsedBy()
 	}
 
 	return "--"
@@ -661,12 +665,12 @@ func printLeases(leases []zebra.Resource) {
 	})
 
 	// print the table here.
-	for _, s := range leases {
-		if l, ok := s.(*lease.Lease); ok {
-			status := l.GetStatus()
-			if status != nil && status.State == zebra.Active {
+	for _, l := range leases {
+		if l, ok := l.(*lease.Lease); ok {
+			s := l.GetStatus()
+			if s != nil && s.State() == status.Active {
 				tw.AppendRow(table.Row{
-					l.Status.UsedBy,
+					l.Status.UsedBy(),
 					l.Duration,
 					l.ActivationTime,
 					time.Until(l.ActivationTime.Add(l.Duration)),
@@ -674,7 +678,7 @@ func printLeases(leases []zebra.Resource) {
 				})
 			} else {
 				tw.AppendRow(table.Row{
-					l.Status.UsedBy,
+					l.Status.UsedBy(),
 					l.Duration,
 					"--",
 					"--",

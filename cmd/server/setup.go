@@ -9,6 +9,7 @@ import (
 	"github.com/go-logr/zerologr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/status"
 	"github.com/project-safari/zebra/store"
 	"github.com/rs/zerolog"
 	"gojini.dev/config"
@@ -76,8 +77,8 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 
 func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) error {
 	user := new(auth.User)
-	user.Status = zebra.DefaultStatus()
-	user.Status.State = zebra.Active
+	user.Status = status.DefaultStatus()
+	user.Status.Activate()
 
 	if err := cfgStore.Get("admin", user); err != nil {
 		return err
