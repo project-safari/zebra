@@ -33,7 +33,7 @@ type User struct {
 
 // Validate returns an error if the given Datacenter object has incorrect values.
 // Else, it returns nil.
-func (u *User) Validate(ctx context.Context) error {
+func (u *User) Validate(ctx context.Context, types string) error {
 	if u.Key == nil {
 		return ErrKeyEmpty
 	}
@@ -46,7 +46,7 @@ func (u *User) Validate(ctx context.Context) error {
 		return ErrPasswordEmpty
 	}
 
-	return u.NamedResource.Validate(ctx)
+	return u.NamedResource.Validate(ctx, types)
 }
 
 func (u *User) Authenticate(token string) error {
@@ -93,7 +93,7 @@ func NewUser(name string, email string, pwd string, key *RsaIdentity, labels zeb
 	user := new(User)
 
 	labels.Add("system.group", "users")
-	user.BaseResource = *zebra.NewBaseResource("User", labels)
+	user.BaseResource = *zebra.NewBaseResource(UserType(), labels)
 	user.Name = name
 	user.Email = email
 	user.Role = &Role{Name: "user", Privileges: []*Priv{priv}}

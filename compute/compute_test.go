@@ -7,6 +7,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/compute"
 	"github.com/stretchr/testify/assert"
@@ -26,37 +27,37 @@ func TestServer(t *testing.T) {
 	server, ok := serverType.New().(*compute.Server)
 	assert.True(ok)
 	assert.NotNil(server)
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.ID = "hello"
-	server.Type = "Server"
+	server.Type = compute.ServerType()
 	server.Name = "there"
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.SerialNumber = "a"
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.BoardIP = net.ParseIP("10.1.0.0")
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.Model = "b"
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.Credentials.Name = "c"
-	server.Credentials.Type = Creds
+	server.Credentials.Type = zebra.CredentialsType()
 	server.Credentials.ID = "dddd"
 	server.Credentials.Keys = make(map[string]string)
 	server.Credentials.Keys["password"] = "e"
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.Credentials.Keys["password"] = "actualPassw0rd%9"
-	assert.NotNil(server.Validate(ctx))
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 
 	server.Labels = pkg.CreateLabels()
 	server.Labels = pkg.GroupLabels(server.Labels, "someServer")
 
-	server.Type = "test"
-	assert.NotNil(server.Validate(ctx))
+	server.Type = zebra.DefaultType()
+	assert.NotNil(server.Validate(ctx, server.Type.Name))
 }
 
 func TestESX(t *testing.T) {
@@ -68,31 +69,31 @@ func TestESX(t *testing.T) {
 	esxType := compute.ESXType()
 	esx, ok := esxType.New().(*compute.ESX)
 	assert.True(ok)
-	assert.NotNil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 
 	esx.ID = "rolling in the deep"
-	esx.Type = "ESX"
+	esx.Type = compute.ESXType()
 	esx.Name = "adele"
-	assert.NotNil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 
 	esx.IP = net.ParseIP("10.1.0.0")
-	assert.NotNil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 
 	esx.ServerID = "server id"
-	assert.NotNil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 
 	esx.Credentials.Name = "k"
 	esx.Credentials.ID = "lllll"
-	esx.Credentials.Type = Creds
+	esx.Credentials.Type = zebra.CredentialsType()
 	esx.Credentials.Keys = make(map[string]string)
 	esx.Credentials.Keys["password"] = "m"
-	assert.NotNil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 
 	esx.Credentials.Keys["password"] = "actualPassw0rd%2"
-	assert.NotNil(esx.Validate(ctx))
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 
-	esx.Type = "notesx"
-	assert.NotNil(esx.Validate(ctx))
+	esx.Type = zebra.DefaultType()
+	assert.NotNil(esx.Validate(ctx, esx.Type.Name))
 }
 
 func TestVCenter(t *testing.T) {
@@ -104,28 +105,28 @@ func TestVCenter(t *testing.T) {
 	vcType := compute.VCenterType()
 	vcenter, ok := vcType.New().(*compute.VCenter)
 	assert.True(ok)
-	assert.NotNil(vcenter.Validate(ctx))
+	assert.NotNil(vcenter.Validate(ctx, vcenter.Type.Name))
 
 	vcenter.ID = "blah"
-	vcenter.Type = "VCenter"
+	vcenter.Type = compute.VCenterType()
 	vcenter.Name = "blahblah"
-	assert.NotNil(vcenter.Validate(ctx))
+	assert.NotNil(vcenter.Validate(ctx, vcenter.Type.Name))
 
 	vcenter.IP = net.ParseIP("10.1.0.0")
-	assert.NotNil(vcenter.Validate(ctx))
+	assert.NotNil(vcenter.Validate(ctx, vcenter.Type.Name))
 
 	vcenter.Credentials.Name = "n"
 	vcenter.Credentials.ID = "oooo"
-	vcenter.Credentials.Type = Creds
+	vcenter.Credentials.Type = zebra.CredentialsType()
 	vcenter.Credentials.Keys = make(map[string]string)
 	vcenter.Credentials.Keys["password"] = "p"
-	assert.NotNil(vcenter.Validate(ctx))
+	assert.NotNil(vcenter.Validate(ctx, vcenter.Type.Name))
 
 	vcenter.Credentials.Keys["password"] = "actualPassw0rd%4"
-	assert.NotNil(vcenter.Validate(ctx))
+	assert.NotNil(vcenter.Validate(ctx, vcenter.Type.Name))
 
-	vcenter.Type = "test"
-	assert.NotNil(vcenter.Validate(ctx))
+	vcenter.Type = zebra.DefaultType()
+	assert.NotNil(vcenter.Validate(ctx, vcenter.Type.Name))
 }
 
 func TestVM(t *testing.T) {
@@ -137,37 +138,37 @@ func TestVM(t *testing.T) {
 	vmType := compute.VMType()
 	machine, ok := vmType.New().(*compute.VM)
 	assert.True(ok)
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.ID = "can you hear me"
-	machine.Type = "VM"
+	machine.Type = compute.VMType()
 	machine.Name = "you'd like to meet"
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.ESXID = "q"
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.ManagementIP = net.ParseIP("10.1.0.0")
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.VCenterID = "r"
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.Credentials.Name = "s"
-	machine.Credentials.Type = Creds
+	machine.Credentials.Type = zebra.CredentialsType()
 	machine.Credentials.ID = "tttt"
 	machine.Credentials.Keys = make(map[string]string)
 	machine.Credentials.Keys["password"] = "u"
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.Credentials.Keys["password"] = "actualPassw0rd%1"
-	assert.NotNil(machine.Validate(ctx))
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 
 	machine.Labels = pkg.CreateLabels()
 	machine.Labels = pkg.GroupLabels(machine.Labels, "someSampleGroup")
 
-	machine.Type = "machine"
-	assert.NotNil(machine.Validate(ctx))
+	machine.Type = zebra.DefaultType()
+	assert.NotNil(machine.Validate(ctx, machine.Type.Name))
 }
 
 // test for vcenter generator.

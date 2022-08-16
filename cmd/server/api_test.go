@@ -282,14 +282,14 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 
 	lab1 := &dc.Lab{
 		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("Lab", nil),
+			BaseResource: *zebra.NewBaseResource(dc.LabType(), nil),
 			Name:         "Lab1",
 		},
 	}
 
 	lab2 := &dc.Lab{
 		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("Lab", nil),
+			BaseResource: *zebra.NewBaseResource(dc.LabType(), nil),
 			Name:         "Lab2",
 		},
 	}
@@ -358,13 +358,13 @@ func TestApplyFunc(t *testing.T) {
 
 	resMap := zebra.NewResourceMap(store.DefaultFactory())
 
-	f := func(r zebra.Resource) error {
-		return r.Validate(context.Background())
+	f := func(r zebra.Resource, key string) error {
+		return r.Validate(context.Background(), key)
 	}
 
 	invalidRes := &dc.Lab{
 		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("notLab", nil),
+			BaseResource: *zebra.NewBaseResource(zebra.DefaultType(), nil),
 			Name:         "",
 		},
 	}

@@ -14,14 +14,14 @@ import (
 
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		BaseResource: *zebra.NewBaseResource(network.VLANPoolType(), nil),
 		RangeStart:   0,
 		RangeEnd:     1,
 	}
 }
 
 func getLab() *dc.Lab {
-	br := *zebra.NewBaseResource("Lab", nil)
+	br := *zebra.NewBaseResource(dc.LabType(), nil)
 
 	return &dc.Lab{
 		NamedResource: zebra.NamedResource{
@@ -107,13 +107,13 @@ func TestDelete(t *testing.T) {
 	assert.Equal(1, len(resources.Resources))
 
 	// Delete resource, should pass
-	assert.Nil(rs.Delete(vlan))
+	assert.Nil(rs.Delete(vlan, vlan.GetType().Name))
 
 	// Delete non-existent resource, should fail
-	assert.NotNil(rs.Delete(nil))
+	assert.NotNil(rs.Delete(nil, ""))
 
 	// Delete uncreated resource, should pass anyways
-	assert.NotNil(rs.Delete(getLab()))
+	assert.NotNil(rs.Delete(getLab(), ""))
 }
 
 func TestLoad(t *testing.T) {

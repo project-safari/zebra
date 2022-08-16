@@ -18,8 +18,8 @@ import (
 func verifyType(assert *assert.Assertions, t string, resources []zebra.Resource) {
 	for _, r := range resources {
 		assert.NotNil(r)
-		assert.Equal(t, r.GetType())
-		assert.Nil(r.Validate(context.Background()))
+		assert.Equal(t, r.GetType().Name)
+		assert.Nil(r.Validate(context.Background(), r.GetType().Name))
 	}
 }
 
@@ -325,7 +325,7 @@ func TestCreateVCenter(t *testing.T) {
 	vc := compute.NewVCenter(pkg.Name(), net.IP("192.222.004"), pkg.CreateLabels())
 
 	assert.NotEmpty(vc)
-	assert.Equal("VCenter", vc.GetType())
+	assert.Equal("VCenter", vc.GetType().Name)
 }
 
 func TestGenerateVC(t *testing.T) {
@@ -415,7 +415,7 @@ func TestCreateUser(t *testing.T) {
 
 	user := auth.NewUser(name, pkg.Email(name), pkg.Password(name), key, pkg.CreateLabels())
 	assert.NotNil(user)
-	assert.Nil(user.Validate(context.Background()))
+	assert.Nil(user.Validate(context.Background(), user.Type.Name))
 }
 
 func TestGenerateUser(t *testing.T) {

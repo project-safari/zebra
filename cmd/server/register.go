@@ -111,7 +111,7 @@ func createNewUser(name string, email string, password string, key *auth.RsaIden
 		Email:        email,
 		NamedResource: zebra.NamedResource{
 			Name:         name,
-			BaseResource: *zebra.NewBaseResource("User", labels),
+			BaseResource: *zebra.NewBaseResource(auth.UserType(), labels),
 		},
 	}
 
@@ -129,7 +129,7 @@ func DefaultRole() *auth.Role {
 }
 
 func deleteUser(u *auth.User, store zebra.Store) error {
-	if err := store.Delete(u); err != nil {
+	if err := store.Delete(u, auth.UserType().Name); err != nil {
 		return err
 	}
 

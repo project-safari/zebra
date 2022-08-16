@@ -14,6 +14,38 @@ func (t *Type) New() Resource {
 	return t.Constructor()
 }
 
+func DefaultType() Type {
+	return Type{
+		Name:        "",
+		Description: "Default Type",
+		Constructor: func() Resource { return nil },
+	}
+}
+
+func CompareType(aType Type, bType Type) bool {
+	if aType.Name != bType.Name || aType.Description != bType.Description {
+		return false
+	}
+
+	return true
+}
+
+// Checks if a given interface is a `Type`` struct and returns that `Type` if true and an error if not.
+func TypeChecker(data interface{}) (Type, error) {
+	empty := DefaultType()
+
+	vType, err := json.Marshal(data)
+	if err != nil {
+		return empty, err
+	}
+
+	if err = json.Unmarshal(vType, &empty); err != nil {
+		return empty, err
+	}
+
+	return empty, nil
+}
+
 type ResourceFactory interface {
 	New(string) Resource
 	Add(Type) ResourceFactory
@@ -114,25 +146,25 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 			return ErrTypeEmpty
 		}
 
+		delete(value, "type")
 		// Make a new resource for this value based on the embedded type field
-		vType, ok := vAny.(string)
-		if !ok {
+		vType, err := TypeChecker(vAny)
+		if err != nil {
 			return ErrTypeEmpty
 		}
 
-		resource := r.factory.New(vType)
+		resource := r.factory.New(vType.Name)
 
 		if resource == nil {
 			// Type factory doesnt know this type return error
 			return ErrTypeEmpty
 		}
-
 		// Capture the []byte of just this value
+
 		resData, err := json.Marshal(value)
 		if err != nil {
 			return err
 		}
-
 		// We have the []byte representation and we have the target object
 		// so now can do the final unmarshal and add this object into the
 		// resource list
@@ -207,14 +239,12 @@ func (r *ResourceMap) UnmarshalJSON(data []byte) error {
 	if e := json.Unmarshal(data, &values); e != nil {
 		return e
 	}
-
 	//
 	for vType, rData := range values {
 		rList := NewResourceList(r.factory)
 		if e := json.Unmarshal(rData, rList); e != nil {
 			return e
 		}
-
 		// Add this list to the Resource map
 		r.Resources[vType] = rList
 	}

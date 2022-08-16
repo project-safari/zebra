@@ -103,7 +103,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(ts.Initialize())
 
 	// Create new resource, should pass
-	assert.Nil(ts.Create(vlan1))
+	assert.Nil(ts.Create(vlan1, vlan1.Type.Name))
 
 	resources, err := ts.Load()
 	assert.Nil(err)
@@ -111,7 +111,7 @@ func TestCreate(t *testing.T) {
 	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
 
 	// Create duplicate resource, should update
-	assert.Nil(ts.Create(vlan3))
+	assert.Nil(ts.Create(vlan3, vlan3.Type.Name))
 
 	resources, err = ts.Load()
 	assert.Nil(err)
@@ -120,7 +120,7 @@ func TestCreate(t *testing.T) {
 	assert.True(labels.MatchEqual("test", "true"))
 
 	// Create another new resource, should pass
-	assert.Nil(ts.Create(vlan2))
+	assert.Nil(ts.Create(vlan2, vlan2.Type.Name))
 
 	resources, err = ts.Load()
 	assert.Nil(err)
@@ -141,13 +141,13 @@ func TestDelete(t *testing.T) {
 	assert.Nil(ts.Initialize())
 
 	// Create new resource, should pass
-	assert.Nil(ts.Create(vlan1))
+	assert.Nil(ts.Create(vlan1, vlan1.Type.Name))
 
 	// Delete resource, should pass
-	assert.Nil(ts.Delete(vlan1))
+	assert.Nil(ts.Delete(vlan1, getVLAN().Type.Name))
 
 	// Try to delete non-existent resource, should pass anyways
-	assert.Nil(ts.Delete(vlan2))
+	assert.Nil(ts.Delete(vlan2, getVLAN().Type.Name))
 }
 
 func TestQuery(t *testing.T) {
@@ -177,7 +177,7 @@ func TestQuery(t *testing.T) {
 
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		BaseResource: *zebra.NewBaseResource(network.VLANPoolType(), nil),
 		RangeStart:   0,
 		RangeEnd:     1,
 	}

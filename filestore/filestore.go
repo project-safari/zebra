@@ -120,21 +120,28 @@ func (f *FileStore) Load() (*zebra.ResourceMap, error) {
 				return nil, err
 			}
 
-			resType, ok := object["type"].(string)
+			resType, ok := object["type"]
 			if !ok {
 				retErr = ErrNoType
 
 				continue
 			}
 
-			newRes, err := f.unpackResource(contents, resType)
+			vType, err := zebra.TypeChecker(resType)
+			if err != nil {
+				retErr = ErrNoType
+
+				continue
+			}
+
+			newRes, err := f.unpackResource(contents, vType.Name)
 			if err != nil {
 				retErr = err
 
 				continue
 			}
 
-			resources.Add(newRes, resType)
+			resources.Add(newRes, vType.Name)
 		}
 	}
 
@@ -231,7 +238,7 @@ func (f *FileStore) unpackResource(contents []byte, resType string) (zebra.Resou
 		return nil, err
 	}
 
-	if err := res.Validate(context.Background()); err != nil {
+	if err := res.Validate(context.Background(), resType); err != nil {
 		return nil, err
 	}
 

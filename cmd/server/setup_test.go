@@ -16,7 +16,10 @@ const storeCfg = `
 	"authKey": "abracadabra",
 	"admin": {
 		"id": "d0ff79eb-e820-469d-b924-dbb78992727e",
-		"type": "User",
+		"type":{ "name":"User",
+		"description": "user",
+		"-" : ""
+	},
 		"labels": {
 		  "system.group": "users"
 		},
@@ -41,7 +44,10 @@ const storeCfgAdapter = `
 	"authKey": "abracadabra",
 	"admin": {
 		"id": "d0ff79eb-e820-469d-b924-dbb78992727e",
-		"type": "User",
+		"type": { "name":"User",
+		"description": "user",
+		"-" : ""
+	},
 		"labels": {
 		  "system.group": "users"
 		},

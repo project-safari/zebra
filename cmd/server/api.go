@@ -61,7 +61,19 @@ func (api *ResourceAPI) Initialize(storageRoot string) error {
 
 // Apply given function f to each resource in resMap.
 // Return error if it occurrs or nil if successful.
-func applyFunc(resMap *zebra.ResourceMap, f func(zebra.Resource) error) error {
+func applyFunc(resMap *zebra.ResourceMap, f func(zebra.Resource, string) error) error {
+	for key, l := range resMap.Resources {
+		for _, r := range l.Resources {
+			if err := f(r, key); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func applyFunc2(resMap *zebra.ResourceMap, f func(zebra.Resource) error) error {
 	for _, l := range resMap.Resources {
 		for _, r := range l.Resources {
 			if err := f(r); err != nil {
@@ -87,9 +99,9 @@ func validateQueries(queries []zebra.Query) error {
 // Validate all resources in a resource map.
 func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
 	// Check all resources to make sure they are valid
-	for _, l := range resMap.Resources {
+	for key, l := range resMap.Resources {
 		for _, r := range l.Resources {
-			if err := r.Validate(ctx); err != nil {
+			if err := r.Validate(ctx, key); err != nil {
 				return err
 			}
 		}
@@ -188,7 +200,7 @@ func handlePost() httprouter.Handle {
 		}
 
 		// Add all resources to store
-		if applyFunc(resMap, api.Store.Create) != nil {
+		if applyFunc2(resMap, api.Store.Create) != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			log.Info("internal server error while creating resources")
 

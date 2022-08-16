@@ -48,30 +48,30 @@ func (ts *TypeStore) Load() (*zebra.ResourceMap, error) {
 }
 
 // Create a resource. If a resource with this ID already exists, update.
-func (ts *TypeStore) Create(res zebra.Resource) error {
+func (ts *TypeStore) Create(res zebra.Resource, typeKey string) error {
 	// Check if resource already exists
-	if oldRes, err := ts.find(res.GetID(), res.GetType()); err == nil {
-		return ts.update(oldRes, res)
+	if oldRes, err := ts.find(res.GetID(), typeKey); err == nil {
+		return ts.update(oldRes, res, typeKey)
 	}
 
 	// If it doesn't, add to resource map
-	ts.resources.Add(res, res.GetType())
+	ts.resources.Add(res, res.GetType().Name)
 
 	return nil
 }
 
 // Update a resource.
-func (ts *TypeStore) update(oldRes zebra.Resource, res zebra.Resource) error {
-	if err := ts.Delete(oldRes); err != nil {
+func (ts *TypeStore) update(oldRes zebra.Resource, res zebra.Resource, typeKey string) error {
+	if err := ts.Delete(oldRes, oldRes.GetType().Name); err != nil {
 		return err
 	}
 
-	return ts.Create(res)
+	return ts.Create(res, typeKey)
 }
 
 // Delete a resource.
-func (ts *TypeStore) Delete(res zebra.Resource) error {
-	ts.resources.Delete(res, res.GetType())
+func (ts *TypeStore) Delete(res zebra.Resource, types string) error {
+	ts.resources.Delete(res, types)
 
 	return nil
 }

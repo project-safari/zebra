@@ -79,7 +79,7 @@ func makeLeaseReq(cmd *cobra.Command, args []string) (*Config, *zebra.ResourceMa
 		[]*lease.ResourceReq{req})
 
 	resMap := zebra.NewResourceMap(store.DefaultFactory())
-	resMap.Add(lease, lease.GetType())
+	resMap.Add(lease, lease.GetType().Name)
 
 	return cfg, resMap, req, nil
 }

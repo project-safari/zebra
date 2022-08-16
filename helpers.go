@@ -6,11 +6,15 @@ import (
 
 const DefaultMaxDuration = 4
 
-func NewBaseResource(resType string, labels Labels) *BaseResource {
+func NewBaseResource(resType Type, labels Labels) *BaseResource {
 	id := uuid.New().String()
 
-	if resType == "" {
-		resType = "BaseResource"
+	if resType.Name == "" {
+		resType = Type{
+			Name:        "BaseResource",
+			Description: "Base Resource",
+			Constructor: func() Resource { return new(BaseResource) },
+		}
 	}
 
 	if labels == nil {

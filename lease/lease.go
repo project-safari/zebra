@@ -58,7 +58,7 @@ func NewLease(userEmail string, dur time.Duration, req []*ResourceReq) *Lease {
 	// Set default values, don't set activation time yet
 	l := &Lease{
 		lock:           sync.RWMutex{},
-		BaseResource:   *zebra.NewBaseResource("Lease", map[string]string{"system.group": "leases"}),
+		BaseResource:   *zebra.NewBaseResource(Type(), map[string]string{"system.group": "leases"}),
 		Duration:       dur,
 		Request:        req,
 		ActivationTime: time.Time{},
@@ -138,7 +138,7 @@ func (l *Lease) RequestList() []*ResourceReq {
 	return l.Request
 }
 
-func (l *Lease) Validate(ctx context.Context) error {
+func (l *Lease) Validate(ctx context.Context, types string) error {
 	if l.Duration.Hours() > zebra.DefaultMaxDuration {
 		return ErrLeaseValid
 	}
@@ -151,5 +151,5 @@ func (l *Lease) Validate(ctx context.Context) error {
 		return ErrLeaseValid
 	}
 
-	return l.BaseResource.Validate(ctx)
+	return l.BaseResource.Validate(ctx, types)
 }

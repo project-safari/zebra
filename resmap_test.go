@@ -59,7 +59,7 @@ func TestListMarshalUnmarshal(t *testing.T) {
 	vlan := &network.VLANPool{
 		BaseResource: zebra.BaseResource{
 			ID:     "0100001",
-			Type:   "invalid",
+			Type:   zebra.DefaultType(),
 			Labels: nil,
 			Status: zebra.DefaultStatus(),
 		},
@@ -79,7 +79,7 @@ func TestListMarshalUnmarshal(t *testing.T) {
 	err = resB.UnmarshalJSON(bytes)
 	assert.NotNil(err)
 
-	vlan.Type = "VLANPool"
+	vlan.Type = network.VLANPoolType()
 	resA.Resources = []zebra.Resource{vlan}
 
 	bytes, err = resA.MarshalJSON()
@@ -205,7 +205,7 @@ func TestMapMarshalUnMarshal(t *testing.T) {
 	vlan := &network.VLANPool{
 		BaseResource: zebra.BaseResource{
 			ID:     "0100001",
-			Type:   "VLANPool",
+			Type:   network.VLANPoolType(),
 			Labels: nil,
 			Status: zebra.DefaultStatus(),
 		},

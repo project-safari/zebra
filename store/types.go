@@ -19,7 +19,7 @@ func DefaultFactory() zebra.ResourceFactory {
 	factory.Add(network.VLANPoolType())
 
 	// dc resources
-	factory.Add(dc.DataCenterType())
+	factory.Add(dc.DatacenterType())
 	factory.Add(dc.LabType())
 	factory.Add(dc.RackType())
 

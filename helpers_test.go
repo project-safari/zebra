@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,17 +12,17 @@ func TestNewBaseResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	br := zebra.NewBaseResource("", nil)
+	br := zebra.NewBaseResource(zebra.DefaultType(), nil)
 	assert.NotNil(br)
 	assert.NotEmpty(br.ID)
-	assert.True(br.Type == "BaseResource")
+	assert.True(br.Type.Name == "BaseResource")
 
 	labels := zebra.Labels{"owner": "shravya"}
 
-	br = zebra.NewBaseResource("Switch", labels)
+	br = zebra.NewBaseResource(network.SwitchType(), labels)
 	assert.NotNil(br)
 	assert.NotEmpty(br.ID)
-	assert.True(br.Type == "Switch")
+	assert.True(br.Type.Name == "Switch")
 	assert.True(br.Labels != nil)
 	assert.True(br.Labels.MatchEqual("owner", "shravya"))
 }

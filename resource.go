@@ -10,13 +10,13 @@ import (
 // Resource interface is implemented by all resources and provides resource
 // validation and label selection methods.
 type Resource interface {
-	Validate(ctx context.Context) error
+	Validate(ctx context.Context, types string) error
 
 	// get the status for resources to see if active or not.
 	GetStatus() *Status
 
 	GetID() string
-	GetType() string
+	GetType() Type
 	GetLabels() Labels
 	GetName() string
 }
@@ -41,20 +41,20 @@ var (
 // assigned an ID string.
 type BaseResource struct {
 	ID     string  `json:"id"`
-	Type   string  `json:"type"`
+	Type   Type    `json:"type,omitempty"`
 	Labels Labels  `json:"labels,omitempty"`
 	Status *Status `json:"status,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.
 // Else, it returns nil.
-func (r *BaseResource) Validate(ctx context.Context) error {
+func (r *BaseResource) Validate(ctx context.Context, types string) error {
 	switch {
 	case r.ID == "":
 		return ErrIDEmpty
 	case len(r.ID) < 3: // nolint:gomnd
 		return ErrIDShort
-	case r.Type == "":
+	case types == "":
 		return ErrTypeEmpty
 	}
 
@@ -89,7 +89,7 @@ func (r *BaseResource) GetID() string {
 }
 
 // BaseResource has no name. Return empty string.
-func (r *BaseResource) GetType() string {
+func (r *BaseResource) GetType() Type {
 	return r.Type
 }
 
@@ -120,12 +120,12 @@ type NamedResource struct {
 
 // Validate returns an error if the given NamedResource object has incorrect values.
 // Else, it returns nil.
-func (r *NamedResource) Validate(ctx context.Context) error {
+func (r *NamedResource) Validate(ctx context.Context, types string) error {
 	if r.Name == "" {
 		return ErrNameEmpty
 	}
 
-	return r.BaseResource.Validate(ctx)
+	return r.BaseResource.Validate(ctx, types)
 }
 
 func (r *NamedResource) GetName() string {
@@ -140,9 +140,17 @@ type Credentials struct {
 	Keys map[string]string
 }
 
+func CredentialsType() Type {
+	return Type{
+		Name:        "Credentials",
+		Description: "Credentials",
+		Constructor: func() Resource { return new(Credentials) },
+	}
+}
+
 // Validate returns an error if the given Credentials object has incorrect values.
 // Else, it returns nil.
-func (c *Credentials) Validate(ctx context.Context) error {
+func (c *Credentials) Validate(ctx context.Context, types string) error {
 	keyValidators := map[string]func(string) error{"password": ValidatePassword, "ssh-key": ValidateSSHKey}
 
 	for keyType, key := range c.Keys {
@@ -156,7 +164,7 @@ func (c *Credentials) Validate(ctx context.Context) error {
 		return ErrNoKeys
 	}
 
-	return c.NamedResource.Validate(ctx)
+	return c.NamedResource.Validate(ctx, types)
 }
 
 // Check to make sure password follows rules.
@@ -207,7 +215,7 @@ func ValidateSSHKey(key string) error {
 func NewCredential(name string, labels Labels) *Credentials {
 	namedRes := new(NamedResource)
 
-	namedRes.BaseResource = *NewBaseResource("Credentials", labels)
+	namedRes.BaseResource = *NewBaseResource(CredentialsType(), labels)
 
 	namedRes.Name = name
 

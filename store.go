@@ -34,7 +34,7 @@ type Store interface {
 	Clear() error
 	Load() (*ResourceMap, error)
 	Create(res Resource) error
-	Delete(res Resource) error
+	Delete(res Resource, types string) error
 	Query() *ResourceMap
 	QueryUUID(uuids []string) *ResourceMap
 	QueryType(types []string) *ResourceMap

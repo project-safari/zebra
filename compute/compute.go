@@ -39,7 +39,7 @@ type Server struct {
 	Model        string            `json:"model"`
 }
 
-func (s *Server) Validate(ctx context.Context) error {
+func (s *Server) Validate(ctx context.Context, types string) error {
 	switch {
 	case s.SerialNumber == "":
 		return ErrSerialEmpty
@@ -49,15 +49,15 @@ func (s *Server) Validate(ctx context.Context) error {
 		return ErrModelEmpty
 	}
 
-	if s.Type != "Server" {
+	if types != "Server" {
 		return zebra.ErrWrongType
 	}
 
-	if err := s.Credentials.Validate(ctx); err != nil {
+	if err := s.Credentials.Validate(ctx, types); err != nil {
 		return err
 	}
 
-	return s.NamedResource.Validate(ctx)
+	return s.NamedResource.Validate(ctx, types)
 }
 
 func ESXType() zebra.Type {
@@ -76,7 +76,7 @@ type ESX struct {
 	IP          net.IP            `json:"ip"`
 }
 
-func (e *ESX) Validate(ctx context.Context) error {
+func (e *ESX) Validate(ctx context.Context, types string) error {
 	if e.IP == nil {
 		return ErrIPEmpty
 	}
@@ -85,15 +85,15 @@ func (e *ESX) Validate(ctx context.Context) error {
 		return ErrServerIDEmtpy
 	}
 
-	if e.Type != "ESX" {
+	if types != "ESX" {
 		return zebra.ErrWrongType
 	}
 
-	if credentialsErr := e.Credentials.Validate(ctx); credentialsErr != nil {
+	if credentialsErr := e.Credentials.Validate(ctx, types); credentialsErr != nil {
 		return credentialsErr
 	}
 
-	return e.NamedResource.Validate(ctx)
+	return e.NamedResource.Validate(ctx, types)
 }
 
 func VCenterType() zebra.Type {
@@ -111,20 +111,20 @@ type VCenter struct {
 	IP          net.IP            `json:"ip"`
 }
 
-func (v *VCenter) Validate(ctx context.Context) error {
+func (v *VCenter) Validate(ctx context.Context, types string) error {
 	if v.IP == nil {
 		return ErrIPEmpty
 	}
 
-	if v.Type != "VCenter" {
+	if types != "VCenter" {
 		return zebra.ErrWrongType
 	}
 
-	if err := v.Credentials.Validate(ctx); err != nil {
+	if err := v.Credentials.Validate(ctx, types); err != nil {
 		return err
 	}
 
-	return v.NamedResource.Validate(ctx)
+	return v.NamedResource.Validate(ctx, types)
 }
 
 func VMType() zebra.Type {
@@ -145,7 +145,7 @@ type VM struct {
 	VCenterID    string            `json:"vCenterID"`    //nolint:tagliatelle
 }
 
-func (v *VM) Validate(ctx context.Context) error {
+func (v *VM) Validate(ctx context.Context, types string) error {
 	switch {
 	case v.ESXID == "":
 		return ErrESXEmpty
@@ -155,22 +155,22 @@ func (v *VM) Validate(ctx context.Context) error {
 		return ErrVCenterEmpty
 	}
 
-	if v.Type != "VM" {
+	if types != "VM" {
 		return zebra.ErrWrongType
 	}
 
-	if err := v.Credentials.Validate(ctx); err != nil {
+	if err := v.Credentials.Validate(ctx, types); err != nil {
 		return err
 	}
 
-	return v.NamedResource.Validate(ctx)
+	return v.NamedResource.Validate(ctx, types)
 }
 
 // create new resources.
 func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 	namedRes := new(zebra.NamedResource)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("VCenter", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(VCenterType(), labels)
 
 	namedRes.Name = name
 
@@ -194,7 +194,7 @@ func NewVCenter(name string, ip net.IP, labels zebra.Labels) *VCenter {
 func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 	named := new(zebra.NamedResource)
 
-	named.BaseResource = *zebra.NewBaseResource("Server", labels)
+	named.BaseResource = *zebra.NewBaseResource(ServerType(), labels)
 
 	named.Name = arr[2]
 
@@ -218,7 +218,7 @@ func NewServer(arr []string, ip net.IP, labels zebra.Labels) *Server {
 func NewESX(name string, serverID string, ip net.IP, labels zebra.Labels) *ESX {
 	namedRes := new(zebra.NamedResource)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("ESX", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(ESXType(), labels)
 
 	namedRes.Name = name
 
@@ -244,7 +244,7 @@ func NewVM(arr []string, ip net.IP, labels zebra.Labels) *VM {
 	namedRes := new(zebra.NamedResource)
 	cred := new(zebra.Credentials)
 
-	namedRes.BaseResource = *zebra.NewBaseResource("VM", labels)
+	namedRes.BaseResource = *zebra.NewBaseResource(VMType(), labels)
 
 	namedRes.Name = arr[0]
 

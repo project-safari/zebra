@@ -10,8 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const userType = "user"
-
 //nolint:funlen
 func TestUser(t *testing.T) {
 	t.Parallel()
@@ -48,18 +46,18 @@ func TestUser(t *testing.T) {
 
 	god.Name = "almighty"
 	god.ID = "00000000000001"
-	god.Type = userType
-	assert.NotNil(god.Validate(ctx))
+	god.Type = auth.UserType()
+	assert.NotNil(god.Validate(ctx, god.Type.Name))
 
 	god.Key = godKey
-	assert.NotNil(god.Validate(ctx))
+	assert.NotNil(god.Validate(ctx, god.Type.Name))
 
 	god.Role = admin
-	assert.NotNil(god.Validate(ctx))
+	assert.NotNil(god.Validate(ctx, god.Type.Name))
 
 	god.PasswordHash = auth.HashPassword("youhaveachoice")
 	god.Email = "god@heaven.com"
-	assert.NotNil(god.Validate(ctx)) // it will have an error because it does not have group label, so not nil.
+	assert.NotNil(god.Validate(ctx, god.Type.Name)) // it will have an error since there is group label.
 
 	adamKey, err := auth.Generate()
 	assert.Nil(err)
@@ -68,7 +66,7 @@ func TestUser(t *testing.T) {
 	adam := new(auth.User)
 	adam.Name = "adam"
 	adam.ID = "00000000000003"
-	adam.Type = userType
+	adam.Type = auth.UserType()
 	adam.Key = adamKey
 	adam.Role = user
 	adam.PasswordHash = auth.HashPassword("iloveeve")
@@ -80,7 +78,7 @@ func TestUser(t *testing.T) {
 	eve := new(auth.User)
 	eve.Name = "eve"
 	eve.ID = "00000000000004"
-	eve.Type = userType
+	eve.Type = auth.UserType()
 	eve.Key = eveKey
 	eve.Role = user
 	eve.PasswordHash = auth.HashPassword("iloveadam")
@@ -115,5 +113,5 @@ func TestUser(t *testing.T) {
 	assert.NotNil(newUser)
 
 	newUser.Labels = pkg.GroupLabels(newUser.Labels, "sample-label")
-	assert.Nil(newUser.Validate(context.Background()))
+	assert.Nil(newUser.Validate(context.Background(), newUser.Type.Name))
 }

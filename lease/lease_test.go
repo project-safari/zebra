@@ -92,19 +92,19 @@ func TestValidate(t *testing.T) {
 	assert := assert.New(t)
 
 	l := getEmptyLease()
-	assert.Nil(l.Validate(context.Background()))
+	assert.Nil(l.Validate(context.Background(), l.Type.Name))
 
 	dur, err := time.ParseDuration("5h")
 	assert.Nil(err)
 
 	l.ActivationTime = time.Now().Add(dur)
-	assert.NotNil(l.Validate(context.Background()))
+	assert.NotNil(l.Validate(context.Background(), l.Type.Name))
 
 	l.Request = nil
-	assert.NotNil(l.Validate(context.Background()))
+	assert.NotNil(l.Validate(context.Background(), l.Type.Name))
 
 	l.Duration = dur
-	assert.NotNil(l.Validate(context.Background()))
+	assert.NotNil(l.Validate(context.Background(), l.Type.Name))
 }
 
 func TestRequestList(t *testing.T) {
@@ -158,7 +158,7 @@ func getLease() *Lease {
 
 func getRes() zebra.Resource {
 	res := &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
+		BaseResource: *zebra.NewBaseResource(network.VLANPoolType(), nil),
 		RangeStart:   0,
 		RangeEnd:     10,
 	}
@@ -169,7 +169,7 @@ func getRes() zebra.Resource {
 func getUser() auth.User {
 	return auth.User{
 		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("User", nil),
+			BaseResource: *zebra.NewBaseResource(auth.UserType(), nil),
 			Name:         "shravya",
 		},
 		Email:        "shravya@cisco.com",

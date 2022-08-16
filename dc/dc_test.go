@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/dc"
 	"github.com/stretchr/testify/assert"
@@ -18,25 +19,25 @@ func TestDatacenter(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
-	dcType := dc.DataCenterType()
+	dcType := dc.DatacenterType()
 	assert.NotNil(dcType)
 
 	datacenter, ok := dcType.New().(*dc.Datacenter)
 	assert.True(ok)
-	assert.NotNil(datacenter.Validate(ctx))
+	assert.NotNil(datacenter.Validate(ctx, datacenter.Type.Name))
 
 	datacenter.ID = "bahbah"
-	datacenter.Type = "Datacenter"
+	datacenter.Type = dc.DatacenterType()
 	datacenter.Name = "jasmine"
 	datacenter.Address = "1 palace st, agrabah"
-	assert.NotNil(datacenter.Validate(ctx))
+	assert.NotNil(datacenter.Validate(ctx, datacenter.Type.Name))
 
 	datacenter.Labels = pkg.CreateLabels()
 	datacenter.Labels = pkg.GroupLabels(datacenter.Labels, "someGroup")
-	assert.Nil(datacenter.Validate(ctx))
+	assert.Nil(datacenter.Validate(ctx, datacenter.Type.Name))
 
-	datacenter.Type = "test1"
-	assert.NotNil(datacenter.Validate(ctx))
+	datacenter.Type = zebra.DefaultType()
+	assert.NotNil(datacenter.Validate(ctx, datacenter.Type.Name))
 
 	labType := dc.LabType()
 	assert.NotNil(labType)
@@ -50,20 +51,20 @@ func TestLab(t *testing.T) {
 	labType := dc.LabType()
 	lab, ok := labType.New().(*dc.Lab)
 	assert.True(ok)
-	assert.NotNil(lab.Validate(ctx))
+	assert.NotNil(lab.Validate(ctx, lab.Type.Name))
 
 	lab.ID = "abracadabra"
-	lab.Type = "Lab"
+	lab.Type = dc.LabType()
 	lab.Name = "sher"
 
 	lab.Labels = pkg.CreateLabels()
-	assert.Nil(lab.Validate(ctx))
+	assert.Nil(lab.Validate(ctx, lab.Type.Name))
 
 	lab.Labels = pkg.GroupLabels(lab.Labels, "oneGroup")
-	assert.Nil(lab.Validate(ctx))
+	assert.Nil(lab.Validate(ctx, lab.Type.Name))
 
-	lab.Type = "test2"
-	assert.NotNil(lab.Validate(ctx))
+	lab.Type = zebra.DefaultType()
+	assert.NotNil(lab.Validate(ctx, lab.Type.Name))
 }
 
 // TestRack tests the *Rack Validate function with a pass and a fail case.
@@ -75,16 +76,16 @@ func TestRack(t *testing.T) {
 	rackType := dc.RackType()
 	rack, ok := rackType.New().(*dc.Rack)
 	assert.True(ok)
-	assert.NotNil(rack.Validate(ctx))
+	assert.NotNil(rack.Validate(ctx, rack.Type.Name))
 
 	rack.ID = "abracadabra"
-	rack.Type = "Rack"
+	rack.Type = dc.DatacenterType()
 	rack.Name = "sher"
 	rack.Row = "bazar"
-	assert.NotNil(rack.Validate(ctx))
+	assert.NotNil(rack.Validate(ctx, rack.Type.Name))
 
-	rack.Type = "test3"
-	assert.NotNil(rack.Validate(ctx))
+	rack.Type = zebra.DefaultType()
+	assert.NotNil(rack.Validate(ctx, rack.Type.Name))
 }
 
 func TestNewDc(t *testing.T) {

@@ -33,8 +33,8 @@ func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	for i := 0; i < 100; i++ {
 		l := new(dc.Lab)
 		l.Name = fmt.Sprintf("lab-%d", i+1)
-		l.Type = "Lab"
-		l.BaseResource = *zebra.NewBaseResource("Lab", labels)
+		l.Type = dc.LabType()
+		l.BaseResource = *zebra.NewBaseResource(l.Type, labels)
 
 		assert.Nil(s.Create(l))
 	}

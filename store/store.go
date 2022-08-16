@@ -107,7 +107,7 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 		return ErrNilResource
 	}
 
-	if err := res.Validate(context.Background()); err != nil {
+	if err := res.Validate(context.Background(), res.GetType().Name); err != nil {
 		return err
 	}
 
@@ -129,7 +129,7 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 		return err
 	}
 
-	err = rs.ts.Create(res)
+	err = rs.ts.Create(res, res.GetType().Name)
 	if err != nil {
 		return err
 	}
@@ -137,8 +137,8 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	return nil
 }
 
-func (rs *ResourceStore) Delete(resource zebra.Resource) error {
-	if resource == nil || resource.Validate(context.Background()) != nil {
+func (rs *ResourceStore) Delete(resource zebra.Resource, typeKey string) error {
+	if resource == nil {
 		return zebra.ErrInvalidResource
 	}
 
@@ -160,7 +160,7 @@ func (rs *ResourceStore) Delete(resource zebra.Resource) error {
 		return err
 	}
 
-	err = rs.ts.Delete(resource)
+	err = rs.ts.Delete(resource, typeKey)
 	if err != nil {
 		return err
 	}
@@ -255,8 +255,7 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-			inList := zebra.IsIn(val, query.Values)
+			inList := zebra.IsIn(t, query.Values)
 
 			if inVals && inList {
 				retMap.Add(res, t)
@@ -348,8 +347,7 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 
 	for t, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
-			matchIn := zebra.IsIn(val, query.Values)
+			matchIn := zebra.IsIn(t, query.Values)
 
 			if (inVals && matchIn) || (!inVals && !matchIn) {
 				retMap.Add(res, t)

@@ -71,7 +71,7 @@ func TestFileStore(t *testing.T) {
 	assert.Nil(res)
 
 	labels := pkg.CreateLabels()
-	resources = append(resources, zebra.NewBaseResource("", labels))
+	resources = append(resources, zebra.NewBaseResource(zebra.DefaultType(), labels))
 	ret := storeResources(resources, fs)
 
 	assert.Nil(ret)
