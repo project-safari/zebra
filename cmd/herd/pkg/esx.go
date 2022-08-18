@@ -5,9 +5,9 @@ import (
 	"github.com/project-safari/zebra/compute"
 )
 
-// function for ESX generation.
+// Function for ESX generation.
 //
-// returns an array of type zebra.Resource.
+// Returns an array of type zebra.Resource.
 func GenerateESX(numESX int) []zebra.Resource {
 	ESXarr := make([]zebra.Resource, 0, numESX)
 

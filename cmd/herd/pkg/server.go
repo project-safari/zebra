@@ -1,15 +1,15 @@
 package pkg
 
 import (
-	// some imports from zebra.
+	// Some imports from zebra.
 	"github.com/project-safari/zebra"
-	// some imports from compute.
+	// Some imports from compute.
 	"github.com/project-safari/zebra/compute"
 )
 
-// function to generate server resources.
+// Function to generate server resources.
 //
-// returns an array of type zebra.Resource.
+// Returns an array of type zebra.Resource.
 func GenerateServer(numServers int) []zebra.Resource {
 	servers := make([]zebra.Resource, 0, numServers)
 

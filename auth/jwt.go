@@ -13,8 +13,8 @@ var ErrInvalidToken = errors.New("invalid jwt token")
 
 const TokenDuration = time.Minute * 10
 
-// struct that helps manage claims.
-// contains StandardClaims, a Role, and an email address.
+// Struct that helps manage claims.
+// It contains StandardClaims, a Role, and an email address.
 type Claims struct {
 	jwt.StandardClaims
 	Role  *Role  `json:"role"`
@@ -33,27 +33,27 @@ func NewClaims(issuer string, subject string, role *Role, email string) *Claims 
 	return claims
 }
 
-// create claims, return boolean.
+// Create claims, return boolean.
 func (claims *Claims) Create(resource string) bool {
 	return claims.Role.Create(resource)
 }
 
-// read claims, return boolean.
+// Read claims, return boolean.
 func (claims *Claims) Read(resource string) bool {
 	return claims.Role.Read(resource)
 }
 
-// write claims, return boolean.
+// Write claims, return boolean.
 func (claims *Claims) Write(resource string) bool {
 	return claims.Role.Write(resource)
 }
 
-// delete existing claims, return boolean.
+// Delete existing claims, return boolean.
 func (claims *Claims) Delete(resource string) bool {
 	return claims.Role.Delete(resource)
 }
 
-// update existing claims, return boolean.
+// Update existing claims, return boolean.
 func (claims *Claims) Update(resource string) bool {
 	return claims.Role.Update(resource)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Mock function that makes a request to be used in tests.
 func makeTypeRequest(assert *assert.Assertions, types ...string) *http.Request {
 	req, err := http.NewRequest("GET", "/api/v1/types", nil)
 	assert.Nil(err)
@@ -25,6 +26,7 @@ func makeTypeRequest(assert *assert.Assertions, types ...string) *http.Request {
 	return req
 }
 
+// Test for an incorrect request.
 func TestBadReq(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -62,6 +64,7 @@ func TestDefaultFactory(t *testing.T) {
 	assert.Equal(rr.Code, http.StatusOK)
 }
 
+// Test request by type.
 func TestTypes(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

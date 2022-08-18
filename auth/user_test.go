@@ -12,7 +12,7 @@ import (
 
 const userType = "user"
 
-// test for crud operations on users, with or without the mandatory system.group label.
+// Test for crud operations on users, with or without the mandatory system.group label.
 func TestUser(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
@@ -60,8 +60,8 @@ func TestUser(t *testing.T) { //nolint:funlen
 	god.PasswordHash = auth.HashPassword("youhaveachoice")
 	god.Email = "god@heaven.com"
 
-	// not nil because this resource does not have the mandatory system.group label.
-	// the error validation will automatically return the error "missing mandatory group label" therefore not nil.
+	// This is not nil because this resource does not have the mandatory system.group label.
+	// The error validation will automatically return the error "missing mandatory group label" therefore not nil.
 	assert.NotNil(god.Validate(ctx))
 
 	adamKey, err := auth.Generate()

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test for new store.
 func TestNewTestStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -17,6 +18,7 @@ func TestNewTestStore(t *testing.T) {
 	assert.NotNil(labelstore.NewLabelStore(resMap))
 }
 
+// Test for initialization.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -28,6 +30,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(ls.Initialize())
 }
 
+// Test for wipe operation.
 func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -41,6 +44,7 @@ func TestWipe(t *testing.T) {
 	assert.Nil(ls.Wipe())
 }
 
+// Test for clear operation.
 func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -67,6 +71,7 @@ func TestClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
+// Test for load operation.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -99,6 +104,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(1, len(resources.Resources["player = 2"].Resources))
 }
 
+// Test for create.
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -123,7 +129,7 @@ func TestCreate(t *testing.T) {
 	assert.NotNil(ls)
 	assert.Nil(ls.Initialize())
 
-	// Create new resource, should pass
+	// Create new resource, should pass.
 	assert.Nil(ls.Create(vlan1))
 
 	resources, err := ls.Load()
@@ -131,13 +137,14 @@ func TestCreate(t *testing.T) {
 	assert.Equal(3, len(resources.Resources))
 	assert.Equal(1, len(resources.Resources["a = i"].Resources))
 
-	// Create another new resource, should pass
+	// Create another new resource, should pass/
 	assert.Nil(ls.Create(vlan2))
 
-	// Create duplicate resource, should update
+	// Create duplicate resource, should update.
 	assert.Nil(ls.Create(vlan1))
 }
 
+// Test for delete.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -162,16 +169,17 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(ls)
 	assert.Nil(ls.Initialize())
 
-	// Create new resource, should pass
+	// Create new resource, should pass.
 	assert.Nil(ls.Create(vlan1))
 
-	// Delete resource, should pass
+	// Delete resource, should pass.
 	assert.Nil(ls.Delete(vlan1))
 
-	// Try to delete non-existent resource, should pass anyways
+	// Try to delete non-existent resource, should pass anyways.
 	assert.Nil(ls.Delete(vlan2))
 }
 
+// Test for query.
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -209,6 +217,7 @@ func TestQuery(t *testing.T) {
 	assert.Equal(1, len(resources.Resources))
 }
 
+// Moc function for a vlan to be used in the tests.
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
 		BaseResource: *zebra.NewBaseResource("VLANPool", nil),

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test for generating a resource factory with all the known types.
+// Test for generating a resource factory with all the known types.
 func TestDefaultFactory(t *testing.T) {
 	t.Parallel()
 

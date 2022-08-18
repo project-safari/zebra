@@ -29,16 +29,19 @@ func NewIDStore(resources *zebra.ResourceMap) *IDStore {
 	return ids
 }
 
+// Operation function on idstore: initialize.
 func (ids *IDStore) Initialize() error {
 	return nil
 }
 
+// Operation function on idstore: wipe.
 func (ids *IDStore) Wipe() error {
 	ids.resources = nil
 
 	return nil
 }
 
+// Operation function on idstore: clear.
 func (ids *IDStore) Clear() error {
 	ids.resources = make(map[string]zebra.Resource)
 

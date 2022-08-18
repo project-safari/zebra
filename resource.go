@@ -12,7 +12,7 @@ import (
 type Resource interface {
 	Validate(ctx context.Context) error
 
-	// get the status for resources to see if active or not.
+	// Get the status for resources to see if active or not.
 	GetStatus() *Status
 
 	GetID() string
@@ -23,7 +23,7 @@ type Resource interface {
 
 const ShortIDSize = 7
 
-// this is a type of error that can occur in a rsource.
+// This is a type of error that can occur in a rsource.
 var (
 	ErrNameEmpty   = errors.New("name is empty")
 	ErrIDEmpty     = errors.New("id is empty")

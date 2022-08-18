@@ -23,7 +23,7 @@ func verifyType(assert *assert.Assertions, t string, resources []zebra.Resource)
 	}
 }
 
-// tests for the address file - IP generation.
+// Tests for the address file - IP generation.
 func TestAddresses(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -34,7 +34,7 @@ func TestAddresses(t *testing.T) {
 	assert.NotEmpty(addr)
 }
 
-// tests for setting the IP address.
+// Tests for setting the IP address.
 func TestSetIP(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -45,7 +45,7 @@ func TestSetIP(t *testing.T) {
 	assert.NotEmpty(samples)
 }
 
-// tests for creating an array of IP addresses.
+// Tests for creating an array of IP addresses.
 func TestCreateIPArr(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -59,7 +59,7 @@ func TestCreateIPArr(t *testing.T) {
 	assert.Equal(num, len(arr))
 }
 
-// tests for the device_info file.
+// Tests for the device_info file.
 func TestPorts(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -69,7 +69,7 @@ func TestPorts(t *testing.T) {
 	assert.NotNil(prt)
 }
 
-// tests for generating a model name.
+// Tests for generating a model name.
 func TestModel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -81,7 +81,7 @@ func TestModel(t *testing.T) {
 	assert.NotEqual(model, " ")
 }
 
-// tests for generating a serial code.
+// Tests for generating a serial code.
 func TestSerials(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -92,7 +92,7 @@ func TestSerials(t *testing.T) {
 	assert.NotEqual(ser, " ")
 }
 
-// tests for generation of row.
+// Tests for generation of row.
 func TestRows(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -103,7 +103,7 @@ func TestRows(t *testing.T) {
 	assert.NotEqual(row, " ")
 }
 
-// tests for generation of detailed information.
+// Tests for generation of detailed information.
 func TestSelectServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -112,7 +112,7 @@ func TestSelectServer(t *testing.T) {
 	assert.NotNil(srv)
 }
 
-// tests for generating / selecting an ID for esx servers.
+// Tests for generating / selecting an ID for esx servers.
 func TestSelectESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -121,7 +121,7 @@ func TestSelectESX(t *testing.T) {
 	assert.NotNil(esx)
 }
 
-// tests for generating / selecting an ID for vcenters.
+// Tests for generating / selecting an ID for vcenters.
 func TestSelectVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -130,7 +130,7 @@ func TestSelectVCenter(t *testing.T) {
 	assert.NotNil(center)
 }
 
-// tests for the person file.
+// Tests for the person file.
 func TestUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -139,7 +139,7 @@ func TestUser(t *testing.T) {
 	assert.NotNil(user)
 }
 
-// tests for gereration of default passwords.
+// Tests for gereration of default passwords.
 func TestPass(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -149,7 +149,7 @@ func TestPass(t *testing.T) {
 	assert.Equal("person123", pwd)
 }
 
-// test for users' names.
+// Test for users' names.
 func TestName(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -159,7 +159,7 @@ func TestName(t *testing.T) {
 	assert.NotNil(name)
 }
 
-// tests for the labels file.
+// Tests for the labels file.
 func TestCreateLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -169,7 +169,7 @@ func TestCreateLabels(t *testing.T) {
 	assert.NotNil(labels)
 }
 
-// tests for the rand file.
+// Tests for the rand file.
 func TestRandData(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -186,7 +186,7 @@ func TestRandData(t *testing.T) {
 	assert.Empty(test2Arr)
 }
 
-// tests for generation of random data for sample executions.
+// Tests for generation of random data for sample executions.
 func TestRandNum(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -194,7 +194,7 @@ func TestRandNum(t *testing.T) {
 	assert.NotNil(reflect.TypeOf(pkg.RandNum(5)))
 }
 
-// tests for Vlan generation.
+// Tests for Vlan generation.
 //
 // #1 - creating the vlan.
 func TestCreateVlanPool(t *testing.T) {
@@ -211,7 +211,7 @@ func TestCreateVlanPool(t *testing.T) {
 	assert.NotEmpty(VlanPool)
 }
 
-// tests for Vlan generation.
+// Tests for Vlan generation.
 //
 // #2 - generating the vlan.
 func TestGenerateVlan(t *testing.T) {
@@ -225,7 +225,7 @@ func TestGenerateVlan(t *testing.T) {
 	verifyType(assert, "VLANPool", testVlans)
 }
 
-// tests for switch generation.
+// Tests for switch generation.
 //
 // #1 - creating the switch.
 func TestCreateSwitch(t *testing.T) {
@@ -239,7 +239,7 @@ func TestCreateSwitch(t *testing.T) {
 	assert.NotEmpty(sw)
 }
 
-// tests for switch generation.
+// Tests for switch generation.
 //
 // #2 - generating the switch.
 func TestGenerateSwitch(t *testing.T) {
@@ -253,7 +253,7 @@ func TestGenerateSwitch(t *testing.T) {
 	verifyType(assert, "Switch", testSwitch)
 }
 
-// tests for IPAddress generation.
+// Tests for IPAddress generation.
 //
 // #1 - creating the IPAddressPool.
 func TestCreateIPPool(t *testing.T) {
@@ -266,7 +266,7 @@ func TestCreateIPPool(t *testing.T) {
 	assert.NotEmpty(pool)
 }
 
-// tests for IPAddress generation.
+// Tests for IPAddress generation.
 //
 // #2 - generating the IPAddressPool.
 func TestGenerateIPAddressPool(t *testing.T) {
@@ -279,7 +279,7 @@ func TestGenerateIPAddressPool(t *testing.T) {
 	verifyType(assert, "IPAddressPool", testPool)
 }
 
-// tests for datacenter generation.
+// Tests for datacenter generation.
 //
 // #1 - creating the datacenter.
 func TestCreateDatacenter(t *testing.T) {
@@ -292,7 +292,7 @@ func TestCreateDatacenter(t *testing.T) {
 	assert.NotEmpty(datacent)
 }
 
-// tests for datacenter generation.
+// Tests for datacenter generation.
 //
 // #2 - generating the datacenter.
 func TestGenerateDatacenterl(t *testing.T) {
@@ -306,7 +306,7 @@ func TestGenerateDatacenterl(t *testing.T) {
 	verifyType(assert, "Datacenter", testDC)
 }
 
-// tests for lab generation.
+// Tests for lab generation.
 //
 // #1 - creating the lab.
 func TestCreateLab(t *testing.T) {
@@ -319,7 +319,7 @@ func TestCreateLab(t *testing.T) {
 	assert.NotEmpty(lab)
 }
 
-// tests for lab generation.
+// Tests for lab generation.
 //
 // #2 - generating the lab.
 func TestGenerateLab(t *testing.T) {
@@ -332,7 +332,7 @@ func TestGenerateLab(t *testing.T) {
 	verifyType(assert, "Lab", testLab)
 }
 
-// tests for rack generation.
+// Tests for rack generation.
 //
 // #1 - creating the rack.
 func TestCreateRack(t *testing.T) {
@@ -344,7 +344,7 @@ func TestCreateRack(t *testing.T) {
 	assert.NotEmpty(rack)
 }
 
-// tests for rack generation.
+// Tests for rack generation.
 //
 // #2 - generating the rack.
 func TestGenerateRack(t *testing.T) {
@@ -357,7 +357,7 @@ func TestGenerateRack(t *testing.T) {
 	verifyType(assert, "Rack", testRack)
 }
 
-// tests for vcenter generation.
+// Tests for vcenter generation.
 //
 // #1 - creating the vcenter.
 func TestCreateVCenter(t *testing.T) {
@@ -370,7 +370,7 @@ func TestCreateVCenter(t *testing.T) {
 	assert.Equal("VCenter", vc.GetType())
 }
 
-// tests for vcenter generation.
+// Tests for vcenter generation.
 //
 // #2 - generating the vcenter.
 func TestGenerateVC(t *testing.T) {
@@ -384,7 +384,7 @@ func TestGenerateVC(t *testing.T) {
 	assert.NotNil(testVC)
 }
 
-// tests for esx generation.
+// Tests for esx generation.
 //
 // #1 - creaing the esx.
 func TestCreateESX(t *testing.T) {
@@ -396,7 +396,7 @@ func TestCreateESX(t *testing.T) {
 	assert.NotEmpty(vc)
 }
 
-// tests for esx generation.
+// Tests for esx generation.
 //
 // #2 - generating the esx.
 func TestGenerateESX(t *testing.T) {
@@ -410,7 +410,7 @@ func TestGenerateESX(t *testing.T) {
 	verifyType(assert, "ESX", testESX)
 }
 
-// tests for server generation.
+// Tests for server generation.
 //
 // #1 - creating the server.
 func TestCreateServer(t *testing.T) {
@@ -423,7 +423,7 @@ func TestCreateServer(t *testing.T) {
 	assert.NotEmpty(server)
 }
 
-// tests for server generation.
+// Tests for server generation.
 //
 // #2 - generating the server.
 func TestGenerateServer(t *testing.T) {
@@ -437,7 +437,7 @@ func TestGenerateServer(t *testing.T) {
 	verifyType(assert, "Server", testServer)
 }
 
-// tests for vm generation.
+// Tests for vm generation.
 //
 // #1 - creating the vm.
 func TestCreateVM(t *testing.T) {
@@ -450,7 +450,7 @@ func TestCreateVM(t *testing.T) {
 	assert.NotEmpty(vm)
 }
 
-// tests for vm generation.
+// Tests for vm generation.
 //
 // #2 - generating the vm.
 func TestGenerateVM(t *testing.T) {
@@ -463,7 +463,7 @@ func TestGenerateVM(t *testing.T) {
 	verifyType(assert, "VM", testVM)
 }
 
-// tests for user info generation.
+// Tests for user info generation.
 //
 // #1 - creating the user.
 func TestCreateUser(t *testing.T) {
@@ -480,7 +480,7 @@ func TestCreateUser(t *testing.T) {
 	assert.Nil(user.Validate(context.Background()))
 }
 
-// tests for user info generation.
+// Tests for user info generation.
 //
 // #2 - generating the user.
 func TestGenerateUser(t *testing.T) {
@@ -493,7 +493,7 @@ func TestGenerateUser(t *testing.T) {
 	verifyType(assert, "User", usr)
 }
 
-// tests for credential info generation.
+// Tests for credential info generation.
 //
 // #1 - creating the credential info.
 func TestCreateCredential(t *testing.T) {
@@ -505,7 +505,7 @@ func TestCreateCredential(t *testing.T) {
 	assert.NotEmpty(credentials)
 }
 
-// tests for credential info generation.
+// Tests for credential info generation.
 //
 // #2 - generating the credential info.
 func TestGenerateCredential(t *testing.T) {

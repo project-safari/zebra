@@ -12,13 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// files that will be used for keys and certificate authorities for go tests.
+// Files that will be used for keys and certificate authorities for go tests.
 const (
 	testCACertFile  = "../../simulator/zebra-ca.crt"
 	testUserKeyFile = "../../simulator/user.key"
 )
 
-// test for starting a new client.
+// Test for starting a new client.
 func TestNewClient(t *testing.T) {
 	t.Parallel()
 
@@ -68,7 +68,7 @@ func TestNewClient(t *testing.T) {
 	assert.NotNil(e)
 }
 
-// tests for the tsl client.
+// Tests for the tsl client.
 func TestTLSClient(t *testing.T) {
 	t.Parallel()
 
@@ -144,6 +144,7 @@ func TestClientDo(t *testing.T) {
 	assert.Equal(http.StatusOK, code)
 }
 
+// Mock function for a starting and returning a new server for the tests.
 func makeServer(assert *assert.Assertions) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		fmt.Println(req.URL.Path)

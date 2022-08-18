@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// constant values to be used in commands and in sample resource generation.
+// Constant values to be used in commands and in sample resource generation.
 const (
 	version             = "unknown"
 	DefaultResourceSize = 100
@@ -90,7 +90,7 @@ func genResources(cmd *cobra.Command,
 	return resources
 }
 
-// run for each resource.
+// Run for each resource.
 func run(cmd *cobra.Command, _ []string) error {
 	rootDir := cmd.Flag("store").Value.String()
 	fs := initStore(rootDir)
@@ -117,9 +117,9 @@ func intVal(cmd *cobra.Command, flag string) int {
 	return i
 }
 
-// initialize the store.
+// Initialize the store.
 //
-// takes in a string for the path (root directory) and returns *filestore.Filestore.
+// Takes in a string for the path (root directory) and returns *filestore.Filestore.
 func initStore(rootDir string) *filestore.FileStore {
 	fs := filestore.NewFileStore(rootDir, store.DefaultFactory())
 	if e := fs.Initialize(); e != nil {

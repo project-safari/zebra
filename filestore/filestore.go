@@ -23,31 +23,31 @@ type FileStore struct {
 }
 
 // ErrTypeInvalid  happens if the resource type is invalid.
-// errors for invalid cases.
+// Errors for invalid cases.
 var ErrTypeInvalid = errors.New("resource type invalid")
 
 // ErrFolderInvalid happens if the folder is invalid.
-// errors for invalid cases.
+// Errors for invalid cases.
 var ErrFolderInvalid = errors.New("folder invalid")
 
 // ErrFileInvalid  happens if the file is invalid.
-// errors for invalid cases.
+// Errors for invalid cases.
 var ErrFileInvalid = errors.New("file invalid")
 
 // ErrTypeUnpack happens when the resource type has issues.
-// errors for type.
+// Errors for type.
 var ErrTypeUnpack = errors.New("unpack failed, resource type error")
 
 // ErrNoType happens when the resource has no type.
-// errors for type.
+// Errors for type.
 var ErrNoType = errors.New("resource has no type field")
 
 // ErrFactoryNil happens when the resource's factory is empty (nil).
-// errors for the factory.
+// Errors for the factory.
 var ErrFactoryNil = errors.New("resource factory is nil for filestore")
 
 // Return new FileStore pointer set with storageRoot root, lock, and map of type
-// name keys with corresponding constructor function values.
+// Name keys with corresponding constructor function values.
 func NewFileStore(root string, resourceFactory zebra.ResourceFactory) *FileStore {
 	return &FileStore{
 		storageRoot: root,
@@ -56,14 +56,14 @@ func NewFileStore(root string, resourceFactory zebra.ResourceFactory) *FileStore
 }
 
 // Initialize the store.
-// this function implements the actual initialization on a filestore.
-// returns error or nil if the initialization succeeds.
+// This function implements the actual initialization on a filestore.
+// Returns error or nil if the initialization succeeds.
 func (f *FileStore) Initialize() error {
 	return f.init()
 }
 
-// init implements the store initialization.
-// it uses the path to the filestore resource folder.
+// Init implements the store initialization.
+// It uses the path to the filestore resource folder.
 // This function must never be called without holding the write lock.
 func (f *FileStore) init() error {
 	location := f.filestoreResourcesPath()

@@ -13,26 +13,26 @@ import (
 func DefaultFactory() zebra.ResourceFactory {
 	factory := zebra.Factory()
 
-	// network resources
+	// Network resources.
 	factory.Add(network.SwitchType())
 	factory.Add(network.IPAddressPoolType())
 	factory.Add(network.VLANPoolType())
 
-	// dc resources
+	// DC resources.
 	factory.Add(dc.DataCenterType())
 	factory.Add(dc.LabType())
 	factory.Add(dc.RackType())
 
-	// compute resources
+	// Compute resources.
 	factory.Add(compute.ServerType())
 	factory.Add(compute.ESXType())
 	factory.Add(compute.VCenterType())
 	factory.Add(compute.VMType())
 
-	// zebra server resources
+	// Zebra server resources.
 	factory.Add(auth.UserType())
 
-	// zebra lease resource
+	// Zebra lease resource.
 	factory.Add(lease.Type())
 
 	// Need to add all the known types here

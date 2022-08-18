@@ -10,9 +10,9 @@ import (
 
 var version string
 
-// function for creating new zebra commands.
+// Function for creating new zebra commands.
 //
-// adds configuration, lease, and show commands to the root command.
+// Adds configuration, lease, and show commands to the root command.
 func New() *cobra.Command {
 	name := filepath.Base(os.Args[0])
 

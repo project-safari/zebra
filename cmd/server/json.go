@@ -17,7 +17,7 @@ import (
 // ErrEmptyBody returns an error if the request body is empty.
 var ErrEmptyBody = errors.New("request body is empty")
 
-// read JSON.
+// Read JSON.
 func readJSON(ctx context.Context, req *http.Request, data interface{}) error {
 	log := logr.FromContextOrDiscard(ctx)
 
@@ -37,7 +37,7 @@ func readJSON(ctx context.Context, req *http.Request, data interface{}) error {
 	return err
 }
 
-// write json.
+// Write json.
 func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
 	log := logr.FromContextOrDiscard(ctx)
 

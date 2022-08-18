@@ -12,9 +12,9 @@ import (
 
 const NumLabels = 10
 
-// function to generate radom label pairs to be used for generation of resources.
+// Function to generate radom label pairs to be used for generation of resources.
 //
-// returns zebra.Labels.
+// Returns zebra.Labels.
 func CreateLabels() zebra.Labels {
 	many := RandNum(NumLabels)
 	codes := make(zebra.Labels, many+1)

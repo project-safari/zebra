@@ -7,9 +7,9 @@ import (
 	"github.com/project-safari/zebra/compute"
 )
 
-// function to gererate VCenter.
+// Function to gererate VCenter.
 //
-// returns an array of type zebra.Resource.
+// Returns an array of type zebra.Resource.
 func GenerateVCenter(numVC int) []zebra.Resource {
 	centers := make([]zebra.Resource, 0, numVC)
 

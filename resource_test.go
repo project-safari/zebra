@@ -77,6 +77,7 @@ func TestNamedResource(t *testing.T) {
 	assert.True(res.GetLabels().HasKey("key"))
 }
 
+// Tests for credentials.
 func TestCredentials(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -129,12 +130,12 @@ func TestCredentials(t *testing.T) {
 	assert.NotNil(credentials.Validate(ctx))
 }
 
-// tests for validation of labels.
+// Tests for validation of labels.
 func TestLabelsValidation(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	// first test - with a correct default label
+	// First test - with a correct default label.
 	mapOne := map[string]string{
 		"system.group": "Americas",
 		"color":        "red",
@@ -143,7 +144,7 @@ func TestLabelsValidation(t *testing.T) {
 	resOne := zebra.NewBaseResource("", mapOne)
 	assert.Nil(resOne.Validate(context.Background()))
 
-	// second test - with an incorrect default label
+	// Second test - with an incorrect default label.
 	mapTwo := map[string]string{
 		"letter": "alpha",
 		"color":  "blue",
@@ -154,7 +155,7 @@ func TestLabelsValidation(t *testing.T) {
 	assert.Nil(resTwo.Validate(context.Background()))
 }
 
-// tests for creation of new credentials.
+// Tests for creation of new credentials.
 func TestNewCred(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -168,7 +169,7 @@ func TestNewCred(t *testing.T) {
 	assert.NotNil(creds)
 }
 
-// tests for getting the status of a resource and validating that resource.
+// Tests for getting the status of a resource and validating that resource.
 func TestGettingStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -5,9 +5,9 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-// function to generate IP pools.
+// Function to generate IP pools.
 //
-// returns an array of type zebra.Resource.
+// Returns an array of type zebra.Resource.
 func GenerateIPPool(numAddr int) []zebra.Resource {
 	IPpool := make([]zebra.Resource, 0, numAddr)
 

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test for initializiation of the filestore.
+// Test for initializiation of the filestore.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -22,7 +22,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(fs.Initialize())
 }
 
-// test init and adding resources to store.
+// Test init and adding resources to store.
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -55,7 +55,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(fs.Create(resource))
 }
 
-// test loading of filestore after init and adding of resources.
+// Test loading of filestore after init and adding of resources.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -87,7 +87,7 @@ func TestLoad(t *testing.T) {
 	assert.NotNil(resources)
 }
 
-// test delete from filestore.
+// Test delete from filestore.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -124,7 +124,7 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(fs.Delete(resource))
 }
 
-// test clearing the store.
+// Test clearing the store.
 func TestClearStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -168,7 +168,7 @@ func TestClearStore(t *testing.T) {
 	assert.True(os.IsNotExist(err))
 }
 
-// test wipe.
+// Test wipe.
 func TestWipeStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -186,7 +186,7 @@ func TestWipeStore(t *testing.T) {
 	assert.True(os.IsNotExist(err))
 }
 
-// test #1 for incorrect load.
+// Test #1 for incorrect load.
 func TestBadLoad1(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -214,7 +214,7 @@ func TestBadLoad1(t *testing.T) {
 	assert.NotNil(err)
 }
 
-// test #2 for incorrect load.
+// Test #2 for incorrect load.
 func TestBadLoad2(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -278,6 +278,7 @@ func TestBadLoad2(t *testing.T) {
 	assert.NotNil(err)
 }
 
+// Mock function to get a vlan resource to use in tests.
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
 		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
@@ -286,6 +287,7 @@ func getVLAN() *network.VLANPool {
 	}
 }
 
+// Mock function for path to be used in tests.
 func getPath(root string, res zebra.Resource) string {
 	resID := res.GetID()
 

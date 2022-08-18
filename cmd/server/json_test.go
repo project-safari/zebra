@@ -14,7 +14,7 @@ import (
 // errFake is an error to be used in unit tests for json read / write.
 var errFake = errors.New("fake error")
 
-// mock reader struct used in unit tests for json read / write.
+// Mock reader struct used in unit tests for json read / write.
 type fakeReader struct {
 	err bool
 }
@@ -27,7 +27,7 @@ func (f fakeReader) Read(b []byte) (int, error) {
 	return 0, io.EOF
 }
 
-// mock writer struct used in unit tests for json read / write.
+// Mock writer struct used in unit tests for json read / write.
 type fakeWriter struct {
 	status int
 	header http.Header
@@ -50,7 +50,7 @@ func (f *fakeWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-// tests for json reading.
+// Tests for json reading.
 func TestReadJSON(t *testing.T) {
 	t.Parallel()
 
@@ -72,7 +72,7 @@ func TestReadJSON(t *testing.T) {
 	assert.NotNil(readJSON(context.Background(), req, nil))
 }
 
-// tests for json writing.
+// Tests for json writing.
 func TestWriteJSON(t *testing.T) {
 	t.Parallel()
 

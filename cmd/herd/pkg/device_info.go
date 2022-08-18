@@ -1,8 +1,8 @@
 package pkg
 
-// creating some random ports.
+// Creating some random ports.
 //
-// returns a uint32 value that represents the port number.
+// Returns a uint32 value that represents the port number.
 func Ports() uint32 {
 	nums := []uint32{1, 2, 3, 4, 6, 8, 9, 16, 27, 32, 36, 54, 72, 64, 81, 128, 162, 216, 256, 512}
 	length := len(nums)
@@ -13,9 +13,9 @@ func Ports() uint32 {
 	return port
 }
 
-// function to create random sample model names.
+// Function to create random sample model names.
 //
-// returns a string containing a model name.
+// Returns a string containing a model name.
 func Models() string {
 	models := []string{
 		"model A", "modelB", "modelC", "modelD",
@@ -28,9 +28,9 @@ func Models() string {
 	return model
 }
 
-// create random serial codes.
+// Create random serial codes.
 //
-// returns a string containing a serial number.
+// Returns a string containing a serial number.
 func Serials() string {
 	nums := []string{
 		"00000", "00001", "00002", "00003",
@@ -47,10 +47,10 @@ func Serials() string {
 	return ser
 }
 
-// function to get some random rows.
+// Function to get some random rows.
 //
-// returns a string containing a random row code.
-// the code has the format of digit/digit/letter.
+// Returns a string containing a random row code.
+// The code has the format of digit/digit/letter.
 func Rows() string {
 	theRows := []string{
 		"00A", "00B", "00C", "00D", "00E",
@@ -63,10 +63,10 @@ func Rows() string {
 	return oneRow
 }
 
-// create random server IDs.
+// Create random server IDs.
 //
-// returns a string that contains a server ID.
-// each server ID which has a series of symbols, letters, and digits.
+// Returns a string that contains a server ID.
+// Each server ID which has a series of symbols, letters, and digits.
 func SelectServer() string {
 	nums := []string{
 		"@S00000A", "@S00001B", "@S00002C", "@S00003D",
@@ -83,10 +83,10 @@ func SelectServer() string {
 	return server
 }
 
-// create random ESX IDs.
+// Create random ESX IDs.
 //
-// returs a string with the ID of an ESX server.
-// each ID is a series of symbols, letters, digits.
+// Returs a string with the ID of an ESX server.
+// Each ID is a series of symbols, letters, digits.
 func SelectESX() string {
 	nums := []string{
 		"@E00000Z", "@E00001Y", "@E00002X", "@E00003W",
@@ -103,10 +103,10 @@ func SelectESX() string {
 	return esx
 }
 
-// create random serial.
+// Create random serial.
 //
-// returns a string that represents the vcenter ID.
-// each vcenter ID is a series of letters and numbers.
+// Returns a string that represents the vcenter ID.
+// Each vcenter ID is a series of letters and numbers.
 func SelectVcenter() string {
 	nums := []string{
 		"V00000A", "V00001B", "V00002A", "V00003B",

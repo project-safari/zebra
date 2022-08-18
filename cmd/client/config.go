@@ -25,7 +25,7 @@ func NewConfigure() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	// add config command.
+	// Add config command.
 	addConfigCommands(configCmd)
 
 	configCmd.AddCommand(&cobra.Command{
@@ -47,7 +47,7 @@ func NewConfigure() *cobra.Command {
 	return configCmd
 }
 
-// configuration commands.
+// Configuration commands.
 func addConfigCommands(configCmd *cobra.Command) {
 	configCmd.AddCommand(&cobra.Command{
 		Use:   "init",
@@ -89,7 +89,7 @@ func addConfigCommands(configCmd *cobra.Command) {
 	})
 }
 
-// default configuration for duration.
+// Default configuration for duration.
 type ConfigDefaults struct {
 	Duration int `yaml:"duration"`
 }
@@ -103,7 +103,7 @@ type Config struct {
 	Defaults      ConfigDefaults    `yaml:"defaults,omitempty"`
 }
 
-// function to create new configuration.
+// Function to create new configuration.
 func NewConfig() *Config {
 	return &Config{
 		User:          os.Getenv("USER"),
@@ -117,7 +117,7 @@ func NewConfig() *Config {
 	}
 }
 
-// function to load config file, returns the config and a(n) (potential) error.
+// Function to load config file, returns the config and a(n) (potential) error.
 func Load(cfgFile string) (*Config, error) {
 	data, e := ioutil.ReadFile(cfgFile)
 	if e != nil {
@@ -130,7 +130,7 @@ func Load(cfgFile string) (*Config, error) {
 	return c, e
 }
 
-// function to save the config to a file, returns the file with the config.
+// Function to save the config to a file, returns the file with the config.
 func (cfg *Config) Save(cfgFile string) error {
 	if cfg.Key == nil {
 		k, e := auth.Generate()
@@ -149,14 +149,14 @@ func (cfg *Config) Save(cfgFile string) error {
 	return ioutil.WriteFile(cfgFile, data, ReadOnly)
 }
 
-// function to show the config.
+// Function to show the config.
 func showConfig(cmd *cobra.Command, args []string) error {
 	cfg := cmd.Flag("config").Value.String()
 
 	return show(cfg)
 }
 
-// function to show the config file.
+// Function to show the config file.
 func show(cfg string) error {
 	b, e := ioutil.ReadFile(cfg)
 	if e != nil {
@@ -169,7 +169,7 @@ func show(cfg string) error {
 	return nil
 }
 
-// initialize configuration.
+// Initialize configuration.
 func initConfig(cmd *cobra.Command, args []string) error {
 	cfg := cmd.Flag("config").Value.String()
 	server := args[0]
@@ -183,7 +183,7 @@ func initConfig(cmd *cobra.Command, args []string) error {
 	return show(cfg)
 }
 
-// configuration for users.
+// Configuration for users.
 func configUser(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 	user := args[0]
@@ -201,7 +201,7 @@ func configUser(cmd *cobra.Command, args []string) error {
 	return show(cfgFile)
 }
 
-// configuration with certificate authority for files that will help with keys.
+// Configuration with certificate authority for files that will help with keys.
 func configCACert(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 	caCert := args[0]
@@ -219,7 +219,7 @@ func configCACert(cmd *cobra.Command, args []string) error {
 	return show(cfgFile)
 }
 
-// configuration for email.
+// Configuration for email.
 func configEmail(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 	email := args[0]
@@ -237,7 +237,7 @@ func configEmail(cmd *cobra.Command, args []string) error {
 	return show(cfgFile)
 }
 
-// configuration for server.
+// Configuration for server.
 func configServer(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 	server := args[0]
@@ -255,8 +255,8 @@ func configServer(cmd *cobra.Command, args []string) error {
 	return show(cfgFile)
 }
 
-// configuration for default values (duration isnthe only default).
-// ensures that the duration is no morethan 4 hours.
+// Configuration for default values (duration isnthe only default).
+// It ensures that the duration is no morethan 4 hours.
 func configDefaults(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 
@@ -282,7 +282,7 @@ func configDefaults(cmd *cobra.Command, args []string) error {
 	return show(cfgFile)
 }
 
-// function to show local public key as string.
+// Function to show local public key as string.
 func showLocalKey(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 	cfg, e := Load(cfgFile)

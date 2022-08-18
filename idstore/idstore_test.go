@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test to create new resource map and use it in creation of a new idstore.
+// Test to create new resource map and use it in creation of a new idstore.
 func TestNewIDStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -18,7 +18,7 @@ func TestNewIDStore(t *testing.T) {
 	assert.NotNil(idstore.NewIDStore(resMap))
 }
 
-// test for init of idstore.
+// Test for init of idstore.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -31,7 +31,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(rs.Initialize())
 }
 
-// test for wiping of idstore.
+// Test for wiping of idstore.
 func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -45,7 +45,7 @@ func TestWipe(t *testing.T) {
 	assert.Nil(rs.Wipe())
 }
 
-// test for clearing the idstore.
+// Test for clearing the idstore.
 func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -72,7 +72,7 @@ func TestClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
-// test of loading for the idstore.
+// Test of loading for the idstore.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -136,13 +136,13 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
-	// Create new resource, should pass
+	// Create new resource, should pass.
 	assert.Nil(rs.Create(vlan1))
 
-	// Delete resource, should pass
+	// Delete resource, should pass.
 	assert.Nil(rs.Delete(vlan1))
 
-	// Try to delete non-existent resource, should pass anyways
+	// Try to delete non-existent resource, should pass anyways.
 	assert.Nil(rs.Delete(vlan2))
 }
 
@@ -177,6 +177,7 @@ func TestQuery(t *testing.T) {
 	assert.Empty(resources.Resources)
 }
 
+// Mock function for a vlan to be used in tests.
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
 		BaseResource: *zebra.NewBaseResource("VLANPool", nil),

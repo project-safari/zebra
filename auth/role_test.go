@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test for keys.
+// Test for keys.
 func TestKey(t *testing.T) {
 	t.Parallel()
 
@@ -31,7 +31,7 @@ func TestKey(t *testing.T) {
 	assert.False(k.Match("/b/c/d"))
 }
 
-// tests for crud operations on priv.
+// Tests for crud operations on priv.
 func TestPriv(t *testing.T) { //nolint:funlen
 	t.Parallel()
 

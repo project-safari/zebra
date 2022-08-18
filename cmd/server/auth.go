@@ -25,8 +25,8 @@ func authAdapter() web.Adapter {
 	}
 }
 
-// function to provide user info.
-// returns 2 strings: the user and his/her token.
+// Function to provide user info.
+// Returns 2 strings: the user and his/her token.
 func creds(r *http.Request) (string, string) {
 	user := r.Header.Get("Zebra-Auth-User")
 	token := r.Header.Get("Zebra-Auth-Token")
@@ -35,9 +35,9 @@ func creds(r *http.Request) (string, string) {
 	return user, string(bt)
 }
 
-// function to create claims and set them into a request.
+// Function to create claims and set them into a request.
 //
-// this function uses valid context (with resources in context), user, and token.
+// This function uses valid context (with resources in context), user, and token.
 func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 	ctx := req.Context()
 	log := logr.FromContextOrDiscard(ctx)
@@ -108,7 +108,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 		return nil
 	}
 
-	// Parse the claims
+	// Parse the claims.
 	jwtClaims, err := auth.FromJWT(jwtCookie.Value, authKey)
 	if err != nil {
 		log.Error(err, "bad jwt token")
@@ -117,7 +117,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 		return nil
 	}
 
-	// Make sure the jwt is still valid
+	// Make sure the jwt is still valid.
 	if err := jwtClaims.Valid(); err != nil {
 		log.Error(err, "invalid jwt token")
 		res.WriteHeader(http.StatusUnauthorized)
@@ -125,7 +125,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 		return nil
 	}
 
-	// Make sure the user still exists
+	// Make sure the user still exists.
 	user := findUser(api.Store, jwtClaims.Email)
 	if user == nil {
 		log.Error(err, "user not found", "user", jwtClaims.Subject)
@@ -134,7 +134,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 		return nil
 	}
 
-	// Set the claims into request
+	// Set the claims into request.
 	ctx = context.WithValue(ctx, ClaimsCtxKey, jwtClaims)
 
 	return req.Clone(ctx)

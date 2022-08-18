@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-// potential errors concerning resource keys and priviledges.
+// Potential errors concerning resource keys and priviledges.
 var (
 	ErrResourceKeyEmpty  = errors.New("resource key is empty")
 	ErrInvalidPrivileges = errors.New("atleast one or atmost four privileges must be set")
 )
 
-// possible crud priviledges.
+// Possible crud priviledges.
 type Priv struct {
 	c bool
 	r bool
@@ -22,6 +22,7 @@ type Priv struct {
 	k *ResourceKey
 }
 
+// Create / generate a new privilege.
 func NewPriv(k string, c bool, r bool, u bool, d bool) (*Priv, error) {
 	rk, e := NewKey(k)
 	if e != nil {
@@ -110,27 +111,27 @@ func (p *Priv) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// crud operation function for priv: read, returns boolean.
+// Crud operation function for priv: read, returns boolean.
 func (p *Priv) Read(key string) bool {
 	return p.k.Match(key) && p.r
 }
 
-// operation function for priv: write, returns boolean.
+// Operation function for priv: write, returns boolean.
 func (p *Priv) Write(key string) bool {
 	return p.k.Match(key) && p.c && p.u && p.d
 }
 
-// crud operation function for priv: update, returns boolean.
+// Crud operation function for priv: update, returns boolean.
 func (p *Priv) Update(key string) bool {
 	return p.k.Match(key) && p.u
 }
 
-// crud operation function for priv: update, returns boolean.
+// Crud operation function for priv: update, returns boolean.
 func (p *Priv) Create(key string) bool {
 	return p.k.Match(key) && p.c
 }
 
-// crud operation function for priv: delete, returns boolean.
+// Crud operation function for priv: delete, returns boolean.
 func (p *Priv) Delete(key string) bool {
 	return p.k.Match(key) && p.d
 }
@@ -171,7 +172,7 @@ func (r *Role) Read(key string) bool {
 	return false
 }
 
-// operation function for role: write, returns boolean.
+// Operation function for role: write, returns boolean.
 func (r *Role) Write(key string) bool {
 	for _, priv := range r.Privileges {
 		if priv.Write(key) {
@@ -182,7 +183,7 @@ func (r *Role) Write(key string) bool {
 	return false
 }
 
-// crud operation function for role: create, returns boolean.
+// Crud operation function for role: create, returns boolean.
 func (r *Role) Create(key string) bool {
 	for _, priv := range r.Privileges {
 		if priv.Create(key) {
@@ -193,7 +194,7 @@ func (r *Role) Create(key string) bool {
 	return false
 }
 
-// crud operation function for role: update, returns boolean.
+// Crud operation function for role: update, returns boolean.
 func (r *Role) Update(key string) bool {
 	for _, priv := range r.Privileges {
 		if priv.Update(key) {
@@ -204,7 +205,7 @@ func (r *Role) Update(key string) bool {
 	return false
 }
 
-// crud operation function for role: delete, returns boolean.
+// Crud operation function for role: delete, returns boolean.
 func (r *Role) Delete(key string) bool {
 	for _, priv := range r.Privileges {
 		if priv.Delete(key) {

@@ -67,7 +67,7 @@ func TestSetup(t *testing.T) {
 	ctx := setupLogger(cfgStore)
 	assert.NotNil(ctx)
 
-	// No store
+	// No store.
 	assert.Panics(func() {
 		setupAdapter(ctx, cfgStore)
 	})
@@ -76,7 +76,7 @@ func TestSetup(t *testing.T) {
 	e := cfgStore.LoadFromStr(ctx, `{"store": {"rootDir": "test_setup"}}`)
 	assert.Nil(e)
 
-	// No authKey
+	// No authKey.
 	assert.Panics(func() {
 		setupAdapter(ctx, cfgStore)
 	})

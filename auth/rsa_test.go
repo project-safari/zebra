@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// tests for new rsa keys.
+// Tests for new rsa keys.
 func TestNewRsaIdentity(t *testing.T) {
 	t.Parallel()
 
@@ -54,7 +54,7 @@ func TestNewRsaIdentity(t *testing.T) {
 	assert.Nil(x.UnmarshalText(b))
 }
 
-// tests for potential errors.
+// Tests for potential errors.
 func TestUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -107,7 +107,7 @@ func TestUnmarshalErrors(t *testing.T) {
 	assert.NotNil(x.UnmarshalText(badType))
 }
 
-// tests for encryption/decryption.
+// Tests for encryption/decryption.
 func TestEncrypt(t *testing.T) {
 	t.Parallel()
 
@@ -222,7 +222,7 @@ func TestEncryptDecrypt(t *testing.T) {
 
 	ingrid := auth.NewRsaIdentity(priv)
 
-	// a message from Henk to Ingrid
+	// This is a message from Henk to Ingrid
 	msg := []byte("Die uitkeringstrekkers pikken al onze banen in.")
 	// To encrypt the message that needs to be sent it to Ingrid, Ingrid's public key is used.
 	encryptedMessage, err := henk.Encrypt(msg, ingrid.PublicKey())
@@ -247,7 +247,7 @@ func TestEncryptDecryptMyself(t *testing.T) {
 
 	henk := auth.NewRsaIdentity(priv)
 
-	// a message from Henk
+	// This is a message from Henk
 	msg := []byte("Subsidized, dat is toch iets dat je krijgt als je eigenlijk niet goed genoeg bent?")
 
 	// To encrypt the message that needs to be sent it to us, our public key is used.
@@ -261,7 +261,7 @@ func TestEncryptDecryptMyself(t *testing.T) {
 	assert.True(bytes.Equal(plainTextMessage, msg))
 }
 
-// tests for key signatures.
+// Tests for key signatures.
 func TestSignVerify(t *testing.T) {
 	t.Parallel()
 
@@ -273,15 +273,15 @@ func TestSignVerify(t *testing.T) {
 	henk := auth.NewRsaIdentity(priv)
 
 	// A public message from Henk.
-	// note that the message is a byte array, not just a string.
+	// Note that the message is a byte array, not just a string.
 	msg := []byte("Wilders doet tenminste iets tegen de politiek.")
 
 	// Henk signs the message with his private key. This will show the recipient
 	// proof that this message is indeed from Henk
 	sig, _ := henk.Sign(msg)
 
-	// now, if the message msg is public, anyone can read it.
-	// the signature sig however, proves this message is from Henk.
+	// Now, if the message msg is public, anyone can read it.
+	// The signature sig however, proves this message is from Henk.
 	priv, err = rsa.GenerateKey(rand.Reader, 2048)
 	assert.Nil(err)
 
@@ -298,7 +298,7 @@ func TestSignVerify(t *testing.T) {
 	err = hans.Verify(msg, sig, henk.PublicKey())
 	assert.Nil(err)
 
-	// test to see if the signature verification can be broken,
+	// Test to see if the signature verification can be broken,
 	// (1) changing the message.
 	err = hans.Verify([]byte("Wilders is een opruier"), sig, henk.PublicKey())
 	assert.NotNil(err)
@@ -315,7 +315,7 @@ func TestSignVerify(t *testing.T) {
 	assert.Equal(auth.ErrNoPrivateKey, err)
 }
 
-// tests for loading of files for keys / identities.
+// Tests for loading of files for keys / identities.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 

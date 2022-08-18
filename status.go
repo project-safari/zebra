@@ -19,14 +19,14 @@ type Status struct {
 	CreatedTime time.Time `json:"createdTime"`
 }
 
-// set types for Fault, Lease, State.
+// Set types for Fault, Lease, State.
 type (
 	Fault uint8
 	Lease uint8
 	State uint8
 )
 
-// default values to be used for status.
+// Default values to be used for status.
 const (
 	None Fault = iota
 	Minor
@@ -34,12 +34,14 @@ const (
 	Critical
 )
 
+// Default values to be used for lease.
 const (
 	Leased Lease = iota
 	Free
 	Setup
 )
 
+// Default values to be used for state.
 const (
 	Active State = iota
 	Inactive
@@ -47,7 +49,7 @@ const (
 
 const Unknown = "unknown"
 
-// errors that can occur in a lease or resource state.
+// Errors that can occur in a lease or resource state.
 var (
 	ErrFault       = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
 	ErrLease       = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
@@ -88,7 +90,7 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// function that deals with lease status.
+// Function that deals with lease status.
 func (l Lease) String() string {
 	strs := map[Lease]string{Leased: "leased", Free: "free", Setup: "setup"}
 	lstr, ok := strs[l]
@@ -121,7 +123,7 @@ func (l *Lease) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// function that deals with state status.
+// Function that deals with state status.
 func (s State) String() string {
 	strs := map[State]string{Active: "active", Inactive: "inactive"}
 	sstr, ok := strs[s]

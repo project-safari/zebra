@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 )
 
-// function that provides random selection from lists.
+// Function that provides random selection from lists.
 //
-// takes in a string array to select from.
+// Takes in a string array to select from.
 //
-// returns a randomly selscted string from the array.
+// Returns a randomly selscted string from the array.
 func RandData(res []string) string {
 	length := len(res)
 
@@ -20,19 +20,19 @@ func RandData(res []string) string {
 	return typ
 }
 
-// function for random numbers.
+// Function for random numbers.
 //
-// takes in a integer that represents the maximum number to be genertaed.
+// Takes in a integer that represents the maximum number to be genertaed.
 //
-// returns a random uint32 pseudo-random number.
+// Returns a random uint32 pseudo-random number.
 func RandNum(length int) uint32 {
 	four := 4
 
-	// for safe, pseudo-random numbers.
+	// For safe, pseudo-random numbers.
 	b := make([]byte, four)
 	n, err := rand.Read(b)
 
-	// check panic.
+	// Check panic.
 	if n != four {
 		panic(n)
 	} else if err != nil {

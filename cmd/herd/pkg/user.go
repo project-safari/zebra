@@ -5,9 +5,9 @@ import (
 	"github.com/project-safari/zebra/auth"
 )
 
-// generate some user info.
+// Generate some user info.
 //
-// returns an array of type zebra.Resource.
+// Returns an array of type zebra.Resource.
 func GenerateUser(numUsr int) []zebra.Resource {
 	users := make([]zebra.Resource, 0, numUsr)
 

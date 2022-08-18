@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// tests for a default status.
+// Tests for a default status.
 func TestDefaultStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -22,7 +22,7 @@ func TestDefaultStatus(t *testing.T) {
 	assert.Equal(zebra.Inactive, s.State)
 }
 
-// tests for validation of status.
+// Tests for validation of status.
 func TestValidateStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test for a new TypeStore.
+// Test for a new TypeStore.
 func TestNewTestStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -18,7 +18,7 @@ func TestNewTestStore(t *testing.T) {
 	assert.NotNil(typestore.NewTypeStore(resMap))
 }
 
-// test for init of a TypeStore.
+// Test for init of a TypeStore.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -30,7 +30,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(ts.Initialize())
 }
 
-// test for wiping of a TypeStore.
+// Test for wiping of a TypeStore.
 func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -44,7 +44,7 @@ func TestWipe(t *testing.T) {
 	assert.Nil(ts.Wipe())
 }
 
-// test for clearing a TypeStore.
+// Test for clearing a TypeStore.
 func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -68,7 +68,7 @@ func TestClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
-// test for loading.
+// Test for loading.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -88,7 +88,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(1, len(resources.Resources["IPAddressPool"].Resources))
 }
 
-// test for creating a new TypeStore.
+// Test for creating a new TypeStore.
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -108,7 +108,7 @@ func TestCreate(t *testing.T) {
 	assert.NotNil(ts)
 	assert.Nil(ts.Initialize())
 
-	// Create new resource, should pass
+	// Create new resource, should pass.
 	assert.Nil(ts.Create(vlan1))
 
 	resources, err := ts.Load()
@@ -116,7 +116,7 @@ func TestCreate(t *testing.T) {
 	assert.Equal(1, len(resources.Resources))
 	assert.Equal(1, len(resources.Resources["VLANPool"].Resources))
 
-	// Create duplicate resource, should update
+	// Create duplicate resource, should update.
 	assert.Nil(ts.Create(vlan3))
 
 	resources, err = ts.Load()
@@ -125,7 +125,7 @@ func TestCreate(t *testing.T) {
 	labels := resources.Resources["VLANPool"].Resources[0].GetLabels()
 	assert.True(labels.MatchEqual("test", "true"))
 
-	// Create another new resource, should pass
+	// Create another new resource, should pass.
 	assert.Nil(ts.Create(vlan2))
 
 	resources, err = ts.Load()
@@ -133,7 +133,7 @@ func TestCreate(t *testing.T) {
 	assert.Equal(2, len(resources.Resources["VLANPool"].Resources))
 }
 
-// test for deleting a TypeStore.
+// Test for deleting a TypeStore.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -147,17 +147,17 @@ func TestDelete(t *testing.T) {
 	assert.NotNil(ts)
 	assert.Nil(ts.Initialize())
 
-	// Create new resource, should pass
+	// Create new resource, should pass.
 	assert.Nil(ts.Create(vlan1))
 
-	// Delete resource, should pass
+	// Delete resource, should pass.
 	assert.Nil(ts.Delete(vlan1))
 
-	// Try to delete non-existent resource, should pass anyways
+	// Try to delete non-existent resource, should pass anyways.
 	assert.Nil(ts.Delete(vlan2))
 }
 
-// test for querring TypeStore.
+// Test for querring TypeStore.
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -183,7 +183,7 @@ func TestQuery(t *testing.T) {
 	assert.Equal(1, len(resources.Resources["IPAddressPool"].Resources))
 }
 
-// mock function to create a VLANPool to use in tests.
+// Mock function to create a VLANPool to use in tests.
 func getVLAN() *network.VLANPool {
 	return &network.VLANPool{
 		BaseResource: *zebra.NewBaseResource("VLANPool", nil),

@@ -1,6 +1,6 @@
 package pkg
 
-// function to create user roles.
+// Function to create user roles.
 func User() string {
 	nameList := []string{
 		"user1",
@@ -23,7 +23,7 @@ func User() string {
 	return username
 }
 
-// create names.
+// Create names.
 func Name() string {
 	nameList := []string{
 		"Marie", "Jack", "Clare",
@@ -37,13 +37,14 @@ func Name() string {
 	return theName
 }
 
-// create some passwords.
+// Create some passwords.
 func Password(user string) string {
 	pwd := user + "123"
 
 	return pwd
 }
 
+// Create user specific email addresses.
 func Email(user string) string {
 	return user + "@cisco.com"
 }

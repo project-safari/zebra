@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// tests for generation of system.group labels.
+// Tests for generation of system.group labels.
 //
-// the tested function generates system.group labels if the given resource does not have any such labels.
+// The tested function generates system.group labels if the given resource does not have any such labels.
 func TestGroupLabel(t *testing.T) {
 	t.Parallel()
 
@@ -18,10 +18,10 @@ func TestGroupLabel(t *testing.T) {
 
 	labels := pkg.CreateLabels()
 
-	// test for generating group label based on address.
+	// Test for generating group label based on address.
 	assert.NotNil(pkg.GroupLabels(labels, pkg.Addresses()))
 
-	// test to see if group is created for given address.
+	// Test to see if group is created for given address.
 	groupTest := pkg.GroupLabels(labels, "Mexico")
 	assert.True(groupTest.MatchEqual("system.group", "Mexico"))
 }

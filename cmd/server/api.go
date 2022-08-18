@@ -11,7 +11,7 @@ import (
 	"github.com/project-safari/zebra/store"
 )
 
-// resource api is a struct that contains a fzebra.ResourceFactory and a zebra.Store.
+// Resource api is a struct that contains a fzebra.ResourceFactory and a zebra.Store.
 type ResourceAPI struct {
 	factory zebra.ResourceFactory
 	Store   zebra.Store
@@ -100,8 +100,8 @@ func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
 	return nil
 }
 
-// function to handle querries.
-// this function helps log the info and write the response in a json file, or return if an error occurs.
+// Function to handle querries.
+// This function helps log the info and write the response in a json file, or return if an error occurs.
 func handleQuery() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()

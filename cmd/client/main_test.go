@@ -10,7 +10,7 @@ import (
 
 var argLock sync.Mutex //nolint:gochecknoglobals
 
-// testing execution of main.
+// Testing execution of main.
 func TestMain(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

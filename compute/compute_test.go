@@ -14,7 +14,7 @@ import (
 
 const Creds string = "Credentials"
 
-// test server data.
+// Test server data.
 func TestServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -60,7 +60,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(server.Validate(ctx))
 }
 
-// test esx data.
+// Test esx data.
 func TestESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -97,7 +97,7 @@ func TestESX(t *testing.T) {
 	assert.NotNil(esx.Validate(ctx))
 }
 
-// test vcenter data.
+// Test vcenter data.
 func TestVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -131,7 +131,7 @@ func TestVCenter(t *testing.T) {
 	assert.NotNil(vcenter.Validate(ctx))
 }
 
-// test vm data.
+// Test vm data.
 func TestVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -174,7 +174,7 @@ func TestVM(t *testing.T) {
 	assert.NotNil(machine.Validate(ctx))
 }
 
-// test for vcenter generator.
+// Test for vcenter generator.
 func TestNewVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -188,7 +188,7 @@ func TestNewVCenter(t *testing.T) {
 	assert.NotNil(vc)
 }
 
-// test fir server generation.
+// Test for server generation.
 func TestNewServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -203,7 +203,7 @@ func TestNewServer(t *testing.T) {
 	assert.NotNil(srv)
 }
 
-// test for esx generation.
+// Test for esx generation.
 func TestNewESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -217,7 +217,7 @@ func TestNewESX(t *testing.T) {
 	assert.NotNil(esx)
 }
 
-// test for vm generation.
+// Test for vm generation.
 func TestNewVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

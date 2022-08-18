@@ -18,12 +18,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// constant values for keys to be used in tests.
+// Constant values for keys to be used in tests.
 const (
 	authKey   = "abracadabra"
 	jiniWords = "youGetThreewishes!"
 )
 
+// Test for finding a given user in the store.
 func TestFindUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -43,6 +44,7 @@ func TestFindUser(t *testing.T) {
 	assert.NotNil(findUser(store, "email@domain"))
 }
 
+// Mock function to make a user to be used in tests.
 func makeUser(assert *assert.Assertions) *auth.User {
 	ctx := context.Background()
 	all, e := auth.NewPriv("", true, true, true, true)
@@ -70,6 +72,7 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	return jini
 }
 
+// Mock function to make a user to be used in tests.
 func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zebra.Store {
 	factory := store.DefaultFactory()
 	assert.NotNil(factory)
@@ -86,6 +89,7 @@ func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zeb
 	return store
 }
 
+// Mock function to make a login request to be used in tests.
 func makeLoginRequest(assert *assert.Assertions, user string, password string,
 	email string, resources *ResourceAPI,
 ) *http.Request {
@@ -101,6 +105,7 @@ func makeLoginRequest(assert *assert.Assertions, user string, password string,
 	return req
 }
 
+// Test for an incorrect user (failed login).
 func TestBadUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -147,6 +152,7 @@ func TestBadLogin(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
+// Test for login.
 func TestLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

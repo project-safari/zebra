@@ -5,9 +5,9 @@ import (
 	"github.com/project-safari/zebra/network"
 )
 
-// function to generate switch resources.
+// Function to generate switch resources.
 //
-// returns an array of type zebra.Resource.
+// Returns an array of type zebra.Resource.
 func GenerateSwitch(numSwitch int) []zebra.Resource {
 	port := Ports()
 

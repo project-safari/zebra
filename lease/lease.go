@@ -29,8 +29,8 @@ type ResourceReq struct {
 	Resources []zebra.Resource `json:"resources,omitempty"`
 }
 
-// lease struct to use for leasing resources.
-// contains a BaseResources, a lock, a duration, a request, and an activation time.
+// Lease struct to use for leasing resources.
+// Contains a BaseResources, a lock, a duration, a request, and an activation time.
 type Lease struct {
 	zebra.BaseResource
 	lock           sync.RWMutex
@@ -39,9 +39,9 @@ type Lease struct {
 	ActivationTime time.Time      `json:"activationTime"`
 }
 
-// possible errors that occur when lease fails.
+// Possible errors that occur when lease fails.
 //
-// a lease can fail if the request is not fully satisfied or if the lease is not valid.
+// A lease can fail if the request is not fully satisfied or if the lease is not valid.
 var (
 	ErrLeaseActivate = errors.New("tried to activate lease but request has not been satisfied entirely")
 	ErrLeaseValid    = errors.New("lease is not valid")
@@ -110,8 +110,8 @@ func (l *Lease) Deactivate() {
 	l.Status.State = zebra.Inactive
 }
 
-// check if lease is satisfied.
-// return bool.
+// Check if lease is satisfied.
+// Return bool.
 func (l *Lease) IsSatisfied() bool {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
@@ -125,8 +125,8 @@ func (l *Lease) IsSatisfied() bool {
 	return true
 }
 
-// check if lease is valid.
-// return bool.
+// Check if lease is valid.
+// Return bool.
 func (l *Lease) IsValid() bool {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
@@ -135,8 +135,8 @@ func (l *Lease) IsValid() bool {
 	return time.Now().Before(l.ActivationTime.Add(l.Duration)) && l.Status.State == zebra.Active
 }
 
-// check if lease is expired.
-// return bool.
+// Check if lease is expired.
+// Return bool.
 func (l *Lease) IsExpired() bool {
 	l.lock.RLock()
 	defer l.lock.RUnlock()

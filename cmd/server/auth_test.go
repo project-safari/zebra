@@ -46,7 +46,7 @@ func TestAuthAdapter(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
-// tests for the rsa key.
+// Tests for the rsa key.
 func TestRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -127,7 +127,7 @@ func TestJWT(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
-// tests for case with an incorrect rsa key.
+// Tests for case with an incorrect rsa key.
 func TestBadRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -218,7 +218,7 @@ func TestBadJWT(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 
-	// bad token
+	// Bad token
 	req, err = http.NewRequestWithContext(ctx, "GET", "/", nil)
 	req.AddCookie(makeCookie("badjwt"))
 	assert.Nil(err)

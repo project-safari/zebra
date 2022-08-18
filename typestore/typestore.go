@@ -4,14 +4,14 @@ import (
 	"github.com/project-safari/zebra"
 )
 
-// the TypeStore struct used to create resource maps.
-// contains a pointer to a zebra.ResourceMap.
+// The TypeStore struct used to create resource maps.
+// It contains a pointer to a zebra.ResourceMap.
 type TypeStore struct {
 	resources *zebra.ResourceMap
 }
 
 // Return new type store pointer given resource map.
-// uses the TypeStore struct.
+// It uses the TypeStore struct.
 func NewTypeStore(resources *zebra.ResourceMap) *TypeStore {
 	typestore := &TypeStore{
 		resources: func() *zebra.ResourceMap {
@@ -25,19 +25,19 @@ func NewTypeStore(resources *zebra.ResourceMap) *TypeStore {
 	return typestore
 }
 
-// operation function on TypeStore: initialization.
+// Operation function on TypeStore: initialization.
 func (ts *TypeStore) Initialize() error {
 	return nil
 }
 
-// operation function on TypeStore: wiping.
+// Operation function on TypeStore: wiping.
 func (ts *TypeStore) Wipe() error {
 	ts.resources = nil
 
 	return nil
 }
 
-// operation function on TypeStore: clear.
+// Operation function on TypeStore: clear.
 func (ts *TypeStore) Clear() error {
 	ts.resources = zebra.NewResourceMap(ts.resources.GetFactory())
 

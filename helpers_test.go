@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test for generation of a base resource.
+// Test for generation of a base resource.
 func TestNewBaseResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -27,7 +27,7 @@ func TestNewBaseResource(t *testing.T) {
 	assert.True(br.Labels.MatchEqual("owner", "shravya"))
 }
 
-// test to check if val is in string list.
+// Test to check if val is in string list.
 func TestIsIn(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
