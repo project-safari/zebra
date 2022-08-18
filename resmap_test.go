@@ -5,6 +5,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,7 +62,7 @@ func TestListMarshalUnmarshal(t *testing.T) {
 			ID:     "0100001",
 			Type:   "invalid",
 			Labels: nil,
-			Status: zebra.DefaultStatus(),
+			Status: status.DefaultStatus(),
 		},
 		RangeStart: 0,
 		RangeEnd:   10,
@@ -207,7 +208,7 @@ func TestMapMarshalUnMarshal(t *testing.T) {
 			ID:     "0100001",
 			Type:   "VLANPool",
 			Labels: nil,
-			Status: zebra.DefaultStatus(),
+			Status: status.DefaultStatus(),
 		},
 		RangeStart: 0,
 		RangeEnd:   10,

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"unicode"
+
+	"github.com/project-safari/zebra/status"
 )
 
 // Resource interface is implemented by all resources and provides resource
@@ -13,7 +15,7 @@ type Resource interface {
 	Validate(ctx context.Context) error
 
 	// get the status for resources to see if active or not.
-	GetStatus() *Status
+	GetStatus() *status.Status
 
 	GetID() string
 	GetType() string
@@ -40,10 +42,10 @@ var (
 // BaseResource must be embedded in all resource structs, ensuring each resource is
 // assigned an ID string.
 type BaseResource struct {
-	ID     string  `json:"id"`
-	Type   string  `json:"type"`
-	Labels Labels  `json:"labels,omitempty"`
-	Status *Status `json:"status,omitempty"`
+	ID     string         `json:"id"`
+	Type   string         `json:"type"`
+	Labels Labels         `json:"labels,omitempty"`
+	Status *status.Status `json:"status,omitempty"`
 }
 
 // Validate returns an error if the given BaseResource object has incorrect values.
@@ -79,7 +81,7 @@ func (r *BaseResource) GetName() string {
 }
 
 // Return Status of BaseResource r.
-func (r *BaseResource) GetStatus() *Status {
+func (r *BaseResource) GetStatus() *status.Status {
 	return r.Status
 }
 

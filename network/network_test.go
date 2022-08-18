@@ -1,4 +1,4 @@
-/// Package network_test tests structs and functions pertaining to network resources
+// / Package network_test tests structs and functions pertaining to network resources
 // outlined in the network package.
 package network_test
 
@@ -10,6 +10,7 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +49,7 @@ func TestSwitch(t *testing.T) {
 				ID:     "blahblah",
 				Type:   "Credentials",
 				Labels: nil,
-				Status: zebra.DefaultStatus(),
+				Status: status.DefaultStatus(),
 			},
 			Name: "blah",
 		},

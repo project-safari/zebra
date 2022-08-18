@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/status"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,10 +26,10 @@ func TestActivate(t *testing.T) {
 	l := getEmptyLease()
 	assert.NotNil(l)
 
-	assert.Equal(zebra.Inactive, l.Status.State)
+	assert.Equal(status.Inactive, l.Status.State())
 
 	assert.Nil(l.Activate())
-	assert.Equal(zebra.Active, l.Status.State)
+	assert.Equal(status.Active, l.Status.State())
 	assert.False(l.ActivationTime.IsZero())
 }
 
@@ -40,14 +40,14 @@ func TestDeactivate(t *testing.T) {
 	l := getEmptyLease()
 	assert.NotNil(l)
 
-	assert.Equal(zebra.Inactive, l.Status.State)
+	assert.Equal(status.Inactive, l.Status.State())
 
 	assert.Nil(l.Activate())
-	assert.Equal(zebra.Active, l.Status.State)
+	assert.Equal(status.Active, l.Status.State())
 	assert.False(l.ActivationTime.IsZero())
 
 	l.Deactivate()
-	assert.Equal(zebra.Inactive, l.Status.State)
+	assert.Equal(status.Inactive, l.Status.State())
 }
 
 func TestBadResources(t *testing.T) {
@@ -120,7 +120,7 @@ func TestOwner(t *testing.T) {
 	assert := assert.New(t)
 
 	l := getEmptyLease()
-	assert.Equal("shravya@cisco.com", l.Owner())
+	assert.Equal("test@zebra.project-safari.io", l.Owner())
 }
 
 func getEmptyLease() *Lease {
@@ -129,7 +129,7 @@ func getEmptyLease() *Lease {
 		return nil
 	}
 
-	return NewLease(getUser().Email, d, make([]*ResourceReq, 0))
+	return NewLease(getEmail(), d, make([]*ResourceReq, 0))
 }
 
 func getLease() *Lease {
@@ -153,7 +153,7 @@ func getLease() *Lease {
 		},
 	}
 
-	return NewLease(getUser().Email, d, resources)
+	return NewLease(getEmail(), d, resources)
 }
 
 func getRes() zebra.Resource {
@@ -166,15 +166,6 @@ func getRes() zebra.Resource {
 	return res
 }
 
-func getUser() auth.User {
-	return auth.User{
-		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("User", nil),
-			Name:         "shravya",
-		},
-		Email:        "shravya@cisco.com",
-		Key:          nil,
-		PasswordHash: "",
-		Role:         nil,
-	}
+func getEmail() string {
+	return "test@zebra.project-safari.io"
 }
