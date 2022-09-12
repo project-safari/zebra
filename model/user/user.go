@@ -1,4 +1,4 @@
-package auth
+package user
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,20 +16,23 @@ var (
 	ErrRoleEmpty     = errors.New("role is empty")
 )
 
-func UserType() zebra.Type {
-	return zebra.Type{
-		Name:        "User",
-		Description: "zebra user",
-		Constructor: func() zebra.Resource { return new(User) },
-	}
+func Type() zebra.Type {
+	return zebra.Type{Name: "system.user", Description: "zebra system user"}
+}
+
+func Empty() zebra.Resource {
+	user := new(User)
+	user.Meta.Type = Type()
+
+	return user
 }
 
 type User struct {
-	zebra.NamedResource
-	Key          *RsaIdentity `json:"key"`
-	PasswordHash string       `json:"passwordHash"`
-	Role         *Role        `json:"role"`
-	Email        string       `json:"email"`
+	zebra.BaseResource
+	Key          *auth.RsaIdentity `json:"key"`
+	PasswordHash string            `json:"passwordHash"`
+	Role         *auth.Role        `json:"role"`
+	Email        string            `json:"email"`
 }
 
 // Validate returns an error if the given Datacenter object has incorrect values.
@@ -46,7 +50,7 @@ func (u *User) Validate(ctx context.Context) error {
 		return ErrPasswordEmpty
 	}
 
-	return u.NamedResource.Validate(ctx)
+	return u.BaseResource.Validate(ctx)
 }
 
 func (u *User) Authenticate(token string) error {
@@ -88,17 +92,35 @@ func HashPassword(password string) string {
 }
 
 // create new user data.
-func NewUser(name string, email string, pwd string, key *RsaIdentity, labels zebra.Labels) *User {
-	priv, _ := NewPriv("", false, true, false, false)
-	user := new(User)
+func NewUser(name string, email string, pwd string, key *auth.RsaIdentity, role *auth.Role) *User {
+	return &User{
+		BaseResource: *zebra.NewBaseResource(Type(), name, name, "users"),
+		Key:          key,
+		PasswordHash: HashPassword(pwd),
+		Role:         role,
+		Email:        email,
+	}
+}
 
-	labels.Add("system.group", "users")
-	user.BaseResource = *zebra.NewBaseResource("User", labels)
-	user.Name = name
-	user.Email = email
-	user.Role = &Role{Name: "user", Privileges: []*Priv{priv}}
-	user.PasswordHash = HashPassword(pwd)
-	user.Key = key
+func MockUser(num int) []zebra.Resource {
+	rs := make([]zebra.Resource, 0, num)
 
-	return user
+	for i := 1; i <= num; i++ {
+		k, _ := auth.Generate()
+		p, _ := auth.NewPriv("", true, true, true, true)
+		r := NewUser(
+			fmt.Sprintf("mock-user-%d", i),
+			fmt.Sprintf("mock-user-%d@zebra.local", i),
+			fmt.Sprintf("UserSecret%d!!!", i),
+			k.Public(),
+			&auth.Role{
+				Name:       "admin",
+				Privileges: []*auth.Priv{p},
+			},
+		)
+
+		rs = append(rs, r)
+	}
+
+	return rs
 }
