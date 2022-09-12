@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/lease"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/lease"
 	"github.com/spf13/cobra"
 )
 
@@ -78,8 +78,10 @@ func makeLeaseReq(cmd *cobra.Command, args []string) (*Config, *zebra.ResourceMa
 		time.Duration(cfg.Defaults.Duration)*time.Hour,
 		[]*lease.ResourceReq{req})
 
-	resMap := zebra.NewResourceMap(store.DefaultFactory())
-	resMap.Add(lease, lease.GetType())
+	resMap := zebra.NewResourceMap(model.Factory())
+	if err := resMap.Add(lease); err != nil {
+		return nil, nil, nil, err
+	}
 
 	return cfg, resMap, req, nil
 }
