@@ -8,8 +8,11 @@ import (
 	"strconv"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
-	"github.com/project-safari/zebra/filestore"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/compute"
+	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/model/network"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/project-safari/zebra/store"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +24,7 @@ const (
 	Max                 = 1500
 )
 
-func main() {
+func herdCmd() *cobra.Command {
 	name := filepath.Base(os.Args[0])
 	rootCmd := &cobra.Command{
 		Use:          name,
@@ -58,13 +61,27 @@ func main() {
 
 	rootCmd.Flags().Int16("user", DefaultUserSize, "number of users")
 
-	if err := rootCmd.Execute(); err != nil {
+	return rootCmd
+}
+
+func execRootCmd() error {
+	rootCmd := herdCmd()
+
+	err := rootCmd.Execute()
+	if err != nil {
 		fmt.Println(err)
+	}
+
+	return err
+}
+
+func main() {
+	if e := execRootCmd(); e != nil {
 		os.Exit(1)
 	}
 }
 
-func storeResources(resources []zebra.Resource, fs *filestore.FileStore) error {
+func storeResources(resources []zebra.Resource, fs *store.FileStore) error {
 	for _, res := range resources {
 		if e := fs.Create(res); e != nil {
 			return e
@@ -96,15 +113,17 @@ func run(cmd *cobra.Command, _ []string) error {
 	resources := make([]zebra.Resource, 0, Max)
 
 	// Generate all the resources
-	resources = genResources(cmd, "vlan-pool", pkg.GenerateVlanPool, resources)
-	resources = genResources(cmd, "switch", pkg.GenerateSwitch, resources)
-	resources = genResources(cmd, "ip-address-pool", pkg.GenerateIPPool, resources)
-	resources = genResources(cmd, "dc", pkg.GenerateDatacenter, resources)
-	resources = genResources(cmd, "server", pkg.GenerateServer, resources)
-	resources = genResources(cmd, "vm", pkg.GenerateVM, resources)
-	resources = genResources(cmd, "rack", pkg.GenerateRack, resources)
-	resources = genResources(cmd, "lab", pkg.GenerateLab, resources)
-	resources = genResources(cmd, "user", pkg.GenerateUser, resources)
+	resources = genResources(cmd, "vlan-pool", network.MockVLANPool, resources)
+	resources = genResources(cmd, "switch", network.MockSwitch, resources)
+	resources = genResources(cmd, "ip-address-pool", network.MockIPAddressPool, resources)
+	resources = genResources(cmd, "server", compute.MockServer, resources)
+	resources = genResources(cmd, "esx", compute.MockESX, resources)
+	resources = genResources(cmd, "vm", compute.MockVM, resources)
+	resources = genResources(cmd, "vcenter", compute.MockVCenter, resources)
+	resources = genResources(cmd, "dc", dc.MockDC, resources)
+	resources = genResources(cmd, "rack", dc.MockRack, resources)
+	resources = genResources(cmd, "lab", dc.MockLab, resources)
+	resources = genResources(cmd, "user", user.MockUser, resources)
 
 	return storeResources(resources, fs)
 }
@@ -116,8 +135,8 @@ func intVal(cmd *cobra.Command, flag string) int {
 	return i
 }
 
-func initStore(rootDir string) *filestore.FileStore {
-	fs := filestore.NewFileStore(rootDir, store.DefaultFactory())
+func initStore(rootDir string) *store.FileStore {
+	fs := store.NewFileStore(rootDir, model.Factory())
 	if e := fs.Initialize(); e != nil {
 		fmt.Println("Error initializing store")
 		panic(e)
