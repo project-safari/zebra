@@ -1,26 +1,23 @@
-package auth_test
+package user_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/stretchr/testify/assert"
 )
 
-const userType = "user"
-
-//nolint:funlen
-func TestUser(t *testing.T) {
+func TestUser(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	assert := assert.New(t)
 	all, e := auth.NewPriv("", true, true, true, true)
 	assert.Nil(e)
 	assert.NotNil(all)
-	admin := &auth.Role{"admin", []*auth.Priv{all}}
+
+	admin := &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
 
 	writeAll, e := auth.NewPriv("", true, false, true, true)
 	assert.Nil(e)
@@ -34,7 +31,7 @@ func TestUser(t *testing.T) {
 	assert.Nil(e)
 	assert.NotNil(rwOne)
 
-	user := &auth.Role{"user", []*auth.Priv{readAll, rwOne}}
+	roleUser := &auth.Role{Name: "user", Privileges: []*auth.Priv{readAll, rwOne}}
 
 	godKey, err := auth.Generate()
 	assert.Nil(err)
@@ -42,13 +39,13 @@ func TestUser(t *testing.T) {
 
 	ctx := context.Background()
 
-	uType := auth.UserType()
-	god, ok := uType.New().(*auth.User)
+	uType := user.Type()
+	god, ok := user.Empty().(*user.User)
 	assert.True(ok)
 
-	god.Name = "almighty"
-	god.ID = "00000000000001"
-	god.Type = userType
+	god.Meta.Name = "almighty"
+	god.Meta.ID = "00000000000001"
+	god.Meta.Type = uType
 	assert.NotNil(god.Validate(ctx))
 
 	god.Key = godKey
@@ -57,7 +54,7 @@ func TestUser(t *testing.T) {
 	god.Role = admin
 	assert.NotNil(god.Validate(ctx))
 
-	god.PasswordHash = auth.HashPassword("youhaveachoice")
+	god.PasswordHash = user.HashPassword("youhaveachoice")
 	god.Email = "god@heaven.com"
 	assert.NotNil(god.Validate(ctx)) // it will have an error because it does not have group label, so not nil.
 
@@ -65,25 +62,25 @@ func TestUser(t *testing.T) {
 	assert.Nil(err)
 	assert.NotNil(adamKey)
 
-	adam := new(auth.User)
-	adam.Name = "adam"
-	adam.ID = "00000000000003"
-	adam.Type = userType
+	adam := new(user.User)
+	adam.Meta.Name = "adam"
+	adam.Meta.ID = "00000000000003"
+	adam.Meta.Type = uType
 	adam.Key = adamKey
-	adam.Role = user
-	adam.PasswordHash = auth.HashPassword("iloveeve")
+	adam.Role = roleUser
+	adam.PasswordHash = user.HashPassword("iloveeve")
 
 	eveKey, err := auth.Generate()
 	assert.Nil(err)
 	assert.NotNil(eveKey)
 
-	eve := new(auth.User)
-	eve.Name = "eve"
-	eve.ID = "00000000000004"
-	eve.Type = userType
+	eve := new(user.User)
+	eve.Meta.Name = "eve"
+	eve.Meta.ID = "00000000000004"
+	eve.Meta.Type = uType
 	eve.Key = eveKey
-	eve.Role = user
-	eve.PasswordHash = auth.HashPassword("iloveadam")
+	eve.Role = roleUser
+	eve.PasswordHash = user.HashPassword("iloveadam")
 
 	token, err := godKey.Sign([]byte(god.Email))
 	assert.Nil(err)
@@ -111,9 +108,8 @@ func TestUser(t *testing.T) {
 	assert.True(eve.Update("eden"))
 	assert.False(eve.Update("universe"))
 
-	newUser := auth.NewUser("eve", "eve@email.com", "eve123", eveKey, zebra.Labels{})
+	newUser := user.NewUser("eve", "eve@email.com", "eve123", eveKey, roleUser)
 	assert.NotNil(newUser)
-
-	newUser.Labels = pkg.GroupLabels(newUser.Labels, "sample-label")
-	assert.Nil(newUser.Validate(context.Background()))
+	assert.Nil(newUser.AuthenticatePassword("eve123"))
+	assert.NotNil(newUser.AuthenticatePassword("adam123"))
 }

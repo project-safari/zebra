@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -120,7 +118,7 @@ func TestOwner(t *testing.T) {
 	assert := assert.New(t)
 
 	l := getEmptyLease()
-	assert.Equal("shravya@cisco.com", l.Owner())
+	assert.Equal("tester@quality.com", l.Owner())
 }
 
 func getEmptyLease() *Lease {
@@ -129,7 +127,7 @@ func getEmptyLease() *Lease {
 		return nil
 	}
 
-	return NewLease(getUser().Email, d, make([]*ResourceReq, 0))
+	return NewLease("tester@quality.com", d, make([]*ResourceReq, 0))
 }
 
 func getLease() *Lease {
@@ -153,28 +151,11 @@ func getLease() *Lease {
 		},
 	}
 
-	return NewLease(getUser().Email, d, resources)
+	return NewLease("tester@quality.com", d, resources)
 }
 
 func getRes() zebra.Resource {
-	res := &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
-		RangeStart:   0,
-		RangeEnd:     10,
-	}
-
-	return res
-}
-
-func getUser() auth.User {
-	return auth.User{
-		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("User", nil),
-			Name:         "shravya",
-		},
-		Email:        "shravya@cisco.com",
-		Key:          nil,
-		PasswordHash: "",
-		Role:         nil,
-	}
+	return zebra.NewBaseResource(
+		zebra.Type{Name: "dummy", Description: "dummy"},
+		"test_res", "tester", "test_group")
 }

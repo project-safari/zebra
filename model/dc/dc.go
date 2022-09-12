@@ -12,19 +12,33 @@ var ErrAddressEmpty = errors.New("address is empty")
 
 var ErrRowEmpty = errors.New("row is empty")
 
-func DataCenterType() zebra.Type {
+func DatacenterType() zebra.Type {
 	return zebra.Type{
-		Name:        "Datacenter",
+		Name:        "dc.datacenter",
 		Description: "data center",
-		Constructor: func() zebra.Resource { return new(Datacenter) },
 	}
+}
+
+func EmptyDatacenter() zebra.Resource {
+	d := new(Datacenter)
+	d.Meta.Type = DatacenterType()
+
+	return d
 }
 
 // A Datacenter represents the physical building. It is a named resource also
 // with a building address.
 type Datacenter struct {
-	zebra.NamedResource
+	zebra.BaseResource
 	Address string `json:"address"`
+}
+
+// create new dc resources.
+func NewDatacenter(address, name, owner, group string) *Datacenter {
+	return &Datacenter{
+		BaseResource: *zebra.NewBaseResource(DatacenterType(), name, owner, group),
+		Address:      address,
+	}
 }
 
 // Validate returns an error if the given Datacenter object has incorrect values.
@@ -34,46 +48,63 @@ func (dc *Datacenter) Validate(ctx context.Context) error {
 		return ErrAddressEmpty
 	}
 
-	if dc.Type != "Datacenter" {
+	if dc.Meta.Type.Name != "dc.datacenter" {
 		return zebra.ErrWrongType
 	}
 
-	return dc.NamedResource.Validate(ctx)
+	return dc.BaseResource.Validate(ctx)
 }
 
 func LabType() zebra.Type {
 	return zebra.Type{
-		Name:        "Lab",
+		Name:        "dc.lab",
 		Description: "data center lab",
-		Constructor: func() zebra.Resource { return new(Lab) },
 	}
+}
+
+func EmptyLab() zebra.Resource {
+	l := new(Lab)
+	l.Meta.Type = LabType()
+
+	return l
 }
 
 // A Lab represents the lab consisting of a name and an ID.
-type Lab struct {
-	zebra.NamedResource
+type Lab struct{ zebra.BaseResource }
+
+// create new dc resources.
+func NewLab(name, owner, group string) *Lab {
+	return &Lab{
+		BaseResource: *zebra.NewBaseResource(LabType(), name, owner, group),
+	}
 }
 
 func (l *Lab) Validate(ctx context.Context) error {
-	if l.Type != "Lab" {
+	if l.Meta.Type.Name != "dc.lab" {
 		return zebra.ErrWrongType
 	}
 
-	return l.NamedResource.Validate(ctx)
+	return l.BaseResource.Validate(ctx)
 }
 
 func RackType() zebra.Type {
 	return zebra.Type{
-		Name:        "Rack",
+		Name:        "dc.rack",
 		Description: "server rack",
-		Constructor: func() zebra.Resource { return new(Rack) },
 	}
+}
+
+func EmptyRack() zebra.Resource {
+	r := new(Rack)
+	r.Meta.Type = RackType()
+
+	return r
 }
 
 // A Rack represents a datacenter rack. It consists of a name, ID, and associated
 // row.
 type Rack struct {
-	zebra.NamedResource
+	zebra.BaseResource
 	Row string `json:"row"`
 }
 
@@ -84,56 +115,16 @@ func (r *Rack) Validate(ctx context.Context) error {
 		return ErrRowEmpty
 	}
 
-	if r.Type != "Rack" {
+	if r.Meta.Type.Name != "dc.rack" {
 		return zebra.ErrWrongType
 	}
 
-	return r.NamedResource.Validate(ctx)
+	return r.BaseResource.Validate(ctx)
 }
 
-// create new dc resources.
-func NewDatacenter(address string, name string, labels zebra.Labels) *Datacenter {
-	named := new(zebra.NamedResource)
-
-	named.BaseResource = *zebra.NewBaseResource("Datacenter", labels)
-
-	named.Name = name
-
-	ret := &Datacenter{
-		NamedResource: *named,
-
-		Address: address,
+func NewRack(row, name, owner, group string) *Rack {
+	return &Rack{
+		BaseResource: *zebra.NewBaseResource(RackType(), name, owner, group),
+		Row:          row,
 	}
-
-	return ret
-}
-
-func NewLab(name string, labels zebra.Labels) *Lab {
-	namedR := new(zebra.NamedResource)
-
-	namedR.BaseResource = *zebra.NewBaseResource("Lab", labels)
-
-	namedR.Name = name
-
-	ret := &Lab{
-		NamedResource: *namedR,
-	}
-
-	return ret
-}
-
-func NewRack(name string, rows string, labels zebra.Labels) *Rack {
-	namedRes := new(zebra.NamedResource)
-
-	namedRes.BaseResource = *zebra.NewBaseResource("Rack", labels)
-
-	namedRes.Name = name
-
-	ret := &Rack{
-		NamedResource: *namedRes,
-		// some random row.
-		Row: rows,
-	}
-
-	return ret
 }

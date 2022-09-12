@@ -11,10 +11,16 @@ import (
 
 func Type() zebra.Type {
 	return zebra.Type{
-		Name:        "Lease",
+		Name:        "system.lease",
 		Description: "lease request from user",
-		Constructor: func() zebra.Resource { return new(Lease) },
 	}
+}
+
+func Empty() zebra.Resource {
+	l := new(Lease)
+	l.Meta.Type = Type()
+
+	return l
 }
 
 type ResourceReq struct {
@@ -58,7 +64,7 @@ func NewLease(userEmail string, dur time.Duration, req []*ResourceReq) *Lease {
 	// Set default values, don't set activation time yet
 	l := &Lease{
 		lock:           sync.RWMutex{},
-		BaseResource:   *zebra.NewBaseResource("Lease", map[string]string{"system.group": "leases"}),
+		BaseResource:   *zebra.NewBaseResource(Type(), "", userEmail, "system.leases"),
 		Duration:       dur,
 		Request:        req,
 		ActivationTime: time.Time{},
