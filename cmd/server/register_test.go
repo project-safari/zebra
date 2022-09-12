@@ -13,8 +13,8 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,65 +22,56 @@ func TestCreateNewUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore1"
+	root := "test_create_new_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	key, _ := auth.Generate()
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
 
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
-
-	assert.NotNil(user)
-	assert.NotNil(user.BaseResource)
-	assert.NotNil(user.Role)
-	assert.NotNil(user.Key)
-	assert.NotNil(user.PasswordHash)
+	assert.NotNil(testUser)
+	assert.NotNil(testUser.Meta.Name)
+	assert.NotNil(testUser.Role)
+	assert.NotNil(testUser.Key)
+	assert.NotNil(testUser.PasswordHash)
 }
 
 func TestUpdateUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore2"
+	root := "test_update_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	key, _ := auth.Generate()
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
 
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
+	oldpassword := testUser.PasswordHash
 
-	oldpassword := user.PasswordHash
-
-	store := makeQueryStore(root, assert, user)
+	store := makeQueryStore(root, assert, testUser)
 	assert.NotNil(store)
-	err := deleteUser(user, store)
+	err := deleteUser(testUser, store)
 	assert.Nil(err)
 
-	changePassword(user, "newpassword")
-	assert.NotEqual(oldpassword, user.PasswordHash)
+	changePassword(testUser, "newpassword")
+	assert.NotEqual(oldpassword, testUser.PasswordHash)
 }
 
 func TestDeleteUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore3"
+	root := "test_delete_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	key, _ := auth.Generate()
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
 
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "groupLabel")
-
-	store := makeQueryStore(root, assert, user)
+	store := makeQueryStore(root, assert, testUser)
 	assert.NotNil(store)
-	err := deleteUser(user, store)
+	err := deleteUser(testUser, store)
 	assert.Nil(err)
 	assert.Empty(store.Query().Resources)
 }
@@ -123,9 +114,9 @@ func TestRegister(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore4"
+	root := "test_register"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	req, err := http.NewRequest("POST", "/register", nil)
 	assert.Nil(err)
@@ -140,13 +131,10 @@ func TestRegister(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 
 	data := newRData("testuser2", "secrect", "myemail@domain", true)
+	testUser := user.NewUser("testuser", "testuser@domain", "secrect", data.Key, DefaultRole())
 
-	user := createNewUser("testuser", "testuser@domain", "secrect", data.Key)
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "groupSample")
-
-	resources := NewResourceAPI(store.DefaultFactory())
-	resources.Store = makeQueryStore(root, assert, user)
+	resources := NewResourceAPI(model.Factory())
+	resources.Store = makeQueryStore(root, assert, testUser)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 
@@ -178,12 +166,13 @@ func TestNoKeyUser(t *testing.T) {
 
 	root := "test_no_key_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	key, _ := auth.Generate()
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
-	resources := NewResourceAPI(store.DefaultFactory())
-	resources.Store = makeQueryStore(root, assert, user)
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
+
+	resources := NewResourceAPI(model.Factory())
+	resources.Store = makeQueryStore(root, assert, testUser)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 
@@ -206,17 +195,15 @@ func TestSameUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore6"
+	root := "test_same_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	data := newRData("testuser", "secrect", "test@cisco123.com", true)
-	user := createNewUser("testuser", "test@cisco123.com", "bigword", data.Key)
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
+	data := newRData("testuser", "secrect", "test@cisco.com", true)
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", data.Key, DefaultRole())
 
-	resources := NewResourceAPI(store.DefaultFactory())
-	resources.Store = makeQueryStore(root, assert, user)
+	resources := NewResourceAPI(model.Factory())
+	resources.Store = makeQueryStore(root, assert, testUser)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 
@@ -238,9 +225,9 @@ func TestBadRequest(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore7"
+	root := "test_bad_request"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	key, _ := auth.Generate()
 	registryData := fmt.Sprintf("{\"user\":\"%s\"\"password\":\"%s\"}", "Bad", "Request")
@@ -249,9 +236,9 @@ func TestBadRequest(t *testing.T) {
 	assert.Nil(err)
 	assert.NotEmpty(v)
 
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
-	resources := NewResourceAPI(store.DefaultFactory())
-	resources.Store = makeQueryStore(root, assert, user)
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
+	resources := NewResourceAPI(model.Factory())
+	resources.Store = makeQueryStore(root, assert, testUser)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 
@@ -273,24 +260,16 @@ func TestDelete1User(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "regteststore8"
+	root := "test_delete_user"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	key, _ := auth.Generate()
+	testUser := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
+	testUser2 := user.NewUser("testuser", "test@cisco.com", "bigword", key.Public(), DefaultRole())
 
-	user := createNewUser("testuser", "test@cisco.com", "bigword", key.Public())
-
-	user.Labels = pkg.CreateLabels()
-	user.Labels = pkg.GroupLabels(user.Labels, "sampleGroup")
-
-	user2 := createNewUser("testuser", "test@cisco.com", "bigword", nil)
-
-	user2.Labels = pkg.CreateLabels()
-	user2.Labels = pkg.GroupLabels(user2.Labels, "groupUser2")
-
-	store := makeQueryStore(root, assert, user)
+	store := makeQueryStore(root, assert, testUser)
 	assert.NotNil(store)
-	err := deleteUser(user2, store)
+	err := deleteUser(testUser2, store)
 	assert.NotNil(err)
 }

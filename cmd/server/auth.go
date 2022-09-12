@@ -68,7 +68,7 @@ func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 	}
 
 	// Set the claims into request
-	claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
+	claims := auth.NewClaims("zebra", user.Meta.Name, user.Role, user.Email)
 	ctx = context.WithValue(ctx, ClaimsCtxKey, claims)
 
 	return req.Clone(ctx)

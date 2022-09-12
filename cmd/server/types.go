@@ -5,11 +5,11 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
 )
 
 func handleTypes() httprouter.Handle {
-	allTypes := store.DefaultFactory()
+	allTypes := model.Factory()
 
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()

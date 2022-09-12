@@ -8,8 +8,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zerologr"
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/rs/zerolog"
 	"gojini.dev/config"
 	"gojini.dev/web"
@@ -40,7 +40,7 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 		panic(e)
 	}
 
-	factory := store.DefaultFactory()
+	factory := model.Factory()
 
 	resAPI := NewResourceAPI(factory)
 	if e := resAPI.Initialize(storeCfg.Root); e != nil {
@@ -75,18 +75,16 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 }
 
 func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) error {
-	user := new(auth.User)
-	user.Status = zebra.DefaultStatus()
-	user.Status.State = zebra.Active
+	admin := new(user.User)
 
-	if err := cfgStore.Get("admin", user); err != nil {
+	if err := cfgStore.Get("admin", admin); err != nil {
 		return err
 	}
 
-	if findUser(store, user.Email) == nil {
+	if findUser(store, admin.Email) == nil {
 		log.Info("creating admin user")
 
-		return store.Create(user)
+		return store.Create(admin)
 	}
 
 	return nil

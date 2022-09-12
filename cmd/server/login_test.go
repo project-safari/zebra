@@ -13,7 +13,8 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,25 +43,18 @@ func TestFindUser(t *testing.T) {
 	assert.NotNil(findUser(store, "email@domain"))
 }
 
-func makeUser(assert *assert.Assertions) *auth.User {
+func makeUser(assert *assert.Assertions) *user.User {
 	ctx := context.Background()
 	all, e := auth.NewPriv("", true, true, true, true)
 	assert.Nil(e)
 	assert.NotNil(all)
 
-	jini := new(auth.User)
-	jini.Name = "jini"
-	jini.Email = "email@domain"
-	jini.ID = "007"
-	jini.Type = "User"
-	jini.PasswordHash = auth.HashPassword(jiniWords)
-	jini.Role = &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
-	jini.Labels = pkg.CreateLabels()
-	jini.Labels = pkg.GroupLabels(jini.Labels, "sampleGroup")
-
 	jiniKey, err := auth.Generate()
 	assert.Nil(err)
 	assert.NotNil(jiniKey)
+
+	jini := user.NewUser("jini", "email@domain", jiniWords, jiniKey,
+		&auth.Role{Name: "admin", Privileges: []*auth.Priv{all}})
 
 	jini.Key = jiniKey
 	assert.Nil(jini.Validate(ctx))
@@ -69,8 +63,8 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	return jini
 }
 
-func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zebra.Store {
-	factory := store.DefaultFactory()
+func makeQueryStore(root string, assert *assert.Assertions, user *user.User) zebra.Store {
+	factory := model.Factory()
 	assert.NotNil(factory)
 
 	store := store.NewResourceStore(root, factory)
@@ -108,7 +102,7 @@ func TestBadUser(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	req := makeLoginRequest(assert, "ali", "aliOfAgrabha", "email@domain1", resources)
@@ -134,7 +128,7 @@ func TestBadLogin(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	req := makeLoginRequest(assert, "jini", "aliOfAgrabha", "email@domain", resources)
@@ -154,7 +148,7 @@ func TestLogin(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	req := makeLoginRequest(assert, "jini", jiniWords, "email@domain", resources)
@@ -195,7 +189,7 @@ func TestLoginContext(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey,
-		NewResourceAPI(store.DefaultFactory()))
+		NewResourceAPI(model.Factory()))
 
 	req, err = http.NewRequestWithContext(ctx, "POST", "/login", nil)
 	assert.Nil(err)

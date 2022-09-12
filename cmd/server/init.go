@@ -7,6 +7,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/spf13/cobra"
 	"gojini.dev/web"
 	"gopkg.in/yaml.v3"
@@ -52,7 +53,7 @@ type ServerConfig struct {
 
 	AuthKey string `json:"authKey"`
 
-	Admin *auth.User `json:"admin"`
+	Admin *user.User `json:"admin"`
 }
 
 func initServer(cmd *cobra.Command, args []string) error {
@@ -83,7 +84,7 @@ func initServer(cmd *cobra.Command, args []string) error {
 	return ioutil.WriteFile(cfgFile, data, ReadWriteOnly)
 }
 
-func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
+func makeAdminConfig(cmd *cobra.Command) (*user.User, error) {
 	userConfig := cmd.Flag("user").Value.String()
 	cfg := &struct {
 		User  string            `yaml:"user"`
@@ -91,7 +92,6 @@ func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
 		Key   *auth.RsaIdentity `yaml:"key"`
 	}{}
 
-	fmt.Println("config:", userConfig)
 	fmt.Println("config:", userConfig)
 
 	cfgData, err := ioutil.ReadFile(userConfig)
@@ -108,14 +108,14 @@ func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
 		return nil, err
 	}
 
-	user := auth.NewUser(cfg.User, cfg.Email,
+	user := user.NewUser(cfg.User, cfg.Email,
 		cmd.Flag("password").Value.String(),
-		cfg.Key.Public(), zebra.Labels{})
-	user.Role = &auth.Role{
-		Name:       "admin",
-		Privileges: []*auth.Priv{p},
-	}
-	user.Status = nil
+		cfg.Key.Public(),
+		&auth.Role{
+			Name:       "admin",
+			Privileges: []*auth.Priv{p},
+		})
+	user.Status.State = zebra.Active
 
 	return user, nil
 }
