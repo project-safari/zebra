@@ -1,6 +1,7 @@
 package zebra_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/project-safari/zebra"
@@ -14,6 +15,7 @@ func TestLabels(t *testing.T) {
 	labels := zebra.Labels{
 		"color": "red",
 	}
+	assert.NotNil(labels.Validate())
 
 	assert.True(labels.MatchEqual("color", "red"))
 	assert.False(labels.MatchEqual("color", "blue"))
@@ -53,4 +55,23 @@ func TestLabels(t *testing.T) {
 	assert.False(labels.MatchNotIn("color", "red"))
 	assert.True(labels.MatchNotIn("color", "blue", "green"))
 	assert.False(labels.MatchNotIn("blah"))
+}
+
+func TestIsIn(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	list := []string{"hi", "hello", "goodbye"}
+
+	assert.True(zebra.IsIn("hello", list))
+	assert.False(zebra.IsIn("hey", list))
+}
+
+func TestLabelsValidation(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	dummy, _ := dummyType()
+	resOne := zebra.NewBaseResource(dummy, "dummy", "dummy", "dummy")
+	assert.Nil(resOne.Validate(context.Background()))
 }

@@ -1,5 +1,9 @@
 package zebra
 
+import "errors"
+
+var ErrLabel = errors.New("missing mandatory system label")
+
 // Labels are key/value pairs that can be attached to any resource. They are
 // used to identify attributes of a resource that are added or modified during
 // the runtime operations on a resource. Resources can be matched using labels
@@ -42,11 +46,7 @@ func (l Labels) MatchNotEqual(key, value string) bool {
 func (l Labels) MatchIn(key string, values ...string) bool {
 	v, ok := l[key]
 	if ok {
-		for _, value := range values {
-			if v == value {
-				return true
-			}
-		}
+		return IsIn(v, values)
 	}
 
 	return false
@@ -56,4 +56,24 @@ func (l Labels) MatchIn(key string, values ...string) bool {
 // does not match any specified value for that key, else returns false.
 func (l Labels) MatchNotIn(key string, values ...string) bool {
 	return l.HasKey(key) && !l.MatchIn(key, values...)
+}
+
+func (l Labels) Validate() error {
+	v, ok := l["system.group"]
+	if !ok || v == "" {
+		return ErrLabel
+	}
+
+	return nil
+}
+
+// IsIn returns if val is in string list.
+func IsIn(val string, list []string) bool {
+	for _, v := range list {
+		if val == v {
+			return true
+		}
+	}
+
+	return false
 }

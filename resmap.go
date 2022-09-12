@@ -4,82 +4,37 @@ import (
 	"encoding/json"
 )
 
-type Type struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Constructor func() Resource `json:"-"`
-}
-
-func (t *Type) New() Resource {
-	return t.Constructor()
-}
-
-type ResourceFactory interface {
-	New(string) Resource
-	Add(Type) ResourceFactory
-	Types() []Type
-	Type(string) (Type, bool)
-}
-
-type typeMap map[string]Type
-
-func (t typeMap) New(resourceType string) Resource {
-	aType, ok := t[resourceType]
-	if !ok {
-		return nil
-	}
-
-	return aType.New()
-}
-
-// Add adds a type and its factory method to the resource factory and returns the resource factory.
-// The returned resource factory object can be used to add more types in a chained fashion.
-func (t typeMap) Add(aType Type) ResourceFactory {
-	t[aType.Name] = aType
-
-	return t
-}
-
-func (t typeMap) Types() []Type {
-	types := make([]Type, 0, len(t))
-	for _, aType := range t {
-		types = append(types, aType)
-	}
-
-	return types
-}
-
-func (t typeMap) Type(name string) (Type, bool) {
-	aType, ok := t[name]
-
-	return aType, ok
-}
-
-func Factory() ResourceFactory {
-	return typeMap{}
-}
-
 type ResourceList struct {
-	factory   ResourceFactory
+	ctr       TypeConstructor
 	Resources []Resource
 }
 
-func NewResourceList(f ResourceFactory) *ResourceList {
+func NewResourceList(ctr TypeConstructor) *ResourceList {
 	return &ResourceList{
-		factory:   f,
+		ctr:       ctr,
 		Resources: []Resource{},
 	}
 }
 
-func (r *ResourceList) Delete(res Resource) {
+func (r *ResourceList) Add(res Resource) error {
+	r.Resources = append(r.Resources, res)
+
+	return nil
+}
+
+func (r *ResourceList) Delete(res Resource) error {
 	listLen := len(r.Resources)
 
 	for i, val := range r.Resources {
-		if val.GetID() == res.GetID() {
+		if val.GetMeta().ID == res.GetMeta().ID {
 			r.Resources[i] = r.Resources[listLen-1]
 			r.Resources = r.Resources[:listLen-1]
+
+			return nil
 		}
 	}
+
+	return ErrNotFound
 }
 
 func CopyResourceList(dest *ResourceList, src *ResourceList) {
@@ -87,7 +42,7 @@ func CopyResourceList(dest *ResourceList, src *ResourceList) {
 		return
 	}
 
-	dest.factory = src.factory
+	dest.ctr = src.ctr
 	dest.Resources = make([]Resource, len(src.Resources))
 	copy(dest.Resources, src.Resources)
 }
@@ -98,45 +53,22 @@ func (r *ResourceList) MarshalJSON() ([]byte, error) {
 
 func (r *ResourceList) UnmarshalJSON(data []byte) error {
 	// unmarshal the data as a list of maps with string as key so that
-	// we can look up the type value of the resource.
-	values := []map[string]interface{}{}
+	// we can then create a resource object and parse each resource.
+	values := []json.RawMessage{}
 	if e := json.Unmarshal(data, &values); e != nil {
 		return e
 	}
 
-	// For each value find out the type, the convert the value back into a
-	// byte array. Use the type to create the actual resource object and the
-	// unmarshal the byte array into that resource object.
+	// Convert each value back into a byte array. Use the type to create the
+	// actual resource object and then unmarshal the byte array into that
+	// resource object.
 	for _, value := range values {
-		// all resources must have type
-		vAny, ok := value["type"]
-		if !ok {
-			return ErrTypeEmpty
-		}
-
-		// Make a new resource for this value based on the embedded type field
-		vType, ok := vAny.(string)
-		if !ok {
-			return ErrTypeEmpty
-		}
-
-		resource := r.factory.New(vType)
-
-		if resource == nil {
-			// Type factory doesnt know this type return error
-			return ErrTypeEmpty
-		}
-
-		// Capture the []byte of just this value
-		resData, err := json.Marshal(value)
-		if err != nil {
-			return err
-		}
+		resource := r.ctr()
 
 		// We have the []byte representation and we have the target object
 		// so now can do the final unmarshal and add this object into the
 		// resource list
-		if e := json.Unmarshal(resData, resource); e != nil {
+		if e := json.Unmarshal(value, resource); e != nil {
 			return e
 		}
 
@@ -167,33 +99,47 @@ func CopyResourceMap(dest *ResourceMap, src *ResourceMap) {
 	dest.Resources = make(map[string]*ResourceList)
 
 	for key, val := range src.Resources {
-		dest.Resources[key] = NewResourceList(dest.factory)
+		ctr, _ := src.factory.Constructor(key)
+		dest.Resources[key] = NewResourceList(ctr)
 		CopyResourceList(dest.Resources[key], val)
 	}
 }
 
-func (r *ResourceMap) GetFactory() ResourceFactory {
+func (r *ResourceMap) Factory() ResourceFactory {
 	return r.factory
 }
 
-func (r *ResourceMap) Add(res Resource, key string) {
-	if r.Resources[key] == nil {
-		r.Resources[key] = NewResourceList(r.factory)
+func (r *ResourceMap) Add(res Resource) error {
+	key := res.GetMeta().Type.Name
+	rl := r.Resources[key]
+
+	if rl == nil {
+		if ctr, ok := r.factory.Constructor(key); ok {
+			rl = NewResourceList(ctr)
+			r.Resources[key] = rl
+		} else {
+			return ErrTypeEmpty
+		}
 	}
 
-	r.Resources[key].Resources = append(r.Resources[key].Resources, res)
+	return rl.Add(res)
 }
 
-func (r *ResourceMap) Delete(res Resource, key string) {
+func (r *ResourceMap) Delete(res Resource) error {
+	key := res.GetMeta().Type.Name
 	if r.Resources[key] == nil {
-		return
+		return ErrNotFound
 	}
 
-	r.Resources[key].Delete(res)
+	if err := r.Resources[key].Delete(res); err != nil {
+		return err
+	}
 
 	if len(r.Resources[key].Resources) == 0 {
 		delete(r.Resources, key)
 	}
+
+	return nil
 }
 
 func (r *ResourceMap) MarshalJSON() ([]byte, error) {
@@ -208,9 +154,14 @@ func (r *ResourceMap) UnmarshalJSON(data []byte) error {
 		return e
 	}
 
-	//
+	// for each type create the resource list and parse the resource list
 	for vType, rData := range values {
-		rList := NewResourceList(r.factory)
+		ctr, ok := r.factory.Constructor(vType)
+		if !ok {
+			return ErrTypeEmpty
+		}
+
+		rList := NewResourceList(ctr)
 		if e := json.Unmarshal(rData, rList); e != nil {
 			return e
 		}
