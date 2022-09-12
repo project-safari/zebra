@@ -5,38 +5,20 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
-	"github.com/project-safari/zebra/dc"
-	"github.com/project-safari/zebra/network"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 
-func getVLAN() *network.VLANPool {
-	return &network.VLANPool{
-		BaseResource: *zebra.NewBaseResource("VLANPool", nil),
-		RangeStart:   0,
-		RangeEnd:     1,
-	}
-}
-
-func getLab() *dc.Lab {
-	br := *zebra.NewBaseResource("Lab", nil)
-
-	return &dc.Lab{
-		NamedResource: zebra.NamedResource{
-			BaseResource: br,
-			Name:         "lab" + br.ID,
-		},
-	}
-}
-
 func getResMap() *zebra.ResourceMap {
+	f := factory()
+
 	// make 10 resources and add them to list
-	resMap := zebra.NewResourceMap(nil)
+	resMap := zebra.NewResourceMap(f)
 
 	for i := 0; i < 10; i++ {
-		resMap.Add(getVLAN(), "VLANPool")
+		if e := resMap.Add(f.New("dummy-1")); e != nil {
+			return nil
+		}
 	}
 
 	return resMap
@@ -46,88 +28,83 @@ func TestNewResourceStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore"
+	root := "teststore_new_resource_Store"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	assert.NotNil(store.NewResourceStore(root, nil))
+	assert.NotNil(store.NewResourceStore(root, factory()))
 }
 
-func TestInitialize(t *testing.T) {
+func TestStoreInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore1"
+	root := "teststore_initialize"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	rs := store.NewResourceStore(root, nil)
+	rs := store.NewResourceStore(root, factory())
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 }
 
-func TestWipe(t *testing.T) {
+func TestStoreWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore2"
+	root := "teststore_Wipe"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	rs := store.NewResourceStore(root, nil)
+	rs := store.NewResourceStore(root, factory())
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 	assert.Nil(rs.Wipe())
 }
 
-func TestDelete(t *testing.T) {
+func TestStoreDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore6"
+	root := "teststore_delete"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
+	f := factory()
 
-	some := network.VLANPoolType()
-	some.New().GetLabels()
-	factory.Add(some)
-
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
 	// Valid resource, should pass
-	vlan := getVLAN()
-	assert.Nil(rs.Create(vlan))
+	r := f.New("dummy-1")
+	assert.Nil(rs.Create(r))
 
 	resources, err := rs.Load()
 	assert.Nil(err)
 	assert.Equal(1, len(resources.Resources))
 
 	// Delete resource, should pass
-	assert.Nil(rs.Delete(vlan))
+	assert.Nil(rs.Delete(r))
 
 	// Delete non-existent resource, should fail
 	assert.NotNil(rs.Delete(nil))
 
 	// Delete uncreated resource, should pass anyways
-	assert.NotNil(rs.Delete(getLab()))
+	assert.NotNil(rs.Delete(f.New("dummy-2")))
 }
 
-func TestLoad(t *testing.T) {
+func TestStoreLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore4"
+	root := "teststore_load"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	f := factory()
 
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
@@ -135,30 +112,31 @@ func TestLoad(t *testing.T) {
 	assert.Nil(err)
 	assert.Empty(len(resources.Resources))
 
-	assert.Nil(rs.Create(getVLAN()))
+	assert.Nil(rs.Create(f.New("dummy-1")))
 	resources, err = rs.Load()
 	assert.Nil(err)
-	assert.Equal(1, len(resources.Resources))
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 1)
 
-	assert.Nil(rs.Create(getVLAN()))
+	assert.Nil(rs.Create(f.New("dummy-1")))
 
 	resources, err = rs.Load()
 	assert.Nil(err)
-	assert.Equal(1, len(resources.Resources))
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 2)
 }
 
-func TestCreate(t *testing.T) {
+func TestStoreCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore5"
+	root := "teststore_create"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	f := factory()
 
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
@@ -166,50 +144,58 @@ func TestCreate(t *testing.T) {
 	assert.NotNil(rs.Create(nil))
 
 	// Valid resource, should pass
-	vlan := getVLAN()
-	assert.Nil(rs.Create(vlan))
+	r := f.New("dummy-1")
+	assert.Nil(rs.Create(r))
 
 	resources, err := rs.Load()
 	assert.Nil(err)
-	assert.Equal(1, len(resources.Resources))
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 1)
 
 	// Duplicate resource, should update
-	assert.Nil(rs.Create(vlan))
+	assert.Nil(rs.Create(r))
+	resources, err = rs.Load()
+	assert.Nil(err)
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 1)
 }
 
-func TestQueryLabel(t *testing.T) {
+func TestStoreQueryLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore10"
+	root := "teststore_query_label"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	f := factory()
 
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
 	// Add 10 resources
 	for i := 0; i < 10; i++ {
-		res := getVLAN()
-		res.Labels = pkg.CreateLabels()
+		res := f.New("dummy-1")
 
 		if i%2 == 0 {
-			res.Labels = zebra.Labels.Add(res.Labels, "owner", "person")
+			res.GetMeta().Labels.Add("owner", "test_owner")
 		}
 
 		assert.Nil(rs.Create(res))
 	}
 
-	// Query for those 5 resources
-	query := zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"shravya"}}
+	// Query for incorrect values
+	query := zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"unknown"}}
 	resources, err := rs.QueryLabel(query)
 	assert.Nil(err)
-	assert.Equal(0, len(resources.Resources))
-	assert.Nil(resources.Resources["VLANPool"])
+	assert.Len(resources.Resources, 0)
+
+	// Query for incorrect values
+	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"test_owner"}}
+	resources, err = rs.QueryLabel(query)
+	assert.Nil(err)
+	assert.Len(resources.Resources["dummy-1"].Resources, 5)
 
 	// Give incorrect query, should return error
 	query = zebra.Query{Op: 10, Key: "", Values: []string{""}}
@@ -217,267 +203,293 @@ func TestQueryLabel(t *testing.T) {
 	assert.NotNil(err)
 }
 
-func TestQuery(t *testing.T) {
+func TestStoreQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore7"
+	root := "teststore_query"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	f := factory()
 
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
 	// Add 10 resources
 	for i := 0; i < 10; i++ {
-		assert.Nil(rs.Create(getVLAN()))
+		assert.Nil(rs.Create(f.New("dummy-1")))
 	}
 
 	// Query for those 10 resources
 	resources := rs.Query()
-	assert.Equal(1, len(resources.Resources))
-	assert.NotNil(resources.Resources["VLANPool"])
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 10)
 }
 
-func TestQueryUUID(t *testing.T) {
+func TestStoreQueryUUID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore8"
+	root := "teststore_query_uuid"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	ids := make([]string, 0, 5)
+	f := factory()
 
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
-	ids := make([]string, 0, 5)
-
 	// Add 10 resources
 	for i := 0; i < 10; i++ {
-		res := getVLAN()
-		assert.Nil(rs.Create(res))
+		r := f.New("dummy-1")
+		assert.Nil(rs.Create(r))
 
 		if i%2 == 0 {
-			ids = append(ids, pkg.Serials())
+			ids = append(ids, r.GetMeta().ID)
 		}
 	}
 
 	// Query for those 5 resources
 	resources := rs.QueryUUID(ids)
-	assert.Equal(0, len(resources.Resources))
-	assert.Nil(resources.Resources["VLANPool"])
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 5)
 }
 
-func TestQueryType(t *testing.T) {
+func TestStoreQueryType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore9"
+	root := "teststore_query_type"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	f := factory()
 
-	dcd := dc.LabType()
-
-	factory.Add(dcd)
-
-	rs := store.NewResourceStore(root, factory)
+	rs := store.NewResourceStore(root, f)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
 	// Add 10 resources
 	for i := 0; i < 10; i++ {
 		if i%2 == 0 {
-			assert.Nil(rs.Create(getLab())) // not nill because these resources have no group label.
+			assert.Nil(rs.Create(f.New("dummy-1")))
 		} else {
-			assert.Nil(rs.Create(getVLAN()))
+			assert.Nil(rs.Create(f.New("dummy-2")))
 		}
 	}
 
 	// Query for those 5 resources
-	resources := rs.QueryType([]string{"Lab"})
-	assert.Equal(1, len(resources.Resources))
-	assert.NotNil(resources.Resources["Lab"])
+	resources := rs.QueryType([]string{"dummy-1"})
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-1"].Resources, 5)
 
-	resources = rs.QueryType([]string{"VLANPool"})
-	assert.Equal(1, len(resources.Resources))
-	assert.NotNil(resources.Resources["VLANPool"])
+	resources = rs.QueryType([]string{"dummy-2"})
+	assert.Len(resources.Resources, 1)
+	assert.Len(resources.Resources["dummy-2"].Resources, 5)
 }
 
-func TestFilterUUID(t *testing.T) {
+func TestStoreFilterUUID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	resMap := getResMap()
+	f := factory()
+	r1 := f.New("dummy-1")
+	id := r1.GetMeta().ID
 
-	vlan := getVLAN()
-	id := vlan.ID
-
-	resMap.Add(vlan, "VLANPool")
+	assert.Nil(resMap.Add(r1))
 
 	resMap, err := store.FilterUUID([]string{id}, resMap)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
-	assert.Equal(1, len(resMap.Resources["VLANPool"].Resources))
-	assert.Equal(id, resMap.Resources["VLANPool"].Resources[0].GetID())
+	assert.Len(resMap.Resources, 1)
+	assert.Len(resMap.Resources["dummy-1"].Resources, 1)
+	assert.Equal(id, resMap.Resources["dummy-1"].Resources[0].GetMeta().ID)
 }
 
-func TestFilterType(t *testing.T) {
+func TestStoreFilterType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	resMap := getResMap()
+	f := factory()
+	r1 := f.New("dummy-2")
+	id := r1.GetMeta().ID
 
-	lab := getLab()
-	id := lab.ID
+	assert.Nil(resMap.Add(r1))
 
-	resMap.Add(lab, "Lab")
-
-	resMap, err := store.FilterType([]string{"Lab"}, resMap)
+	resMap, err := store.FilterType([]string{"dummy-2"}, resMap)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
-	assert.Equal(1, len(resMap.Resources["Lab"].Resources))
-	assert.Equal(id, resMap.Resources["Lab"].Resources[0].GetID())
+	assert.Len(resMap.Resources, 1)
+	assert.Len(resMap.Resources["dummy-2"].Resources, 1)
+	assert.Equal(id, resMap.Resources["dummy-2"].Resources[0].GetMeta().ID)
 
 	resMap, err = store.FilterType([]string{"blah"}, resMap)
 	assert.Nil(err)
 	assert.Equal(0, len(resMap.Resources))
 }
 
-func TestFilterLabel(t *testing.T) {
+func TestStoreFilterLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	resMap := getResMap()
 
-	lab := getLab()
-	id := lab.ID
-	lab.Labels = zebra.Labels{"owner": "shravya"}
+	f := factory()
+	r := f.New("dummy-1")
+	id := r.GetMeta().ID
 
-	resMap.Add(lab, "Lab")
+	r.GetMeta().Labels.Add("owner", "test_owner")
+	assert.Nil(resMap.Add(r))
 
-	query := zebra.Query{Op: 10, Key: "owner", Values: []string{"shravya"}}
+	query := zebra.Query{Op: 10, Key: "owner", Values: []string{"test_owner"}}
 	resMap, err := store.FilterLabel(query, resMap)
 	assert.NotNil(err)
 
-	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"shravya", "nandyala"}}
+	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"test_owner", "someone"}}
 	resMap, err = store.FilterLabel(query, resMap)
 	assert.NotNil(err)
 
-	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "owner", Values: []string{"shravya", "nandyala"}}
+	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "owner", Values: []string{"test_owner", "someone"}}
 	resMap, err = store.FilterLabel(query, resMap)
 	assert.NotNil(err)
 
-	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"shravya"}}
+	query = zebra.Query{Op: zebra.MatchEqual, Key: "owner", Values: []string{"test_owner"}}
 	resMap, err = store.FilterLabel(query, resMap)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
-	assert.Equal(1, len(resMap.Resources["Lab"].Resources))
-	assert.Equal(id, resMap.Resources["Lab"].Resources[0].GetID())
+	assert.Len(resMap.Resources, 1)
+	assert.Len(resMap.Resources["dummy-1"].Resources, 1)
+	assert.Equal(id, resMap.Resources["dummy-1"].Resources[0].GetMeta().ID)
 
-	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "owner", Values: []string{"shravya"}}
+	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "owner", Values: []string{"test_owner"}}
 	resMap, err = store.FilterLabel(query, resMap)
 	assert.Nil(err)
-	assert.Equal(0, len(resMap.Resources))
+	assert.Empty(resMap.Resources)
 }
 
-func TestFilterProperty(t *testing.T) {
+type propRes struct {
+	zebra.BaseResource
+	Prop1 string `json:"prop1"`
+	Prop2 string `json:"prop2"`
+}
+
+func propType() (zebra.Type, zebra.TypeConstructor) {
+	t := zebra.Type{Name: "propType", Description: "dummy prop resource"}
+
+	return t, func() zebra.Resource {
+		r := new(propRes)
+		r.BaseResource = *zebra.NewBaseResource(t, "prop_test", "prop_test_owner", "prop_test_group")
+		r.Meta.Type = t
+
+		return r
+	}
+}
+
+func TestStoreFilterProperty(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	resMap := getResMap()
+	f := factory()
+	resMap := zebra.NewResourceMap(f)
+	ty, c := propType()
+	f.Add(ty, c)
 
-	lab := getLab()
+	r1, ok := f.New("propType").(*propRes)
+	assert.True(ok)
 
-	resMap.Add(lab, "Lab")
-	resMap.Add(getVLAN(), "VLANPool")
+	r1.Meta.Type = ty
+	r1.Prop1 = "test_prop_value"
 
-	query := zebra.Query{Op: 10, Key: "Type", Values: []string{"Lab"}}
+	assert.Nil(resMap.Add(r1))
+
+	query := zebra.Query{Op: 10, Key: "Type", Values: []string{"dummy-2"}}
 	resMap, err := store.FilterProperty(query, resMap)
 	assert.NotNil(err)
 
-	query = zebra.Query{Op: zebra.MatchEqual, Key: "Type", Values: []string{"Lab", "VLANPool"}}
+	query = zebra.Query{Op: zebra.MatchEqual, Key: "Type", Values: []string{"dummy-1", "dummy-2"}}
 	resMap, err = store.FilterProperty(query, resMap)
 	assert.NotNil(err)
 
-	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "type", Values: []string{"Lab", "VLANPool"}}
+	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "type", Values: []string{"dummy-1", "dummy-2"}}
 	resMap, err = store.FilterProperty(query, resMap)
 	assert.NotNil(err)
 
-	query = zebra.Query{Op: zebra.MatchEqual, Key: "Type", Values: []string{"Lab"}}
+	query = zebra.Query{Op: zebra.MatchEqual, Key: "Prop1", Values: []string{"test_prop_value"}}
 	resMap, err = store.FilterProperty(query, resMap)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
-	assert.Equal(1, len(resMap.Resources["Lab"].Resources))
-	assert.Equal(lab.ID, resMap.Resources["Lab"].Resources[0].GetID())
+	assert.Len(resMap.Resources, 1)
+	assert.Len(resMap.Resources["propType"].Resources, 1)
+	assert.Equal(r1.GetMeta().ID, resMap.Resources["propType"].Resources[0].GetMeta().ID)
 
 	query = zebra.Query{Op: zebra.MatchNotEqual, Key: "type", Values: []string{"Lab"}}
 	resMap, err = store.FilterProperty(query, resMap)
 	assert.Nil(err)
-	assert.Equal(0, len(resMap.Resources))
+	assert.NotNil(resMap)
 }
 
-func TestClear(t *testing.T) {
+func TestStoreClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore3"
+	root := "teststore_clear"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	factory := zebra.Factory()
-	factory.Add(network.VLANPoolType())
+	f := factory()
+	rs := store.NewResourceStore(root, f)
 
-	rs := store.NewResourceStore(root, factory)
 	assert.NotNil(rs)
 	assert.Nil(rs.Initialize())
 
-	assert.Nil(rs.Create(getVLAN()))
-	assert.Nil(rs.Create(getVLAN()))
+	assert.Nil(rs.Create(f.New("dummy-1")))
+	assert.Nil(rs.Create(f.New("dummy-1")))
 
 	resources, err := rs.Load()
 	assert.Nil(err)
-	assert.Equal(1, len(resources.Resources))
+	assert.Len(resources.Resources, 1)
 
 	assert.Nil(rs.Clear())
 
 	resources, err = rs.Load()
 	assert.Nil(err)
-	assert.Empty(len(resources.Resources))
+	assert.Empty(resources.Resources)
 }
 
-func TestQueryProperty(t *testing.T) {
+func TestStoreQueryProperty(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore11"
+	root := "teststore_query_property"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	res1, res2 := getVLAN(), getLab()
+	f := factory()
+	ty, c := propType()
+	f.Add(ty, c)
 
-	f := zebra.Factory()
-	f.Add(network.VLANPoolType())
+	res1, ok := f.New("propType").(*propRes)
+	assert.True(ok)
+
+	res2, ok := f.New("propType").(*propRes)
+	assert.True(ok)
+
+	res1.Prop1 = "r1p1"
+	res1.Prop2 = "r1p2"
+	res2.Prop1 = "r2p1"
+	res2.Prop2 = "r2p2"
 
 	rs := store.NewResourceStore(root, f)
 	assert.Nil(rs.Initialize())
 	assert.Nil(rs.Create(res1))
 	assert.Nil(rs.Create(res2))
 
-	query1 := zebra.Query{Op: zebra.MatchEqual, Key: "Type", Values: []string{"VLANPool", "Lab"}}
-	query2 := zebra.Query{Op: zebra.MatchIn, Key: "Type", Values: []string{"VLANPool"}}
-	query3 := zebra.Query{Op: zebra.MatchNotEqual, Key: "Type", Values: []string{"VLANPool", "Lab"}}
-	query4 := zebra.Query{Op: zebra.MatchNotIn, Key: "Type", Values: []string{"VLANPool", "Lab"}}
+	query1 := zebra.Query{Op: zebra.MatchEqual, Key: "Prop1", Values: []string{"r1p1", "r2p1"}}
+	query2 := zebra.Query{Op: zebra.MatchIn, Key: "Prop1", Values: []string{"r1p1"}}
+	query3 := zebra.Query{Op: zebra.MatchNotEqual, Key: "Prop1", Values: []string{"VLANPool", "Lab"}}
+	query4 := zebra.Query{Op: zebra.MatchNotIn, Key: "Prop1", Values: []string{"r1p1", "r2p1"}}
 
 	// Should fail on query 1 and query 3.
 	_, err := rs.QueryProperty(query1)
@@ -487,26 +499,29 @@ func TestQueryProperty(t *testing.T) {
 	assert.NotNil(err)
 
 	// Update query 1, should succeed.
-	query1.Values = []string{"Lab"}
+	query1.Values = []string{"r1p1"}
 	resMap, err := rs.QueryProperty(query1)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
+	assert.Len(resMap.Resources, 1)
+	assert.Equal(res1.GetMeta().ID, resMap.Resources["propType"].Resources[0].GetMeta().ID)
 
 	// Should succeed on query 2, return first resource.
 	resMap, err = rs.QueryProperty(query2)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
+	assert.Len(resMap.Resources, 1)
+	assert.Equal(res1.GetMeta().ID, resMap.Resources["propType"].Resources[0].GetMeta().ID)
 
 	// Should succeed on query 4, return no resources.
 	resMap, err = rs.QueryProperty(query4)
 	assert.Nil(err)
-	assert.Empty(len(resMap.Resources))
+	assert.Empty(resMap.Resources)
 
 	// Update query 3 to be valid, return 1 resource.
-	query3.Values = []string{"Lab"}
+	query3.Values = []string{"r1p1"}
 	resMap, err = rs.QueryProperty(query3)
 	assert.Nil(err)
-	assert.Equal(1, len(resMap.Resources))
+	assert.Len(resMap.Resources, 1)
+	assert.Equal(res2.GetMeta().ID, resMap.Resources["propType"].Resources[0].GetMeta().ID)
 
 	resMap, err = rs.QueryProperty(zebra.Query{Op: 0x7, Key: "", Values: []string{""}})
 	assert.Nil(resMap)

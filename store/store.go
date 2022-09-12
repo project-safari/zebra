@@ -8,10 +8,6 @@ import (
 	"sync"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/filestore"
-	"github.com/project-safari/zebra/idstore"
-	"github.com/project-safari/zebra/labelstore"
-	"github.com/project-safari/zebra/typestore"
 )
 
 var ErrNilResource = errors.New("nil resource not allowed")
@@ -20,10 +16,10 @@ type ResourceStore struct {
 	lock        sync.RWMutex
 	StorageRoot string
 	Factory     zebra.ResourceFactory
-	fs          *filestore.FileStore
-	ids         *idstore.IDStore
-	ls          *labelstore.LabelStore
-	ts          *typestore.TypeStore
+	fs          *FileStore
+	ids         *IDStore
+	ls          *LabelStore
+	ts          *TypeStore
 }
 
 func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore {
@@ -42,7 +38,7 @@ func (rs *ResourceStore) Initialize() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
 
-	rs.fs = filestore.NewFileStore(rs.StorageRoot, rs.Factory)
+	rs.fs = NewFileStore(rs.StorageRoot, rs.Factory)
 	if err := rs.fs.Initialize(); err != nil {
 		return err
 	}
@@ -52,9 +48,9 @@ func (rs *ResourceStore) Initialize() error {
 		return err
 	}
 
-	rs.ids = idstore.NewIDStore(resources)
-	rs.ls = labelstore.NewLabelStore(resources)
-	rs.ts = typestore.NewTypeStore(resources)
+	rs.ids = NewIDStore(resources)
+	rs.ls = NewLabelStore(resources)
+	rs.ts = NewTypeStore(resources)
 
 	return nil
 }
@@ -178,7 +174,7 @@ func (rs *ResourceStore) Query() *zebra.ResourceMap {
 		return nil
 	}
 
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
 	zebra.CopyResourceMap(retMap, resMap)
 
@@ -191,7 +187,7 @@ func (rs *ResourceStore) QueryUUID(uuids []string) *zebra.ResourceMap {
 	defer rs.lock.RUnlock()
 
 	resMap := rs.ids.Query(uuids)
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
 	zebra.CopyResourceMap(retMap, resMap)
 
@@ -204,7 +200,7 @@ func (rs *ResourceStore) QueryType(types []string) *zebra.ResourceMap {
 	defer rs.lock.RUnlock()
 
 	resMap := rs.ts.Query(types)
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
 	zebra.CopyResourceMap(retMap, resMap)
 
@@ -221,7 +217,7 @@ func (rs *ResourceStore) QueryLabel(query zebra.Query) (*zebra.ResourceMap, erro
 	defer rs.lock.RUnlock()
 
 	resMap := rs.ls.Query(query)
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
 	zebra.CopyResourceMap(retMap, resMap)
 
@@ -253,15 +249,15 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 
 	retMap := zebra.NewResourceMap(rs.Factory)
 
-	for t, l := range resMap.Resources {
+	for _, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
 			inList := zebra.IsIn(val, query.Values)
 
-			if inVals && inList {
-				retMap.Add(res, t)
-			} else if !inVals && !inList {
-				retMap.Add(res, t)
+			if (inVals && inList) || (!inVals && !inList) {
+				if e := retMap.Add(res); e != nil {
+					return nil, e
+				}
 			}
 		}
 	}
@@ -271,12 +267,14 @@ func (rs *ResourceStore) propertyMatch(query zebra.Query, inVals bool) (*zebra.R
 
 // Filter given map by uuids.
 func FilterUUID(uuids []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
-	for t, l := range resMap.Resources {
+	for _, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			if zebra.IsIn(res.GetID(), uuids) {
-				retMap.Add(res, t)
+			if zebra.IsIn(res.GetMeta().ID, uuids) {
+				if e := retMap.Add(res); e != nil {
+					return nil, e
+				}
 			}
 		}
 	}
@@ -286,7 +284,7 @@ func FilterUUID(uuids []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, 
 
 // Filter given map by types.
 func FilterType(types []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
-	f := resMap.GetFactory()
+	f := resMap.Factory()
 	retMap := zebra.NewResourceMap(f)
 
 	for _, t := range types {
@@ -295,7 +293,12 @@ func FilterType(types []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, 
 			continue
 		}
 
-		copyL := zebra.NewResourceList(f)
+		c, ok := f.Constructor(t)
+		if !ok {
+			return nil, zebra.ErrNotFound
+		}
+
+		copyL := zebra.NewResourceList(c)
 
 		zebra.CopyResourceList(copyL, l)
 		retMap.Resources[t] = copyL
@@ -305,12 +308,12 @@ func FilterType(types []string, resMap *zebra.ResourceMap) (*zebra.ResourceMap, 
 }
 
 // Filter given map by label name and val.
-func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
+func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) { //nolint:cyclop
 	if err := query.Validate(); err != nil {
 		return resMap, err
 	}
 
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
 	inVals := false
 
@@ -318,13 +321,15 @@ func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceM
 		inVals = true
 	}
 
-	for t, l := range resMap.Resources {
+	for _, l := range resMap.Resources {
 		for _, res := range l.Resources {
-			labels := res.GetLabels()
+			labels := res.GetMeta().Labels
 			matchIn := labels.MatchIn(query.Key, query.Values...)
 
 			if (inVals && matchIn) || (!inVals && !matchIn) {
-				retMap.Add(res, t)
+				if e := retMap.Add(res); e != nil {
+					return nil, e
+				}
 			}
 		}
 	}
@@ -333,12 +338,12 @@ func FilterLabel(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceM
 }
 
 // Filter given map by property name (case insensitive) and val.
-func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) {
+func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.ResourceMap, error) { //nolint:cyclop
 	if err := query.Validate(); err != nil {
 		return resMap, err
 	}
 
-	retMap := zebra.NewResourceMap(resMap.GetFactory())
+	retMap := zebra.NewResourceMap(resMap.Factory())
 
 	inVals := false
 
@@ -346,13 +351,15 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 		inVals = true
 	}
 
-	for t, l := range resMap.Resources {
+	for _, l := range resMap.Resources {
 		for _, res := range l.Resources {
 			val := FieldByName(reflect.ValueOf(res).Elem(), query.Key).String()
 			matchIn := zebra.IsIn(val, query.Values)
 
 			if (inVals && matchIn) || (!inVals && !matchIn) {
-				retMap.Add(res, t)
+				if e := retMap.Add(res); e != nil {
+					return nil, e
+				}
 			}
 		}
 	}
