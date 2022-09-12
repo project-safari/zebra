@@ -8,6 +8,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/store"
 )
 
@@ -170,7 +171,7 @@ func handlePost() httprouter.Handle {
 			return
 		}
 
-		resMap := zebra.NewResourceMap(store.DefaultFactory())
+		resMap := zebra.NewResourceMap(model.Factory())
 
 		// Read request, return error if applicable
 		if err := readJSON(ctx, req, resMap); err != nil {
@@ -213,7 +214,7 @@ func handleDelete() httprouter.Handle {
 			return
 		}
 
-		resMap := zebra.NewResourceMap(store.DefaultFactory())
+		resMap := zebra.NewResourceMap(model.Factory())
 
 		// Read request, return error if applicable
 		if err := readJSON(ctx, req, resMap); err != nil {

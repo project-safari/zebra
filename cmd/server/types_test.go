@@ -72,7 +72,7 @@ func TestTypes(t *testing.T) {
 		h(w, r, nil)
 	})
 
-	req := makeTypeRequest(assert, "Server", "Switch")
+	req := makeTypeRequest(assert, "compute.server", "network.switch")
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(rr.Code, http.StatusOK)

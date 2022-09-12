@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,9 +31,9 @@ func TestAuthAdapter(t *testing.T) {
 
 	root := "test_auth_adapter"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -52,14 +52,14 @@ func TestRSAKey(t *testing.T) {
 
 	root := "test_rsa_key"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -95,14 +95,14 @@ func TestJWT(t *testing.T) {
 
 	root := "test_jwt"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -111,7 +111,7 @@ func TestJWT(t *testing.T) {
 	req, err := http.NewRequestWithContext(ctx, "GET", "/", nil)
 	assert.Nil(err)
 
-	claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
+	claims := auth.NewClaims("zebra", user.Meta.Name, user.Role, user.Email)
 	jwt := claims.JWT(authKey)
 	req.AddCookie(makeCookie(jwt))
 
@@ -132,14 +132,14 @@ func TestBadRSAKey(t *testing.T) {
 
 	root := "test_bad_rsa_key"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -184,14 +184,14 @@ func TestBadJWT(t *testing.T) {
 
 	root := "test_bad_jwt"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)

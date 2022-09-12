@@ -62,7 +62,7 @@ func matchLabels(matchSet map[string]struct{}, rMap *zebra.ResourceMap) map[stri
 
 	for _, resList := range rMap.Resources {
 		for _, r := range resList.Resources {
-			labels := r.GetLabels()
+			labels := r.GetMeta().Labels
 			for k, v := range labels {
 				_, matchOk := matchSet[k] // check if key is list
 				matched := matchAny || matchOk

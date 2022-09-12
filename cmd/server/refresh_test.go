@@ -17,12 +17,12 @@ func TestRefresh(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "teststore5"
+	root := "test_refresh"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	jini := makeUser(assert)
-	claims := auth.NewClaims("zebra", jini.Name, jini.Role, "email@domain")
+	claims := auth.NewClaims("zebra", jini.Meta.Name, jini.Role, "email@domain")
 	jwtStr := claims.JWT(authKey)
 
 	req := makeRefreshRequest(assert, claims, authKey)

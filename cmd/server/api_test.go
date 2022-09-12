@@ -11,10 +11,8 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
-	"github.com/project-safari/zebra/dc"
-	"github.com/project-safari/zebra/network"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/dc"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,11 +34,11 @@ func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "testquery"
+	root := "test_query"
 
 	defer func() { os.RemoveAll(root) }()
 
-	api := NewResourceAPI(store.DefaultFactory())
+	api := NewResourceAPI(model.Factory())
 	assert.Nil(api.Initialize(root))
 
 	h := handleQuery()
@@ -80,11 +78,11 @@ func TestEmptyQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "testemptyquery"
+	root := "test_empty_query"
 
 	defer func() { os.RemoveAll(root) }()
 
-	api := NewResourceAPI(store.DefaultFactory())
+	api := NewResourceAPI(model.Factory())
 	assert.Nil(api.Initialize(root))
 
 	h := handleQuery()
@@ -107,11 +105,11 @@ func TestBadQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "testbadquery"
+	root := "test_bad_query"
 
 	defer func() { os.RemoveAll(root) }()
 
-	api := NewResourceAPI(store.DefaultFactory())
+	api := NewResourceAPI(model.Factory())
 	assert.Nil(api.Initialize(root))
 
 	h := handleQuery()
@@ -163,11 +161,11 @@ func TestInvalidQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "testinvalidquery"
+	root := "test_invalid_query"
 
 	defer func() { os.RemoveAll(root) }()
 
-	api := NewResourceAPI(store.DefaultFactory())
+	api := NewResourceAPI(model.Factory())
 	assert.Nil(api.Initialize(root))
 
 	h := handleQuery()
@@ -209,11 +207,11 @@ func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "api_teststore"
+	root := "test_initialize"
 
 	defer func() { os.RemoveAll(root) }()
 
-	f := zebra.Factory().Add(network.VLANPoolType())
+	f := model.Factory()
 
 	api := NewResourceAPI(f)
 	assert.Nil(api.Initialize(root))
@@ -223,11 +221,11 @@ func TestPostResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "api_teststore1"
+	root := "test_post_resource"
 
 	defer func() { os.RemoveAll(root) }()
 
-	myAPI := NewResourceAPI(store.DefaultFactory())
+	myAPI := NewResourceAPI(model.Factory())
 	assert.Nil(myAPI.Initialize(root))
 
 	h := handlePost()
@@ -264,15 +262,15 @@ func TestPostResource(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
-func TestDeleteResource(t *testing.T) { //nolint:funlen
+func TestDeleteResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	root := "api_teststore2"
+	root := "test_delete_resource"
 
 	defer func() { os.RemoveAll(root) }()
 
-	myAPI := NewResourceAPI(store.DefaultFactory())
+	myAPI := NewResourceAPI(model.Factory())
 	assert.Nil(myAPI.Initialize(root))
 
 	h := handleDelete()
@@ -280,28 +278,11 @@ func TestDeleteResource(t *testing.T) { //nolint:funlen
 		h(w, r, nil)
 	})
 
-	lab1 := &dc.Lab{
-		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("Lab", nil),
-			Name:         "Lab1",
-		},
-	}
-
-	lab2 := &dc.Lab{
-		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("Lab", nil),
-			Name:         "Lab2",
-		},
-	}
+	lab1 := dc.NewLab("Lab1", "test_owner", "test_group")
+	lab2 := dc.NewLab("Lab2", "test_owner", "test_group")
 
 	assert.Nil(myAPI.Store.Create(lab1))
 	assert.Nil(myAPI.Store.Create(lab2))
-
-	lab1.Labels = pkg.CreateLabels()
-	lab2.Labels = pkg.CreateLabels()
-
-	lab1.Labels = pkg.GroupLabels(lab1.Labels, "sampleGroup")
-	lab2.Labels = pkg.GroupLabels(lab2.Labels, "sampleGroup2")
 
 	// Invalid resources requested to be deleted
 	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
@@ -356,19 +337,14 @@ func TestApplyFunc(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	resMap := zebra.NewResourceMap(store.DefaultFactory())
+	resMap := zebra.NewResourceMap(model.Factory())
 
 	f := func(r zebra.Resource) error {
 		return r.Validate(context.Background())
 	}
 
-	invalidRes := &dc.Lab{
-		NamedResource: zebra.NamedResource{
-			BaseResource: *zebra.NewBaseResource("notLab", nil),
-			Name:         "",
-		},
-	}
-	resMap.Add(invalidRes, "Lab")
+	invalidRes := dc.NewLab("", "", "")
+	assert.Nil(resMap.Add(invalidRes))
 
 	assert.NotNil(applyFunc(resMap, f))
 }

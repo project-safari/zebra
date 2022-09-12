@@ -8,6 +8,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/model/user"
 	"gojini.dev/web"
 )
 
@@ -63,7 +64,7 @@ func loginAdapter() web.Adapter {
 				return
 			}
 
-			claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
+			claims := auth.NewClaims("zebra", user.Meta.Name, user.Role, user.Email)
 			respondWithClaims(ctx, res, claims, authKey)
 
 			log.Info("login succeeded", "user", user.Email)
@@ -80,16 +81,16 @@ func makeCookie(jwt string) *http.Cookie {
 	return cookie
 }
 
-func findUser(store zebra.Store, email string) *auth.User {
-	resMap := store.QueryType([]string{"User"})
+func findUser(store zebra.Store, email string) *user.User {
+	resMap := store.QueryType([]string{"system.user"})
 
-	users := resMap.Resources["User"]
+	users := resMap.Resources["system.user"]
 	if users == nil {
 		return nil
 	}
 
 	for _, u := range users.Resources {
-		user, ok := u.(*auth.User)
+		user, ok := u.(*user.User)
 		if ok && user.Email == email {
 			return user
 		}
