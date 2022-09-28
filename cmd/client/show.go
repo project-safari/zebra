@@ -9,18 +9,15 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/compute"
-	"github.com/project-safari/zebra/dc"
-	"github.com/project-safari/zebra/lease"
-	"github.com/project-safari/zebra/network"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/compute"
+	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/model/lease"
+	"github.com/project-safari/zebra/model/network"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/spf13/cobra"
 )
 
-// ErrQuery returns an error message if there is an error in querring the server.
-//
-// Error usually occurs when http status is not ok (i.e. when http.StatusOK  =/= 200).
 var ErrQuery = errors.New("server query failed")
 
 type QueryRequest struct {
@@ -30,14 +27,13 @@ type QueryRequest struct {
 	Properties []zebra.Query `json:"properties,omitempty"`
 }
 
-// Function for the new show command and its subsequent commands.
 func NewShow() *cobra.Command { //nolint:funlen
 	showCmd := &cobra.Command{
 		Use:   "show",
 		Short: "show resources",
 	}
 
-	// Server resource types - server, esx, vcenter, vm.
+	// server resource types - server, esx, vcenter, vm.
 	showCmd.AddCommand(&cobra.Command{
 		Use:          "server",
 		Short:        "show the specified servers",
@@ -70,7 +66,7 @@ func NewShow() *cobra.Command { //nolint:funlen
 		SilenceUsage: true,
 	})
 
-	// Dc resource types - datacenter, lab, rack.
+	// dc resource types - datacenter, lab, rack.
 	showCmd.AddCommand(&cobra.Command{
 		Use:          "datacenter",
 		Short:        "show the specified datacenters",
@@ -95,7 +91,7 @@ func NewShow() *cobra.Command { //nolint:funlen
 		SilenceUsage: true,
 	})
 
-	// Network resource types: vlan, switch, IPAddressPool.
+	// network resource types: vlan, switch, IPAddressPool.
 	showCmd.AddCommand(&cobra.Command{
 		Use:          "vlan",
 		Short:        "show the specified vlans",
@@ -155,8 +151,6 @@ func NewShow() *cobra.Command { //nolint:funlen
 	return showCmd
 }
 
-// Function that eases the process of getting the necessary dta for the resource(s).
-// Returns int, a pointer to a resource map, and (a) potential error(s).
 func justGet(cmd *cobra.Command, p string, resTypes ...string) (int, *zebra.ResourceMap, error) {
 	cfgFile := cmd.Flag("config").Value.String()
 
@@ -171,7 +165,7 @@ func justGet(cmd *cobra.Command, p string, resTypes ...string) (int, *zebra.Reso
 	}
 
 	in := &QueryRequest{Types: resTypes}
-	resMap := zebra.NewResourceMap(store.DefaultFactory())
+	resMap := zebra.NewResourceMap(model.Factory())
 	status, err := c.Get(path.Join("api", "v1", p), in, resMap)
 
 	return status, resMap, err
@@ -193,7 +187,7 @@ func showResources(cmd *cobra.Command, args []string) error {
 }
 
 // Show server resource types - server, esx, vcenter, vm.
-// Function for server.
+// Function for servers.
 func showServers(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "Server")
 	if err != nil {
@@ -212,7 +206,7 @@ func showServers(cmd *cobra.Command, args []string) error {
 }
 
 // Show server resource types - server, esx, vcenter, vm.
-// Function for esx.
+// Function for esx servers.
 func showESX(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "ESX")
 	if err != nil {
@@ -231,7 +225,7 @@ func showESX(cmd *cobra.Command, args []string) error {
 }
 
 // Show server resource types - server, esx, vcenter, vm.
-// Function for vcenter.
+// Function for VCenters.
 func showVCenters(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "VCenter")
 	if err != nil {
@@ -250,7 +244,7 @@ func showVCenters(cmd *cobra.Command, args []string) error {
 }
 
 // Show server resource types - server, esx, vcenter, vm.
-// Function for vm.
+// Function for virtual machines.
 func showVM(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "VM")
 	if err != nil {
@@ -269,7 +263,7 @@ func showVM(cmd *cobra.Command, args []string) error {
 }
 
 // Show dc resource types - datacenter, lab, rack.
-// Function for datacenter.
+// Function for datacenters.
 func showDatacenters(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "Datacenter")
 	if err != nil {
@@ -288,7 +282,7 @@ func showDatacenters(cmd *cobra.Command, args []string) error {
 }
 
 // Show dc resource types - datacenter, lab, rack.
-// Function for lab.
+// Function for labs.
 func showLabs(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "Lab")
 	if err != nil {
@@ -307,7 +301,7 @@ func showLabs(cmd *cobra.Command, args []string) error {
 }
 
 // Show dc resource types - datacenter, lab, rack.
-// Function for rack.
+// Function for racks.
 func showRacks(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "Rack")
 	if err != nil {
@@ -326,7 +320,7 @@ func showRacks(cmd *cobra.Command, args []string) error {
 }
 
 // Show network resource types: vlan, switch, IPAddressPool.
-// Function for vlan.
+// Function for vlan pools.
 func showVlans(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "VLANPool")
 	if err != nil {
@@ -345,7 +339,7 @@ func showVlans(cmd *cobra.Command, args []string) error {
 }
 
 // Show network resource types: vlan, switch, IPAddressPool.
-// Function for switch.
+// Function for switches.
 func showSwitches(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "Switch")
 	if err != nil {
@@ -364,7 +358,7 @@ func showSwitches(cmd *cobra.Command, args []string) error {
 }
 
 // Show network resource types: vlan, switch, IPAddressPool.
-// Function for IPaddressPool.
+// Function for IP address pools.
 func showIPs(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "IPAddressPool")
 	if err != nil {
@@ -418,7 +412,7 @@ func showUsers(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// function to show registrations.
+// Function to show registrations.
 func showRegistrations(cmd *cobra.Command, args []string) error {
 	code, resMap, err := justGet(cmd, "resources", "Registration")
 	if err != nil {
@@ -436,7 +430,7 @@ func showRegistrations(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// Function to show (the) public key(s).
+// Function to show public keys.
 func showPublicKey(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 
@@ -450,25 +444,21 @@ func showPublicKey(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// Function that helps get the stae.
+// Function to show the state of a resource.
 func state(r zebra.Resource) string {
-	if s := r.GetStatus(); s != nil {
-		return s.State.String()
-	}
-
-	return "--"
+	return r.GetStatus().State.String()
 }
 
-// Function that helps get the user that uses a given resource.
+// Function to show who uses a resource.
 func usedBy(r zebra.Resource) string {
-	if s := r.GetStatus(); s != nil {
-		return s.UsedBy
+	s := r.GetStatus().UsedBy
+	if s == "" {
+		s = "--"
 	}
 
-	return "--"
+	return s
 }
 
-// Print resources.
 func printResources(resources *zebra.ResourceMap) {
 	tw := table.NewWriter()
 	tw.AppendHeader(table.Row{"Name", "Type", "Status"})
@@ -476,7 +466,7 @@ func printResources(resources *zebra.ResourceMap) {
 	for t, l := range resources.Resources {
 		for _, resource := range l.Resources {
 			tw.AppendRow(table.Row{
-				resource.GetName(),
+				resource.GetMeta().Name,
 				t,
 				state(resource),
 			})
@@ -495,7 +485,7 @@ func printServers(servers []zebra.Resource) {
 	for _, s := range servers {
 		if server, ok := s.(*compute.Server); ok {
 			tw.AppendRow(table.Row{
-				server.GetName(),
+				server.GetMeta().Name,
 				server.BoardIP,
 				server.Model,
 				server.SerialNumber,
@@ -517,7 +507,7 @@ func printESX(manyESX []zebra.Resource) {
 	for _, e := range manyESX {
 		if esx, ok := e.(*compute.ESX); ok {
 			data.AppendRow(table.Row{
-				esx.GetName(),
+				esx.GetMeta().Name,
 				esx.ServerID,
 				esx.IP.String(),
 				esx.Credentials.Keys,
@@ -539,7 +529,7 @@ func printVCenters(manyVC []zebra.Resource) {
 	for _, vc := range manyVC {
 		if vcenter, ok := vc.(*compute.VCenter); ok {
 			data.AppendRow(table.Row{
-				vcenter.GetName(),
+				vcenter.GetMeta().Name,
 				vcenter.IP.String(),
 				vcenter.Credentials.Keys,
 				usedBy(vcenter),
@@ -552,7 +542,7 @@ func printVCenters(manyVC []zebra.Resource) {
 }
 
 // Print server resource types - servers, esx, vcenters, vms.
-// Function for vms.
+// Function for virtual machines.
 func printVM(manyVM []zebra.Resource) {
 	data := table.NewWriter()
 	data.AppendHeader(table.Row{"Name", "IP", "Credentials", "ESXID", "VCID", "User", "Status"})
@@ -560,7 +550,7 @@ func printVM(manyVM []zebra.Resource) {
 	for _, vm := range manyVM {
 		if machine, ok := vm.(*compute.VM); ok {
 			data.AppendRow(table.Row{
-				machine.GetName(),
+				machine.GetMeta().Name,
 				machine.ManagementIP.String(),
 				machine.Credentials.Keys,
 				machine.ESXID,
@@ -574,7 +564,7 @@ func printVM(manyVM []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print dc resource types - datacenters, labs, racks.
+// Print dc resource types - datacenter, lab, rack.
 // Function for datacenters.
 func printDatacenters(dcs []zebra.Resource) {
 	data := table.NewWriter()
@@ -583,7 +573,7 @@ func printDatacenters(dcs []zebra.Resource) {
 	for _, d := range dcs {
 		if dc, ok := d.(*dc.Datacenter); ok {
 			data.AppendRow(table.Row{
-				dc.GetName(),
+				dc.GetMeta().Name,
 				dc.Address,
 				usedBy(dc),
 				state(dc),
@@ -594,7 +584,7 @@ func printDatacenters(dcs []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print dc resource types - datacenters, labs, racks.
+// Print dc resource types - datacenter, lab, rack.
 // Function for labs.
 func printLabs(labs []zebra.Resource) {
 	data := table.NewWriter()
@@ -603,7 +593,7 @@ func printLabs(labs []zebra.Resource) {
 	for _, lb := range labs {
 		if lab, ok := lb.(*dc.Lab); ok {
 			data.AppendRow(table.Row{
-				lab.GetName(),
+				lab.GetMeta().Name,
 				usedBy(lab),
 				state(lab),
 			})
@@ -613,7 +603,7 @@ func printLabs(labs []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print dc resource types - datacenters, labs, racks.
+// Print dc resource types - datacenter, lab, rack.
 // Function for racks.
 func printRacks(racks []zebra.Resource) {
 	data := table.NewWriter()
@@ -622,7 +612,7 @@ func printRacks(racks []zebra.Resource) {
 	for _, r := range racks {
 		if rack, ok := r.(*dc.Rack); ok {
 			data.AppendRow(table.Row{
-				rack.GetName(),
+				rack.GetMeta().Name,
 				rack.Row,
 				usedBy(rack),
 				state(rack),
@@ -633,8 +623,8 @@ func printRacks(racks []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print network resource types: vlans, switches, IPAddressPools.
-// Function for vlans.
+// Print network resource types: vlan, switch, IPAddressPool.
+// Function for vlan pools.
 func printVlans(vlans []zebra.Resource) {
 	data := table.NewWriter()
 	data.AppendHeader(table.Row{"VLanPool", "User", "Status"})
@@ -654,7 +644,7 @@ func printVlans(vlans []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print network resource types: vlans, switches, IPAddressPools.
+// Print network resource types: vlan, switch, IPAddressPool.
 // Function for switches.
 func printSwitches(switches []zebra.Resource) {
 	data := table.NewWriter()
@@ -666,7 +656,7 @@ func printSwitches(switches []zebra.Resource) {
 	for _, s := range switches {
 		if sw, ok := s.(*network.Switch); ok {
 			data.AppendRow(table.Row{
-				sw.GetName(),
+				sw.GetMeta().Name,
 				sw.ManagementIP.String(),
 				sw.Credentials.Keys,
 				sw.SerialNumber,
@@ -681,8 +671,8 @@ func printSwitches(switches []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print network resource types: vlans, switches, IPAddressPools.
-// Function for IPAddressPools.
+// Print network resource types: vlan, switch, IPAddressPool.
+// Function for IP address pools.
 func printIPs(ips []zebra.Resource) {
 	data := table.NewWriter()
 	data.AppendHeader(table.Row{"Subnets", "User", "Status"})
@@ -700,7 +690,7 @@ func printIPs(ips []zebra.Resource) {
 	fmt.Println(data.Render())
 }
 
-// Print leases.
+// Function to print leases.
 func printLeases(leases []zebra.Resource) {
 	tw := table.NewWriter()
 	tw.AppendHeader(table.Row{
@@ -712,7 +702,7 @@ func printLeases(leases []zebra.Resource) {
 	for _, s := range leases {
 		if l, ok := s.(*lease.Lease); ok {
 			status := l.GetStatus()
-			if status != nil && status.State == zebra.Active {
+			if status.State == zebra.Active {
 				tw.AppendRow(table.Row{
 					l.Status.UsedBy,
 					l.Duration,
@@ -735,17 +725,17 @@ func printLeases(leases []zebra.Resource) {
 	fmt.Println(tw.Render())
 }
 
-// Print users.
+// Function to print the users.
 func printUsers(users []zebra.Resource) {
 	data := table.NewWriter()
 	data.AppendHeader(table.Row{"Name", "Role", "Privileges", "Status"})
 
 	for _, u := range users {
-		user, ok := u.(*auth.User)
+		user, ok := u.(*user.User)
 
 		if ok {
 			data.AppendRow(table.Row{
-				user.GetName(),
+				user.GetMeta().Name,
 				user.Role.Name,
 				user.Role.Privileges,
 				state(user),

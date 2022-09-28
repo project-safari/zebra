@@ -2,127 +2,30 @@ package main //nolint:testpackage
 
 import (
 	"os"
-	"path"
+	"sync"
 	"testing"
 
-	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
-// Sample command to use in go testts for zebra commands.
-func mockCmd() *cobra.Command {
-	cmd := &cobra.Command{ //nolint:exhaustruct,exhaustivestruct
-		Use:          "Name",
-		Short:        "herd",
-		Version:      version + "\n",
-		RunE:         run,
-		SilenceUsage: true,
-	}
+var argLock sync.Mutex //nolint:gochecknoglobals
 
-	cmd.Flags().String("store", path.Join(
-		func() string {
-			s, _ := os.Getwd()
-
-			return s
-		}(), "herd_store"),
-		"root directory of the store",
-	)
-
-	cmd.Flags().Int16("user", DefaultUserSize, "number of users")
-	cmd.Flags().Int16("vlan-pool", DefaultResourceSize, "number of vlan pools")
-	cmd.Flags().Int16("switch", DefaultResourceSize, "number of switches")
-
-	cmd.Flags().Int16("ip-address-pool", DefaultResourceSize, "number of ip address pools")
-	cmd.Flags().Int16("dc", DefaultResourceSize, "number of data centers")
-
-	cmd.Flags().Int16("server", DefaultResourceSize, "number of servers")
-	cmd.Flags().Int16("vm", DefaultResourceSize, "number of vms")
-
-	cmd.Flags().Int16("rack", DefaultResourceSize, "number of racks")
-	cmd.Flags().Int16("vcenter", DefaultResourceSize, "number of vcenters")
-
-	cmd.Flags().Int16("esx", DefaultResourceSize, "number of esx servers")
-	cmd.Flags().Int16("lab", DefaultResourceSize, "number of labs")
-
-	return cmd
-}
-
-// Tests for initialization.
-func TestInit(t *testing.T) {
+// Function to test execution of main.
+func TestMain(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	stored := initStore("test_store")
-	assert.NotNil(stored)
-	assert.Nil(os.RemoveAll("test_store"))
-}
+	argLock.Lock()
+	defer argLock.Unlock()
 
-// Tests for the filestore.
-func TestFileStore(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
+	defer func() { os.RemoveAll("herd_store") }()
 
-	fs := initStore("herd_file_store")
+	os.Args = []string{"herd"}
 
-	defer os.RemoveAll("herd_file_store")
+	e := execRootCmd()
+	assert.Nil(e)
 
-	resources := make([]zebra.Resource, 0, 2)
-	res := storeResources(resources, fs)
+	os.Args = append([]string{"herd"}, "--help")
 
-	assert.Nil(res)
-
-	labels := pkg.CreateLabels()
-	resources = append(resources, zebra.NewBaseResource("", labels))
-	ret := storeResources(resources, fs)
-
-	assert.Nil(ret)
-}
-
-// Tests for the init value.
-func TestInitVal(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	vals := intVal(mockCmd(), "user")
-
-	assert.NotNil(vals)
-
-	assert.True(vals > 0)
-}
-
-// Tests for generation of the store.
-func TestGenerateStore(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	resources := make([]zebra.Resource, 0, Max)
-
-	res := genResources(mockCmd(), "vlan-pool", pkg.GenerateVlanPool, resources)
-
-	assert.NotNil(res)
-
-	assert.True(len(res) > 0)
-}
-
-// Tests for the run function.
-func TestRun(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	arr := []string{}
-
-	exec := run(mockCmd(), arr)
-
-	assert.Nil(exec)
-}
-
-// Test for the overall behavior of zebra commands.
-func TestBehavior(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	assert.NotNil(mockCmd())
-	main()
+	assert.Nil(execRootCmd())
 }

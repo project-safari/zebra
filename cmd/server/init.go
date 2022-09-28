@@ -7,6 +7,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/spf13/cobra"
 	"gojini.dev/web"
 	"gopkg.in/yaml.v3"
@@ -14,11 +15,7 @@ import (
 
 const ReadWriteOnly = 0o600
 
-// New command that initializes and creates default server configs for the zebra tool.
-//
-// It has flags for: store, addresss, cert, key, user, password, auth-key.
-//
-// It returns *cobra.Command with these setups.
+// Function that initializes a cobra command and returns a pointer to a cobra command.
 func NewInitCmd() *cobra.Command {
 	initCmd := new(cobra.Command)
 
@@ -45,11 +42,10 @@ func NewInitCmd() *cobra.Command {
 	return initCmd
 }
 
-// This is a nested struct with configurations for store and server, as well as Authkey, and admin users.
+// The ServerConfig struct contains data for setting up the configuration.
 //
-// The structs nested inside of this struct are store and server
-//
-// The store contains a root of type string, and the server an address of type string and a tsl of type *web.TSL.
+// It contains two substructs: Store and Server, a string for the
+// authentication key, and a pointer to user.User.
 type ServerConfig struct {
 	Store struct {
 		Root string `json:"rootDir"`
@@ -62,14 +58,12 @@ type ServerConfig struct {
 
 	AuthKey string `json:"authKey"`
 
-	Admin *auth.User `json:"admin"`
+	Admin *user.User `json:"admin"`
 }
 
-// Function to initialize the server.
+// Function that initializes the server.
 //
-// Writes to file using ioutil.WriteFile.
-//
-// Returns an error.
+// Takes in a pointer to the cobra command and returns an error or nil in the absence thereof.
 func initServer(cmd *cobra.Command, args []string) error {
 	cfgFile := cmd.Flag("config").Value.String()
 
@@ -98,8 +92,8 @@ func initServer(cmd *cobra.Command, args []string) error {
 	return ioutil.WriteFile(cfgFile, data, ReadWriteOnly)
 }
 
-// Function for admin user configuration(s).
-func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
+// Function for creating the admin's configurations.
+func makeAdminConfig(cmd *cobra.Command) (*user.User, error) {
 	userConfig := cmd.Flag("user").Value.String()
 	cfg := &struct {
 		User  string            `yaml:"user"`
@@ -107,7 +101,6 @@ func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
 		Key   *auth.RsaIdentity `yaml:"key"`
 	}{}
 
-	fmt.Println("config:", userConfig)
 	fmt.Println("config:", userConfig)
 
 	cfgData, err := ioutil.ReadFile(userConfig)
@@ -124,14 +117,14 @@ func makeAdminConfig(cmd *cobra.Command) (*auth.User, error) {
 		return nil, err
 	}
 
-	user := auth.NewUser(cfg.User, cfg.Email,
+	user := user.NewUser(cfg.User, cfg.Email,
 		cmd.Flag("password").Value.String(),
-		cfg.Key.Public(), zebra.Labels{})
-	user.Role = &auth.Role{
-		Name:       "admin",
-		Privileges: []*auth.Priv{p},
-	}
-	user.Status = nil
+		cfg.Key.Public(),
+		&auth.Role{
+			Name:       "admin",
+			Privileges: []*auth.Priv{p},
+		})
+	user.Status.State = zebra.Active
 
 	return user, nil
 }

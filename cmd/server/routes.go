@@ -6,7 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// RouteHandler returns a http handler that handles all routes under the
+// routeHandler returns a http handler that handles all routes under the
 // /api/v1 endpoint. It is expected that this handler is the final handler
 // and requires the request context to be set with log, store, auth etc.
 func routeHandler() http.Handler {

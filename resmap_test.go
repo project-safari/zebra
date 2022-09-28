@@ -1,45 +1,43 @@
 package zebra_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/network"
 	"github.com/stretchr/testify/assert"
 )
 
-// Function to add a new Switch to use in tests.
-func TestAddNew(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
+// Mock function that returns a new zebra.Resource to be used in tests.
+// It crates a new zebra.BaseResource of type dummy.
+func dummyCtr() zebra.Resource {
+	r := new(zebra.BaseResource)
+	r.Meta.Type.Name = "dummy"
 
-	f := zebra.Factory()
-	assert.NotNil(f)
-
-	f.Add(network.SwitchType())
-	assert.NotNil(f.New("Switch"))
-	assert.Nil(f.New("random"))
+	return r
 }
 
-// Test for function to create a new ResourceList.
+// Test function for creating resource lists.
 func TestNewResourceList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	assert.NotNil(zebra.NewResourceList(nil))
+	_, ctr := dummyType()
+	assert.NotNil(zebra.NewResourceList(ctr))
 }
 
-// Test for function to copy a ResourceList.
+// Test function for copying resource lists.
 func TestCopyResourceList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	resA := zebra.NewResourceList(nil)
+	_, ctr := dummyType()
+	resA := zebra.NewResourceList(ctr)
 	assert.NotNil(resA)
 
-	resA.Resources = append(resA.Resources, new(network.IPAddressPool))
+	resA.Resources = append(resA.Resources, ctr())
 
-	resB := zebra.NewResourceList(nil)
+	resB := zebra.NewResourceList(ctr)
 	assert.NotNil(resB)
 	assert.Empty(len(resB.Resources))
 
@@ -53,45 +51,37 @@ func TestListMarshalUnmarshal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
+	dummy, ctr := dummyType()
 	funMap := zebra.Factory()
-	funMap.Add(network.VLANPoolType())
+	funMap.Add(dummy, ctr)
 
-	resA := zebra.NewResourceList(funMap)
+	resA := zebra.NewResourceList(ctr)
 	assert.NotNil(resA)
 
-	vlan := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "invalid",
-			Labels: nil,
-			Status: zebra.DefaultStatus(),
-		},
-		RangeStart: 0,
-		RangeEnd:   10,
-	}
-
-	resA.Resources = append(resA.Resources, vlan)
+	d := ctr()
+	assert.Nil(resA.Add(d))
 
 	bytes, err := resA.MarshalJSON()
 	assert.Nil(err)
 	assert.NotNil(bytes)
 
-	resB := zebra.NewResourceList(funMap)
+	resB := zebra.NewResourceList(ctr)
 	assert.NotNil(resB)
 
 	err = resB.UnmarshalJSON(bytes)
-	assert.NotNil(err)
+	assert.Nil(err)
 
-	vlan.Type = "VLANPool"
-	resA.Resources = []zebra.Resource{vlan}
+	d1 := ctr()
+	resA.Resources = []zebra.Resource{d1}
 
 	bytes, err = resA.MarshalJSON()
 	assert.Nil(err)
 	assert.NotNil(bytes)
 
-	resB = zebra.NewResourceList(funMap)
+	resB = zebra.NewResourceList(ctr)
 	assert.NotNil(resB)
 
+	fmt.Println(string(bytes))
 	err = resB.UnmarshalJSON(bytes)
 	assert.Nil(err)
 	assert.Equal(1, len(resB.Resources))
@@ -102,18 +92,18 @@ func TestErrorMarshalUnmarshal(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add(network.VLANPoolType())
-	resList := zebra.NewResourceList(funMap)
-	assert.NotNil(resList.UnmarshalJSON(nil))
-	assert.NotNil(resList.UnmarshalJSON([]byte(`[{"id":"0100000001"}]`)))
-	assert.NotNil(resList.UnmarshalJSON([]byte(`[{"id":"0100000001", "type":123}]`)))
+	funMap.Add(zebra.Type{"dummy", "dummy type"}, dummyCtr)
 
-	resMap := zebra.NewResourceMap(nil)
+	resList := zebra.NewResourceList(dummyCtr)
+	assert.NotNil(resList.UnmarshalJSON(nil))
+	assert.NotNil(resList.UnmarshalJSON([]byte(`[{"id":"0100000001", "meta":123}]`)))
+
+	resMap := zebra.NewResourceMap(funMap)
 	assert.NotNil(resMap.UnmarshalJSON(nil))
 	assert.NotNil(resMap.UnmarshalJSON([]byte(`{"VLANPool":[{"id":"0100000001", "type":123}]}`)))
 }
 
-// Test for function to create a new ResourceMap.
+// Test function for creating resource maps.
 func TestNewResourceMap(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -121,82 +111,52 @@ func TestNewResourceMap(t *testing.T) {
 	assert.NotNil(zebra.NewResourceMap(nil))
 }
 
-// Test for function to copy a ResourceMap.
+// Test function for copying resource maps.
 func TestCopyResourceMap(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	resA := zebra.NewResourceMap(nil)
+	funMap := zebra.Factory()
+	dummy, ctr := dummyType()
+	funMap.Add(dummy, ctr)
+
+	resA := zebra.NewResourceMap(funMap)
 	assert.NotNil(resA)
+	assert.NotNil(resA.Factory())
 
-	resA.Add(new(network.IPAddressPool), "IPAddressPool")
+	assert.Nil(resA.Add(ctr()))
 
-	resB := zebra.NewResourceMap(nil)
+	resB := zebra.NewResourceMap(funMap)
 	assert.NotNil(resB)
 
 	zebra.CopyResourceMap(resB, nil)
 
 	zebra.CopyResourceMap(resB, resA)
 	assert.Equal(1, len(resB.Resources))
-	assert.Equal(1, len(resB.Resources["IPAddressPool"].Resources))
+	assert.Equal(1, len(resB.Resources["dummy"].Resources))
 }
 
-// Test for function to get a factory given a ResourceMap.
-func TestGetFactory(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	f := zebra.Factory()
-	f.Add(network.SwitchType())
-	assert.NotEmpty(f.Types())
-	aType, ok := f.Type("Switch")
-	assert.True(ok)
-	assert.NotNil(aType)
-
-	resA := zebra.NewResourceMap(f)
-	assert.NotNil(resA)
-
-	assert.NotNil(resA.GetFactory())
-}
-
-// Test for adding to resMap and checking the length.
-func TestAdd(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	funMap := zebra.Factory()
-	funMap.Add(network.SwitchType())
-
-	resA := zebra.NewResourceMap(funMap)
-	assert.NotNil(resA)
-
-	switch1 := funMap.New("Switch")
-
-	resA.Add(switch1, "Switch")
-	assert.NotNil(len(resA.Resources["Switch"].Resources) == 1)
-}
-
-// Test for adding to resMap, checking the length, and deleting.
+// Test function for deliting resource lists and resource maps.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add(network.SwitchType())
+	funMap.Add(dummyType())
 
 	resA := zebra.NewResourceMap(funMap)
 	assert.NotNil(resA)
 
-	switch1 := funMap.New("Switch")
+	d := funMap.New("dummy")
 
-	resA.Add(switch1, "Switch")
-	assert.NotNil(len(resA.Resources["Switch"].Resources) == 1)
+	assert.Nil(resA.Add(d))
+	assert.NotNil(len(resA.Resources["dummy"].Resources) == 1)
 
-	resA.Delete(switch1, "Switch")
+	assert.Nil(resA.Delete(d))
 
-	resA.Delete(switch1, "invalid_key")
+	assert.NotNil(resA.Delete(d))
 
-	_, ok := resA.Resources["Switch"]
+	_, ok := resA.Resources["dummy"]
 	assert.NotNil(ok)
 }
 
@@ -205,23 +165,13 @@ func TestMapMarshalUnMarshal(t *testing.T) {
 	assert := assert.New(t)
 
 	funMap := zebra.Factory()
-	funMap.Add(network.VLANPoolType())
+	funMap.Add(zebra.Type{"dummy", "dummy type"}, dummyCtr)
 
 	resA := zebra.NewResourceMap(funMap)
 	assert.NotNil(resA)
 
-	vlan := &network.VLANPool{
-		BaseResource: zebra.BaseResource{
-			ID:     "0100001",
-			Type:   "VLANPool",
-			Labels: nil,
-			Status: zebra.DefaultStatus(),
-		},
-		RangeStart: 0,
-		RangeEnd:   10,
-	}
-
-	resA.Add(vlan, "VLANPool")
+	d := funMap.New("dummy")
+	assert.Nil(resA.Add(d))
 
 	bytes, err := resA.MarshalJSON()
 	assert.Nil(err)

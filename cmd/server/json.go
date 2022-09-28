@@ -1,7 +1,3 @@
-/*
-file contains functions to read / write json.
-*/
-
 package main
 
 import (
@@ -14,10 +10,13 @@ import (
 	"github.com/go-logr/logr"
 )
 
-// ErrEmptyBody returns an error if the request body is empty.
+// ErrEmptyBody is an error that occurs if the request body is empty.
 var ErrEmptyBody = errors.New("request body is empty")
 
-// Read JSON.
+// Function that reads from a request body, logs it, and unmarshals the data.
+//
+// It takes in a context.Context, a pointer to http.Request, and an interface.
+// It returns an error or nil in the absence thereof.
 func readJSON(ctx context.Context, req *http.Request, data interface{}) error {
 	log := logr.FromContextOrDiscard(ctx)
 
@@ -37,7 +36,10 @@ func readJSON(ctx context.Context, req *http.Request, data interface{}) error {
 	return err
 }
 
-// Write json.
+// Function that writes the response header.
+//
+// It takes in a context.Context, a pointer to http.ResponceWriter, and an interface.
+// It returns an error or nil in the absence thereof.
 func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
 	log := logr.FromContextOrDiscard(ctx)
 

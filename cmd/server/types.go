@@ -5,11 +5,13 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
 )
 
+// Function that helps handle the request types.
+// Returns a httprouter.Handle and takes in nothing.
 func handleTypes() httprouter.Handle {
-	allTypes := store.DefaultFactory()
+	allTypes := model.Factory()
 
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
@@ -29,7 +31,7 @@ func handleTypes() httprouter.Handle {
 		}{Types: []zebra.Type{}}
 
 		if len(typeReq.Types) == 0 {
-			// Return all types.
+			// return all types
 			typeRes.Types = allTypes.Types()
 		} else {
 			for _, t := range typeReq.Types {

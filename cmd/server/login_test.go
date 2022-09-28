@@ -13,18 +13,19 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 
-// Constant values for keys to be used in tests.
+// Mock const values for authentication to be used in tests.
 const (
 	authKey   = "abracadabra"
 	jiniWords = "youGetThreewishes!"
 )
 
-// Test for finding a given user in the store.
+// Test function to find a user.
 func TestFindUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -44,26 +45,20 @@ func TestFindUser(t *testing.T) {
 	assert.NotNil(findUser(store, "email@domain"))
 }
 
-// Mock function to make a user to be used in tests.
-func makeUser(assert *assert.Assertions) *auth.User {
+// Mock function to create a user to be used in tests.
+// It returns a pointer to user.User.
+func makeUser(assert *assert.Assertions) *user.User {
 	ctx := context.Background()
 	all, e := auth.NewPriv("", true, true, true, true)
 	assert.Nil(e)
 	assert.NotNil(all)
 
-	jini := new(auth.User)
-	jini.Name = "jini"
-	jini.Email = "email@domain"
-	jini.ID = "007"
-	jini.Type = "User"
-	jini.PasswordHash = auth.HashPassword(jiniWords)
-	jini.Role = &auth.Role{Name: "admin", Privileges: []*auth.Priv{all}}
-	jini.Labels = pkg.CreateLabels()
-	jini.Labels = pkg.GroupLabels(jini.Labels, "sampleGroup")
-
 	jiniKey, err := auth.Generate()
 	assert.Nil(err)
 	assert.NotNil(jiniKey)
+
+	jini := user.NewUser("jini", "email@domain", jiniWords, jiniKey,
+		&auth.Role{Name: "admin", Privileges: []*auth.Priv{all}})
 
 	jini.Key = jiniKey
 	assert.Nil(jini.Validate(ctx))
@@ -72,9 +67,10 @@ func makeUser(assert *assert.Assertions) *auth.User {
 	return jini
 }
 
-// Mock function to make a user to be used in tests.
-func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zebra.Store {
-	factory := store.DefaultFactory()
+// Mock function to make a query store to be used in tests.
+// It returns a zebra.Store.
+func makeQueryStore(root string, assert *assert.Assertions, user *user.User) zebra.Store {
+	factory := model.Factory()
 	assert.NotNil(factory)
 
 	store := store.NewResourceStore(root, factory)
@@ -89,7 +85,7 @@ func makeQueryStore(root string, assert *assert.Assertions, user *auth.User) zeb
 	return store
 }
 
-// Mock function to make a login request to be used in tests.
+// Mock function that makes a login request for the tests in this file.
 func makeLoginRequest(assert *assert.Assertions, user string, password string,
 	email string, resources *ResourceAPI,
 ) *http.Request {
@@ -105,7 +101,7 @@ func makeLoginRequest(assert *assert.Assertions, user string, password string,
 	return req
 }
 
-// Test for an incorrect user (failed login).
+// Test function for a bad / incorrect user.
 func TestBadUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -114,7 +110,7 @@ func TestBadUser(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	req := makeLoginRequest(assert, "ali", "aliOfAgrabha", "email@domain1", resources)
@@ -132,6 +128,7 @@ func TestBadUser(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// Test function for a bad / incorrect login.
 func TestBadLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -140,7 +137,7 @@ func TestBadLogin(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	req := makeLoginRequest(assert, "jini", "aliOfAgrabha", "email@domain", resources)
@@ -152,7 +149,7 @@ func TestBadLogin(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
-// Test for login.
+// Test function for login.
 func TestLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -161,7 +158,7 @@ func TestLogin(t *testing.T) {
 
 	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	req := makeLoginRequest(assert, "jini", jiniWords, "email@domain", resources)
@@ -202,7 +199,7 @@ func TestLoginContext(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey,
-		NewResourceAPI(store.DefaultFactory()))
+		NewResourceAPI(model.Factory()))
 
 	req, err = http.NewRequestWithContext(ctx, "POST", "/login", nil)
 	assert.Nil(err)

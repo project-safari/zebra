@@ -9,10 +9,11 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/store"
+	"github.com/project-safari/zebra/model"
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for the authentication adapter.
 func TestAuthAdapter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -31,9 +32,9 @@ func TestAuthAdapter(t *testing.T) {
 
 	root := "test_auth_adapter"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, makeUser(assert))
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -46,21 +47,21 @@ func TestAuthAdapter(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
-// Tests for the rsa key.
+// Test function for the RSA key function.
 func TestRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	root := "test_rsa_key"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -90,20 +91,21 @@ func TestRSAKey(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// Test function for the JWT.
 func TestJWT(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	root := "test_jwt"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -112,7 +114,7 @@ func TestJWT(t *testing.T) {
 	req, err := http.NewRequestWithContext(ctx, "GET", "/", nil)
 	assert.Nil(err)
 
-	claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
+	claims := auth.NewClaims("zebra", user.Meta.Name, user.Role, user.Email)
 	jwt := claims.JWT(authKey)
 	req.AddCookie(makeCookie(jwt))
 
@@ -127,21 +129,21 @@ func TestJWT(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
-// Tests for case with an incorrect rsa key.
+// Test function for using a bad rsa key.
 func TestBadRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	root := "test_bad_rsa_key"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -180,20 +182,21 @@ func TestBadRSAKey(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
+// Test function for using a bad JWT.
 func TestBadJWT(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
 	root := "test_bad_jwt"
 
-	t.Cleanup(func() { os.RemoveAll(root) })
+	defer func() { os.RemoveAll(root) }()
 
 	user := makeUser(assert)
 	priKey := user.Key
 
 	user.Key = priKey.Public()
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeQueryStore(root, assert, user)
 
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
@@ -218,7 +221,7 @@ func TestBadJWT(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 
-	// Bad token
+	// bad token
 	req, err = http.NewRequestWithContext(ctx, "GET", "/", nil)
 	req.AddCookie(makeCookie("badjwt"))
 	assert.Nil(err)

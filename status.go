@@ -1,32 +1,23 @@
 package zebra
 
 import (
-	"context"
 	"errors"
 	"strings"
-	"time"
 )
 
-// Status is a struct that sets the status of a resource.
-//
-// It should contain a fault, a lease,
-// a string that represents a user's name, a state, and the time when it was created.
 type Status struct {
-	Fault       Fault     `json:"fault"`
-	Lease       Lease     `json:"lease"`
-	UsedBy      string    `json:"usedBy"`
-	State       State     `json:"state"`
-	CreatedTime time.Time `json:"createdTime"`
+	Fault       Fault       `json:"fault,omitempty"`
+	LeaseStatus LeaseStatus `json:"lease,omitempty"`
+	UsedBy      string      `json:"usedBy,omitempty"`
+	State       State       `json:"state,omitempty"`
 }
 
-// Set types for Fault, Lease, State.
 type (
-	Fault uint8
-	Lease uint8
-	State uint8
+	Fault       uint8
+	LeaseStatus uint8
+	State       uint8
 )
 
-// Default values to be used for status.
 const (
 	None Fault = iota
 	Minor
@@ -34,25 +25,22 @@ const (
 	Critical
 )
 
-// Default values to be used for lease.
 const (
-	Leased Lease = iota
-	Free
+	Free LeaseStatus = iota
+	Leased
 	Setup
 )
 
-// Default values to be used for state.
 const (
-	Active State = iota
-	Inactive
+	Inactive State = iota
+	Active
 )
 
 const Unknown = "unknown"
 
-// Errors that can occur in a lease or resource state.
 var (
 	ErrFault       = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
-	ErrLease       = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
+	ErrLeaseStatus = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
 	ErrState       = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
 	ErrCreatedTime = errors.New(`createdTime is incorrect, must be before current time`)
 )
@@ -90,9 +78,8 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// Function that deals with lease status.
-func (l Lease) String() string {
-	strs := map[Lease]string{Leased: "leased", Free: "free", Setup: "setup"}
+func (l LeaseStatus) String() string {
+	strs := map[LeaseStatus]string{Leased: "leased", Free: "free", Setup: "setup"}
 	lstr, ok := strs[l]
 
 	if !ok {
@@ -102,12 +89,12 @@ func (l Lease) String() string {
 	return lstr
 }
 
-func (l *Lease) MarshalText() ([]byte, error) {
+func (l *LeaseStatus) MarshalText() ([]byte, error) {
 	return []byte(l.String()), nil
 }
 
-func (l *Lease) UnmarshalText(data []byte) error {
-	lmap := map[string]Lease{
+func (l *LeaseStatus) UnmarshalText(data []byte) error {
+	lmap := map[string]LeaseStatus{
 		"leased": Leased,
 		"free":   Free,
 		"setup":  Setup,
@@ -115,7 +102,7 @@ func (l *Lease) UnmarshalText(data []byte) error {
 
 	lval, ok := lmap[strings.ToLower(string(data))]
 	if !ok {
-		return ErrFault
+		return ErrLeaseStatus
 	}
 
 	*l = lval
@@ -123,7 +110,6 @@ func (l *Lease) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// Function that deals with state status.
 func (s State) String() string {
 	strs := map[State]string{Active: "active", Inactive: "inactive"}
 	sstr, ok := strs[s]
@@ -147,7 +133,7 @@ func (s *State) UnmarshalText(data []byte) error {
 
 	sval, ok := smap[strings.ToLower(string(data))]
 	if !ok {
-		return ErrFault
+		return ErrState
 	}
 
 	*s = sval
@@ -155,21 +141,17 @@ func (s *State) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (s *Status) Validate(ctx context.Context) error {
+func (s Status) Validate() error {
 	if s.Fault > Critical {
 		return ErrFault
 	}
 
-	if s.Lease > Setup {
-		return ErrLease
+	if s.LeaseStatus > Setup {
+		return ErrLeaseStatus
 	}
 
-	if s.State > Inactive {
+	if s.State > Active {
 		return ErrState
-	}
-
-	if !s.CreatedTime.Before(time.Now()) {
-		return ErrCreatedTime
 	}
 
 	return nil
@@ -177,12 +159,11 @@ func (s *Status) Validate(ctx context.Context) error {
 
 // DefaultStatus returns a Status object with starting values (i.e. healthy
 // resource in a free state, active, no user, and create time as right now).
-func DefaultStatus() *Status {
-	return &Status{
+func DefaultStatus() Status {
+	return Status{
 		Fault:       None,
-		Lease:       Free,
+		LeaseStatus: Free,
 		UsedBy:      "",
 		State:       Inactive,
-		CreatedTime: time.Now(),
 	}
 }

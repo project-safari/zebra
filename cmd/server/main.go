@@ -22,9 +22,6 @@ func main() {
 	}
 }
 
-// Function that executes the command.
-// This function adds the initialization command to the root command.
-// Will be used in main to complete server execution.
 func execRootCmd() error {
 	name := filepath.Base(os.Args[0])
 	rootCmd := new(cobra.Command)
@@ -48,16 +45,12 @@ func execRootCmd() error {
 	return err
 }
 
-// For path.
-// Returns a string containing the path.
 func cwd(f string) string {
 	s, _ := os.Getwd()
 
 	return path.Join(s, f)
 }
 
-// Function to start the server once the server configuration is loaded.
-// Returns an error.
 func run(cmd *cobra.Command, args []string) error {
 	// Load server configuration
 	cfgFile := cmd.Flag("config").Value.String()
@@ -70,9 +63,6 @@ func run(cmd *cobra.Command, args []string) error {
 	return startServer(cfgStore)
 }
 
-// Function to start the server, given a *config.Store.
-// Will be used in run.
-// Returns an error.
 func startServer(cfgStore *config.Store) error {
 	appCtx := setupLogger(cfgStore)
 	log := logr.FromContextOrDiscard(appCtx)
@@ -93,7 +83,7 @@ func startServer(cfgStore *config.Store) error {
 	routes := routeHandler()
 
 	// The order of wrap matters, routes is the final handler that is being
-	// wrapped. Setup, login and register are unauthenticated APIs that serve
+	// wrapped. setup, login and register are unauthenticated APIs that serve
 	// as a way to bootstrap authentication. auth, refresh and all endpoints
 	// registered by routes must be authenticated either via a jwt in the cookie
 	// or via a rsa key token in the header.

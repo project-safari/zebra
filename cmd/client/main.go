@@ -5,14 +5,13 @@ import (
 	"os"
 )
 
-// Main puts together the execution of the commands.
 func main() {
 	if e := execRootCmd(); e != nil {
 		os.Exit(1)
 	}
 }
 
-// Getting the root command to execute in main.
+// Function that executes the root cobra command.
 func execRootCmd() error {
 	rootCmd := New()
 

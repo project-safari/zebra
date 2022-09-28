@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Go tests for lease commands.
+// Test function for lease requests.
 func TestLease(t *testing.T) {
 	t.Parallel()
 

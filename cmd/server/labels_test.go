@@ -12,30 +12,31 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/dc"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/dc"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )
 
-// Mock function to create a a resource store to be used in the tests.
+// Mock function that creates a store with 100 labs to be used for tests.
 func makeStore(assert *assert.Assertions, root string) zebra.Store {
-	s := store.NewResourceStore(root, store.DefaultFactory())
+	f := model.Factory()
+	s := store.NewResourceStore(root, f)
 	assert.Nil(s.Initialize())
 
-	labels := zebra.Labels{}
-
-	for i := 0; i < 10; i++ {
-		key := fmt.Sprintf("label%d", i)
-		value := fmt.Sprintf("value%d", i)
-		labels[key] = value
-	}
-
-	// Create 100 labs.
+	// create 100 labs
 	for i := 0; i < 100; i++ {
-		l := new(dc.Lab)
-		l.Name = fmt.Sprintf("lab-%d", i+1)
-		l.Type = "Lab"
-		l.BaseResource = *zebra.NewBaseResource("Lab", labels)
+		l, ok := f.New("dc.lab").(*dc.Lab)
+		assert.True(ok)
+
+		n := fmt.Sprintf("lab-%d", i+1)
+		l.BaseResource = *zebra.NewBaseResource(l.Meta.Type, n, "test_owner", "test_group")
+
+		for i := 0; i < 10; i++ {
+			key := fmt.Sprintf("label%d", i)
+			value := fmt.Sprintf("value%d", i)
+			l.Meta.Labels.Add(key, value)
+		}
 
 		assert.Nil(s.Create(l))
 	}
@@ -43,7 +44,7 @@ func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	return s
 }
 
-// Function to create an http request to be used in the tests.
+// Mock function that creates a request for labels, to be used for tests.
 func makeLabelRequest(assert *assert.Assertions, resources *ResourceAPI, labels ...string) *http.Request {
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 	ctx = context.WithValue(ctx, AuthCtxKey, authKey)
@@ -61,7 +62,7 @@ func makeLabelRequest(assert *assert.Assertions, resources *ResourceAPI, labels 
 	return req
 }
 
-// Test for a request with invalid / incorrect label.
+// Test for a bad request for labels.
 func TestBadLabelReq(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -72,7 +73,7 @@ func TestBadLabelReq(t *testing.T) {
 		h(w, r, nil)
 	})
 
-	ctx := context.WithValue(context.Background(), ResourcesCtxKey, NewResourceAPI(store.DefaultFactory()))
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, NewResourceAPI(model.Factory()))
 	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/labels", nil)
 	assert.Nil(err)
 	assert.NotNil(req)
@@ -93,18 +94,16 @@ func TestBadLabelReq(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 }
 
-// Tests where all labels are used.
+// Function to test a request for all labels.
 func TestAllLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	defer func() { os.RemoveAll("test_all_labels") }()
+
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeStore(assert, "test_all_labels")
 	assert.NotNil(resources.Store)
-
-	defer func() {
-		assert.Nil(os.RemoveAll("test_all_labels"))
-	}()
 
 	h := handleLabels()
 	rr := httptest.NewRecorder()
@@ -118,18 +117,16 @@ func TestAllLabels(t *testing.T) {
 	assert.Equal(rr.Code, http.StatusOK)
 }
 
-// Tests where label request is successful.
+// Function to test labels and label requests.
 func TestLabels(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
-	resources := NewResourceAPI(store.DefaultFactory())
+	defer func() { os.RemoveAll("test_labels") }()
+
+	resources := NewResourceAPI(model.Factory())
 	resources.Store = makeStore(assert, "test_labels")
 	assert.NotNil(resources.Store)
-
-	defer func() {
-		assert.Nil(os.RemoveAll("test_labels"))
-	}()
 
 	h := handleLabels()
 	rr := httptest.NewRecorder()

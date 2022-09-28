@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,174 +15,32 @@ func TestBaseResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
+	d, _ := dummyType()
 	ctx := context.Background()
 	res := &zebra.BaseResource{
-		ID:     "",
-		Type:   "",
-		Labels: zebra.Labels{"key": "value"},
+		Meta:   zebra.NewMeta(d, "", "", ""),
 		Status: zebra.DefaultStatus(),
 	}
+	res.Meta.Name = ""
 	assert.NotNil(res.Validate(ctx))
 
-	res.ID = "ab"
+	res.Meta.ID = "abracadabra"
 	assert.NotNil(res.Validate(ctx))
-	assert.Equal("ab", res.GetName())
-
-	res.ID = "abracadabra"
-	assert.NotNil(res.Validate(ctx))
-
-	res.Type = "BaseResource"
-	assert.NotNil(res.Validate(ctx))
-
-	res.Labels.Add("system.group", "test")
-
-	assert.Nil(res.Validate(ctx))
-	assert.Equal(res.ID, res.GetID())
-	assert.Equal(res.Type, res.GetType())
-	assert.True(res.GetLabels().HasKey("key"))
-	assert.Equal(res.ID[:7], res.GetName())
+	assert.Equal("abracadabra", res.GetMeta().ID)
 }
 
-// TestBaseResource tests the *NamedResource Validate function with a pass case
-// and a fail case.
-func TestNamedResource(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	ctx := context.Background()
-	res := &zebra.NamedResource{
-		BaseResource: zebra.BaseResource{
-			ID:     "",
-			Type:   "",
-			Labels: zebra.Labels{"key": "value"},
-			Status: zebra.DefaultStatus(),
-		},
-		Name: "",
-	}
-	assert.NotNil(res.Validate(ctx))
-
-	res.ID = "abracadabra"
-	assert.NotNil(res.Validate(ctx))
-	assert.Equal(res.ID, res.GetID())
-
-	res.Type = "NamedResource"
-	assert.NotNil(res.Validate(ctx))
-	assert.Equal(res.Type, res.GetType())
-
-	res.Name = "jasmine"
-	assert.NotNil(res.Validate(ctx))
-	assert.Equal("jasmine", res.GetName())
-
-	assert.True(res.GetLabels().HasKey("key"))
-}
-
-// Tests for credentials.
-func TestCredentials(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	ctx := context.Background()
-
-	credentials := zebra.Credentials{
-		NamedResource: zebra.NamedResource{
-			BaseResource: zebra.BaseResource{
-				ID:     "",
-				Type:   "Credentials",
-				Labels: zebra.Labels{},
-				Status: zebra.DefaultStatus(),
-			},
-			Name: "",
-		},
-		Keys: nil,
-	}
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.ID = "id123"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Type = "Credentials"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Name = "name"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys = make(map[string]string)
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys["password"] = "a"
-	credentials.Keys["ssh-key"] = "test"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys["password"] = "abcdefghijklm"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys["password"] = "ABCDEFGHIJKLM"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys["password"] = "ABCDEFghijklm"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys["password"] = "ABCDEFghijklm1"
-	assert.NotNil(credentials.Validate(ctx))
-
-	credentials.Keys["password"] = "properPass123$"
-	assert.NotNil(credentials.Validate(ctx))
-}
-
-// Tests for validation of labels.
-func TestLabelsValidation(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	// First test - with a correct default label.
-	mapOne := map[string]string{
-		"system.group": "Americas",
-		"color":        "red",
-	}
-
-	resOne := zebra.NewBaseResource("", mapOne)
-	assert.Nil(resOne.Validate(context.Background()))
-
-	// Second test - with an incorrect default label.
-	mapTwo := map[string]string{
-		"letter": "alpha",
-		"color":  "blue",
-	}
-
-	resTwo := zebra.NewBaseResource("", mapTwo)
-
-	assert.Nil(resTwo.Validate(context.Background()))
-}
-
-// Tests for creation of new credentials.
-func TestNewCred(t *testing.T) {
-	t.Parallel()
-	assert := assert.New(t)
-
-	labels := pkg.CreateLabels()
-
-	labels = pkg.GroupLabels(labels, "group")
-
-	creds := zebra.NewCredential(pkg.Name(), labels)
-
-	assert.NotNil(creds)
-}
-
-// Tests for getting the status of a resource and validating that resource.
+// Test function for getting the status of a resource.
 func TestGettingStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
 
+	d, _ := dummyType()
 	ctx := context.Background()
-	res := &zebra.NamedResource{
-		BaseResource: zebra.BaseResource{
-			ID:     "",
-			Type:   "Switch",
-			Labels: zebra.Labels{"key": "value"},
-			Status: zebra.DefaultStatus(),
-		},
-		Name: "",
-	}
-	assert.NotNil(res.Validate(ctx))
+
+	res := zebra.NewBaseResource(d, "dummy", "dummy", "dummy")
+	assert.Nil(res.Validate(ctx))
 	assert.NotNil(res.GetStatus())
+
+	res.Status.Fault = zebra.Fault(100)
+	assert.NotNil(res.Validate(ctx))
 }

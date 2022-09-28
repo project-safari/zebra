@@ -11,10 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// errFake is an error to be used in unit tests for json read / write.
+// errFake is a mock error to be used in tests.
 var errFake = errors.New("fake error")
 
-// Mock reader struct used in unit tests for json read / write.
 type fakeReader struct {
 	err bool
 }
@@ -27,7 +26,6 @@ func (f fakeReader) Read(b []byte) (int, error) {
 	return 0, io.EOF
 }
 
-// Mock writer struct used in unit tests for json read / write.
 type fakeWriter struct {
 	status int
 	header http.Header
@@ -50,7 +48,7 @@ func (f *fakeWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-// Tests for json reading.
+// Test function for reading json.
 func TestReadJSON(t *testing.T) {
 	t.Parallel()
 
@@ -72,7 +70,7 @@ func TestReadJSON(t *testing.T) {
 	assert.NotNil(readJSON(context.Background(), req, nil))
 }
 
-// Tests for json writing.
+// Test function for writing json.
 func TestWriteJSON(t *testing.T) {
 	t.Parallel()
 

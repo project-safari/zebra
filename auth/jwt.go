@@ -7,14 +7,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// ErrInvalidToken is a potential error concerning tokens.
-// ErrInvalidToken returns an error if the token is not valid.
 var ErrInvalidToken = errors.New("invalid jwt token")
 
 const TokenDuration = time.Minute * 10
 
-// Struct that helps manage claims.
-// It contains StandardClaims, a Role, and an email address.
 type Claims struct {
 	jwt.StandardClaims
 	Role  *Role  `json:"role"`
@@ -33,27 +29,22 @@ func NewClaims(issuer string, subject string, role *Role, email string) *Claims 
 	return claims
 }
 
-// Create claims, return boolean.
 func (claims *Claims) Create(resource string) bool {
 	return claims.Role.Create(resource)
 }
 
-// Read claims, return boolean.
 func (claims *Claims) Read(resource string) bool {
 	return claims.Role.Read(resource)
 }
 
-// Write claims, return boolean.
 func (claims *Claims) Write(resource string) bool {
 	return claims.Role.Write(resource)
 }
 
-// Delete existing claims, return boolean.
 func (claims *Claims) Delete(resource string) bool {
 	return claims.Role.Delete(resource)
 }
 
-// Update existing claims, return boolean.
 func (claims *Claims) Update(resource string) bool {
 	return claims.Role.Update(resource)
 }

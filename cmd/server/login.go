@@ -8,18 +8,11 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/model/user"
 	"gojini.dev/web"
 )
 
-// Function to create a login adapter.
-//
-// Function reads the json file, finds the user, and authenticates him. her with the respective password.
-//
-// If no user of type (*auth.User) is found, or the email is nivalid, log error "no user found".
-//
-// If user exists, but authentication fails, log error "user auth failed".
-//
-// Returns web.Adapter.
+// Function that sets up the login adapter and returns a web.Adapter for the login of a user.
 func loginAdapter() web.Adapter {
 	return func(nextHandler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -72,7 +65,7 @@ func loginAdapter() web.Adapter {
 				return
 			}
 
-			claims := auth.NewClaims("zebra", user.Name, user.Role, user.Email)
+			claims := auth.NewClaims("zebra", user.Meta.Name, user.Role, user.Email)
 			respondWithClaims(ctx, res, claims, authKey)
 
 			log.Info("login succeeded", "user", user.Email)
@@ -80,7 +73,7 @@ func loginAdapter() web.Adapter {
 	}
 }
 
-// Function to make the cookies.
+// Function that makes cookies and returns a pointer to the http.Cookie.
 func makeCookie(jwt string) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Name = "jwt"
@@ -90,21 +83,18 @@ func makeCookie(jwt string) *http.Cookie {
 	return cookie
 }
 
-// Function to find the user.
-//
-// This function will be used in loginAdapter() to ensure that the user exists.
-//
-// Returns *auth.User.
-func findUser(store zebra.Store, email string) *auth.User {
-	resMap := store.QueryType([]string{"User"})
+// Function that helps find a user in the zebra store with a given string containing an email address.
+// It returns a pointer to user.User.
+func findUser(store zebra.Store, email string) *user.User {
+	resMap := store.QueryType([]string{"system.user"})
 
-	users := resMap.Resources["User"]
+	users := resMap.Resources["system.user"]
 	if users == nil {
 		return nil
 	}
 
 	for _, u := range users.Resources {
-		user, ok := u.(*auth.User)
+		user, ok := u.(*user.User)
 		if ok && user.Email == email {
 			return user
 		}
@@ -113,7 +103,9 @@ func findUser(store zebra.Store, email string) *auth.User {
 	return nil
 }
 
-// Function for response data from login.
+// Function for an http response with claims.
+//
+// It sets up a cookie using the JWT of the response data and writes it.
 func respondWithClaims(ctx context.Context, res http.ResponseWriter,
 	claims *auth.Claims, authKey string,
 ) {

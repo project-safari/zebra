@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test for store validation.
+// Test function for validation of the store.
 func TestValidateStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -26,6 +26,7 @@ func TestValidateStore(t *testing.T) {
 	assert.Nil(q.Validate())
 }
 
+// Test function for marshaling the query.
 func TestMarshalQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -46,6 +47,7 @@ func TestMarshalQuery(t *testing.T) {
 	assert.NotNil(err)
 }
 
+// Test function for unmarshaling the query.
 func TestUnmarshalQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

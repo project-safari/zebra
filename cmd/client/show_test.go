@@ -2,26 +2,28 @@ package main //nolint:testpackage
 
 import (
 	"testing"
+	"time"
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
-	"github.com/project-safari/zebra/cmd/herd/pkg"
-	"github.com/project-safari/zebra/compute"
-	"github.com/project-safari/zebra/dc"
-	"github.com/project-safari/zebra/network"
+	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/compute"
+	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/model/lease"
+	"github.com/project-safari/zebra/model/network"
+	"github.com/project-safari/zebra/model/user"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
-// To make it easier.
-// Mock function that creates a new show command.
+// to make it easier.
 func test() *cobra.Command {
 	showCmd := NewShow()
 
 	return showCmd
 }
 
-// Tests for the client.
+// Function that tests the client.
 func TestClient(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -68,7 +70,7 @@ func TestClient(t *testing.T) {
 	assert.NotNil(cli)
 }
 
-// Tests for adding new show command(s).
+// tests for adding new show command(s).
 func TestNewZebraCommand(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -77,7 +79,7 @@ func TestNewZebraCommand(t *testing.T) {
 	assert.NotNil(cmd)
 }
 
-// Tests for resources.
+// tests for resources.
 func TestShowRes(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -96,7 +98,7 @@ func TestShowRes(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Showing lease status and information.
+// showing lease status and information.
 func TestShowLease(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -115,9 +117,7 @@ func TestShowLease(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for server resource types (server, esx, vcenter, vm).
-//
-//  Tests for server commands.
+// tests for server resource types (server, esx, vcenter, vm).
 func TestShowServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -136,9 +136,6 @@ func TestShowServer(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for server resource types (server, esx, vcenter, vm).
-//
-//  Tests for esx commands.
 func TestShowESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -157,9 +154,6 @@ func TestShowESX(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for server resource types (server, esx, vcenter, vm).
-//
-//  Tests for vc commands.
 func TestShowVC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -178,9 +172,6 @@ func TestShowVC(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for server resource types (server, esx, vcenter, vm).
-//
-//  Tests for vm commands.
 func TestShowVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -199,9 +190,7 @@ func TestShowVM(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for dc resource types (datacenter, lab, rack).
-//
-//  Tests for datacenter commands.
+// tests for dc resource types (datacenter, lab, rack).
 func TestShowDatacenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -220,9 +209,6 @@ func TestShowDatacenter(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for dc resource types (datacenter, lab, rack).
-//
-//  Tests for lab commands.
 func TestShowLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -241,9 +227,6 @@ func TestShowLab(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for dc resource types (datacenter, lab, rack).
-//
-//  Tests for rack commands.
 func TestShowRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -262,9 +245,7 @@ func TestShowRack(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for network resources (switch, vlan, ip-address).
-//
-//  Tests for switch commands.
+// tests for network resources (switch, vlan, ip-address).
 func TestShowSwitches(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -283,9 +264,6 @@ func TestShowSwitches(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for network resources (switch, vlan, ip-address).
-//
-//  Tests for vlan commands.
 func TestShowVlans(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -304,9 +282,6 @@ func TestShowVlans(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for network resources (switch, vlan, ip-address).
-//
-//  Tests for IPAddressPool commands.
 func TestShowPools(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -325,9 +300,7 @@ func TestShowPools(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for user resources (user data, registrations, key).
-//
-//  Tests for user commands.
+// tests for user resources (user data, registrations, key).
 func TestShowUsers(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -346,9 +319,6 @@ func TestShowUsers(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// Tests for user resources (user data, registrations, key).
-//
-//  Tests for registration commands.
 func TestShowRegistrations(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -367,7 +337,6 @@ func TestShowRegistrations(t *testing.T) {
 	assert.NotNil(res)
 }
 
-//  Tests for  printing resources.
 func TestPrintResources(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)
@@ -377,143 +346,76 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 
 	rootCmd.AddCommand(test())
 
-	// Test with only one resource.
+	// test with only one resource.
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
 
-	resMap := zebra.NewResourceMap(*fact)
+	resMap := zebra.NewResourceMap(fact)
 
 	assert.NotNil(resMap)
 
-	rack := new(dc.Rack)
-	rack.Status = new(zebra.Status)
-
-	rack.Status.UsedBy = pkg.Name()
-
-	resMap.Add(rack, "Rack")
+	rack := dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+	assert.Nil(resMap.Add(rack))
 
 	printResources(resMap)
 
-	// Test with many resources.
+	// test with many resources.
 
-	bigMap := zebra.NewResourceMap(*fact)
+	bigMap := zebra.NewResourceMap(fact)
 
 	assert.NotNil(bigMap)
 
-	addr := new(network.IPAddressPool)
-	addr.Status = new(zebra.Status)
+	addr := network.NewIPAddressPool("test_ip_pool", "test_owner", "test_group")
+	assert.Nil(bigMap.Add(addr))
 
-	addr.Status.UsedBy = pkg.Name()
+	vlan := network.NewVLANPool("test_vlan_pool", "test_owner", "test_group")
+	assert.Nil(bigMap.Add(vlan))
 
-	bigMap.Add(addr, "IPAddressPool")
-
-	vlan := new(network.VLANPool)
-
-	vlan.Status = new(zebra.Status)
-
-	vlan.Status.UsedBy = pkg.Name()
-
-	bigMap.Add(vlan, "VLANPool")
-
-	sw := new(network.Switch)
-
-	sw.Status = new(zebra.Status)
-
-	sw.Status.UsedBy = pkg.Name()
-
-	bigMap.Add(sw, "Switch")
+	sw := network.NewSwitch("test_switch", "test_owner", "test_group")
+	assert.Nil(bigMap.Add(sw))
 
 	printResources(bigMap)
 
-	// Test with all resources.
+	// test with all resources.
 
-	allMap := zebra.NewResourceMap(*fact)
-
+	allMap := zebra.NewResourceMap(fact)
 	assert.NotNil(allMap)
 
-	addr2 := new(network.IPAddressPool)
-	addr2.Status = new(zebra.Status)
+	assert.Nil(allMap.Add(addr))
+	assert.Nil(allMap.Add(vlan))
+	assert.Nil(allMap.Add(sw))
 
-	addr2.Status.UsedBy = pkg.Name()
+	center := dc.NewDatacenter("test_dc_addr", "test_dc", "test_owner", "test_group")
+	assert.Nil(allMap.Add(center))
+	assert.Nil(allMap.Add(rack))
 
-	allMap.Add(addr2, "IPAddressPool")
+	lab := dc.NewLab("test_lab", "test_owner", "test_group")
+	assert.Nil(allMap.Add(lab))
 
-	vlan2 := new(network.VLANPool)
-	vlan2.Status = new(zebra.Status)
+	vc := compute.NewVCenter("test_vcenter", "test_owner", "test_group")
+	assert.Nil(allMap.Add(vc))
 
-	vlan2.Status.UsedBy = pkg.Name()
+	vm := compute.NewVM("test_esx", "test_vm", "test_owner", "test_group")
+	assert.Nil(allMap.Add(vm))
 
-	allMap.Add(vlan2, "VLANPool")
+	srv := compute.NewServer("test_serial", "test_model", "test_server", "test_owner", "test_group")
+	assert.Nil(allMap.Add(srv))
 
-	sw2 := new(network.Switch)
-	sw2.Status = new(zebra.Status)
+	eserver := compute.NewESX("test_server", "test_esx", "test_owner", "test_group")
+	assert.Nil(allMap.Add(eserver))
 
-	sw2.Status.UsedBy = pkg.Name()
-
-	allMap.Add(sw2, "Switch")
-
-	center := new(dc.Datacenter)
-	center.Status = new(zebra.Status)
-
-	center.Status.UsedBy = pkg.Name()
-
-	allMap.Add(center, "Datacenter")
-
-	rack2 := new(dc.Rack)
-	rack2.Status = new(zebra.Status)
-
-	rack2.Status.UsedBy = pkg.Name()
-
-	allMap.Add(rack, "Rack")
-
-	lab := new(dc.Lab)
-	lab.Status = new(zebra.Status)
-
-	lab.Status.UsedBy = pkg.Name()
-
-	allMap.Add(lab, "Lab")
-
-	vc := new(compute.VCenter)
-	vc.Status = new(zebra.Status)
-
-	vc.Status.UsedBy = pkg.Name()
-
-	allMap.Add(vc, "VCenter")
-
-	vm := new(compute.VM)
-	vm.Status = new(zebra.Status)
-
-	vm.Status.UsedBy = pkg.Name()
-
-	allMap.Add(vm, "VM")
-
-	srv := new(compute.Server)
-	srv.Status = new(zebra.Status)
-
-	srv.Status.UsedBy = pkg.Name()
-
-	allMap.Add(srv, "S")
-
-	eserver := new(compute.ESX)
-	eserver.Status = new(zebra.Status)
-
-	eserver.Status.UsedBy = pkg.Name()
-
-	allMap.Add(eserver, "esx")
-
-	usr := new(auth.User)
-	usr.Role = new(auth.Role)
-
-	usr.Status = new(zebra.Status)
-
-	usr.Status.UsedBy = pkg.Name()
-
-	allMap.Add(usr, "person")
+	key, _ := auth.Generate()
+	p, _ := auth.NewPriv("", false, true, false, false)
+	role := &auth.Role{
+		Name:       "user",
+		Privileges: []*auth.Priv{p},
+	}
+	usr := user.NewUser("test_user", "test@zebra.io", "bigPassword1!!!", key.Public(), role)
+	assert.Nil(allMap.Add(usr))
 
 	printResources(allMap)
 }
 
-//  Tests for  printing servers.
 func TestPrintServers(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -523,26 +425,17 @@ func TestPrintServers(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	server := compute.NewServer("test_serial", "test_model", "test_server", "test_owner", "test_group")
+	assert.Nil(resMap.Add(server))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	server := new(compute.Server)
-
-	server.Status = new(zebra.Status)
-
-	server.Status.UsedBy = pkg.Name()
-
-	resMap.Add(server, "Server")
-
-	listed := resMap.Resources["Server"].Resources
-
+	listed := resMap.Resources["compute.server"].Resources
 	assert.NotNil(listed)
 
 	printServers(listed)
 }
 
-//  Tests for  printing esx.
 func TestPrintESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -552,25 +445,17 @@ func TestPrintESX(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	esx := compute.NewESX("test_server", "test_esx", "test_owner", "test_group")
+	assert.Nil(resMap.Add(esx))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	eserver := new(compute.ESX)
-	eserver.Status = new(zebra.Status)
-
-	eserver.Status.UsedBy = pkg.Name()
-
-	resMap.Add(eserver, "ESX")
-
-	listed := resMap.Resources["ESX"].Resources
-
+	listed := resMap.Resources["compute.esx"].Resources
 	assert.NotNil(listed)
 
 	printESX(listed)
 }
 
-//  Tests for  printing vcs.
 func TestPrintVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -580,25 +465,18 @@ func TestPrintVCenter(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	vc := compute.NewVCenter("test_vcenter", "test_owner", "test_group")
+	assert.Nil(resMap.Add(vc))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	v := new(compute.VCenter)
-	v.Status = new(zebra.Status)
-
-	v.Status.UsedBy = pkg.Name()
-
-	resMap.Add(v, "VCenter")
-
-	listed := resMap.Resources["VCenter"].Resources
+	listed := resMap.Resources["compute.vcenter"].Resources
 
 	assert.NotNil(listed)
 
 	printVCenters(listed)
 }
 
-//  Tests for  printing vms.
 func TestPrintVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -608,25 +486,18 @@ func TestPrintVM(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	vm := compute.NewVM("test_esx", "test_vm", "test_owner", "test_group")
+	assert.Nil(resMap.Add(vm))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	machine := new(compute.VM)
-	machine.Status = new(zebra.Status)
-
-	machine.Status.UsedBy = pkg.Name()
-
-	resMap.Add(machine, "VM")
-
-	listed := resMap.Resources["VM"].Resources
+	listed := resMap.Resources["compute.vm"].Resources
 
 	assert.NotNil(listed)
 
 	printVM(listed)
 }
 
-//  Tests for  printing vlans.
 func TestPrintVlan(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -636,26 +507,18 @@ func TestPrintVlan(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	vlan := network.NewVLANPool("test_vlan_pool", "test_owner", "test_group")
+	assert.Nil(resMap.Add(vlan))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	vlan := new(network.VLANPool)
-
-	vlan.Status = new(zebra.Status)
-
-	vlan.Status.UsedBy = pkg.Name()
-
-	resMap.Add(vlan, "VLANPool")
-
-	listed := resMap.Resources["VLANPool"].Resources
+	listed := resMap.Resources["network.vlanPool"].Resources
 
 	assert.NotNil(listed)
 
 	printVlans(listed)
 }
 
-//  Tests for  printing switches.
 func TestPrintSwitches(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -665,25 +528,18 @@ func TestPrintSwitches(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	sw := network.NewSwitch("test_switch", "test_owner", "test_group")
+	assert.Nil(resMap.Add(sw))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	sw := new(network.Switch)
-	sw.Status = new(zebra.Status)
-
-	sw.Status.UsedBy = pkg.Name()
-
-	resMap.Add(sw, "Switch")
-
-	listed := resMap.Resources["Switch"].Resources
+	listed := resMap.Resources["network.switch"].Resources
 
 	assert.NotNil(listed)
 
 	printSwitches(listed)
 }
 
-//  Tests for  printing IPAddressPools.
 func TestPrintIPPools(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -693,26 +549,17 @@ func TestPrintIPPools(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	ip := network.NewIPAddressPool("test_ip_pool", "test_owner", "test_group")
+	assert.Nil(resMap.Add(ip))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	pool := new(network.IPAddressPool)
-
-	pool.Status = new(zebra.Status)
-
-	pool.Status.UsedBy = pkg.Name()
-
-	resMap.Add(pool, "ips")
-
-	listed := resMap.Resources["ips"].Resources
-
+	listed := resMap.Resources["network.ipAddressPool"].Resources
 	assert.NotNil(listed)
 
 	printIPs(listed)
 }
 
-//  Tests for  printing datacenters.
 func TestPrintDC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -722,25 +569,17 @@ func TestPrintDC(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	dc := dc.NewDatacenter("test_dc_addr", "test_dc", "test_owner", "test_group")
+	assert.Nil(resMap.Add(dc))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	dc := new(dc.Datacenter)
-	dc.Status = new(zebra.Status)
-
-	dc.Status.UsedBy = pkg.Name()
-
-	resMap.Add(dc, "Datacenter")
-
-	listed := resMap.Resources["Datacenter"].Resources
-
+	listed := resMap.Resources["dc.datacenter"].Resources
 	assert.NotNil(listed)
 
 	printDatacenters(listed)
 }
 
-//  Tests for  printing labs.
 func TestPrintlabs(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -750,25 +589,17 @@ func TestPrintlabs(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	lab := dc.NewLab("test_lab", "test_owner", "test_group")
+	assert.Nil(resMap.Add(lab))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	lb := new(dc.Lab)
-	lb.Status = new(zebra.Status)
-
-	lb.Status.UsedBy = pkg.Name()
-
-	resMap.Add(lb, "Lab")
-
-	listed := resMap.Resources["Lab"].Resources
-
+	listed := resMap.Resources["dc.lab"].Resources
 	assert.NotNil(listed)
 
 	printLabs(listed)
 }
 
-//  Tests for  printing racks.
 func TestPrintRacks(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -778,25 +609,17 @@ func TestPrintRacks(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	rack := dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+	assert.Nil(resMap.Add(rack))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	r := new(dc.Rack)
-	r.Status = new(zebra.Status)
-
-	r.Status.UsedBy = pkg.Name()
-
-	resMap.Add(r, "Rack")
-
-	listed := resMap.Resources["Rack"].Resources
-
+	listed := resMap.Resources["dc.rack"].Resources
 	assert.NotNil(listed)
 
 	printRacks(listed)
 }
 
-//  Tests for  printing leases.
 func TestPrintLeases(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -806,20 +629,17 @@ func TestPrintLeases(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	lease := lease.NewLease("test@zebra.io", time.Hour, nil)
+	assert.Nil(resMap.Add(lease))
 
-	resMap := zebra.NewResourceMap(*fact)
+	listed := resMap.Resources["system.lease"].Resources
+	assert.NotNil(listed)
 
-	assert.NotNil(resMap)
-
-	l := new([]zebra.Resource)
-
-	assert.NotNil(l)
-
-	printLeases(*l)
+	printLeases(listed)
 }
 
-//  Tests for  printing users.
 func TestPrintUsers(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -829,26 +649,23 @@ func TestPrintUsers(t *testing.T) {
 
 	rootCmd.AddCommand(test())
 
-	fact := new(zebra.ResourceFactory)
+	fact := model.Factory()
+	resMap := zebra.NewResourceMap(fact)
+	key, _ := auth.Generate()
+	p, _ := auth.NewPriv("", false, true, false, false)
+	role := &auth.Role{
+		Name:       "user",
+		Privileges: []*auth.Priv{p},
+	}
+	usr := user.NewUser("test_user", "test@zebra.io", "bigPassword1!!!", key.Public(), role)
+	assert.Nil(resMap.Add(usr))
 
-	resMap := zebra.NewResourceMap(*fact)
-
-	usr := new(auth.User)
-
-	usr.Role = new(auth.Role)
-
-	usr.Status = new(zebra.Status)
-
-	resMap.Add(usr, "User")
-
-	listed := resMap.Resources["User"].Resources
-
+	listed := resMap.Resources["system.user"].Resources
 	assert.NotNil(listed)
 
 	printUsers(listed)
 }
 
-//  Tests for  expected behavior.
 func TestBehavior(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
