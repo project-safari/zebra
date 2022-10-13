@@ -285,7 +285,7 @@ func TestDeleteResource(t *testing.T) {
 	assert.Nil(myAPI.Store.Create(lab2))
 
 	// Invalid resources requested to be deleted
-	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
+	body := `{"type":[]}`
 	req := createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
@@ -304,7 +304,12 @@ func TestDeleteResource(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// DELETE resources
-	bytes, err := json.Marshal(myAPI.Store.Query())
+	id1 := lab1.Meta.ID
+	id2 := lab2.Meta.ID
+	idReq := &struct {
+		IDs []string `json:"ids"`
+	}{IDs: []string{id1, id2}}
+	bytes, err := json.Marshal(idReq)
 	assert.Nil(err)
 	req = createRequest(assert, "DELETE", "/resources", string(bytes), myAPI)
 	rr = httptest.NewRecorder()

@@ -214,17 +214,23 @@ func handleDelete() httprouter.Handle {
 			return
 		}
 
-		resMap := zebra.NewResourceMap(model.Factory())
+		idReq := &struct {
+			IDs []string `json:"ids"`
+		}{}
+		resMap := api.Store.Query()
 
 		// Read request, return error if applicable
-		if err := readJSON(ctx, req, resMap); err != nil {
+		if err := readJSON(ctx, req, idReq); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be deleted, could not read request")
 
 			return
 		}
 
-		if validateResources(ctx, resMap) != nil {
+		idStore := store.NewIDStore(resMap)
+		resMap = idStore.Query(idReq.IDs)
+
+		if len(idReq.IDs) == 0 {
 			res.WriteHeader(http.StatusBadRequest)
 			log.Info("resources could not be deleted, found invalid resource(s)")
 
