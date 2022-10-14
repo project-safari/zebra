@@ -22,6 +22,8 @@ func (r *ResourceList) Add(res Resource) error {
 	return nil
 }
 
+// Use these functions to add resources imported from the data base.
+
 func (r *ResourceList) Delete(res Resource) error {
 	listLen := len(r.Resources)
 

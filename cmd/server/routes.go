@@ -15,6 +15,9 @@ func routeHandler() http.Handler {
 	router.GET("/api/v1/labels", handleLabels())
 	router.GET("/api/v1/resources", handleQuery())
 	router.POST("/api/v1/resources", handlePost())
+	// add the resources from the database on to the zebra server.
+	// using put to avoid panic errors in the handle/path for post.
+	router.PUT("/api/v1/resources", postToZebra())
 	router.DELETE("/api/v1/resources", handleDelete())
 
 	return router

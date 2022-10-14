@@ -36,11 +36,13 @@ func EmptySwitch() zebra.Resource {
 // address, a serial number, model, and ports.
 type Switch struct {
 	zebra.BaseResource
-	Credentials  zebra.Credentials `json:"credentials"`
-	ManagementIP net.IP            `json:"managementIp"`
-	SerialNumber string            `json:"serialNumber"`
-	Model        string            `json:"model"`
-	NumPorts     uint32            `json:"numPorts"`
+	Credentials zebra.Credentials `json:"credentials"`
+	// We have IP addresses in IPv6Allocation.
+	ManagementIP net.IP `json:"managementIp"`
+	SerialNumber string `json:"serialNumber"`
+	Model        string `json:"model"`
+	// We have porrt table in the db.
+	NumPorts uint32 `json:"numPorts"`
 }
 
 // Validate returns an error if the given Switch object has incorrect values.

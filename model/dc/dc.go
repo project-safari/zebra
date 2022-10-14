@@ -105,7 +105,17 @@ func EmptyRack() zebra.Resource {
 // row.
 type Rack struct {
 	zebra.BaseResource
+	// Might want to change the json to row_name to distinguish and to match the db data.
 	Row string `json:"row"`
+
+	// adding data from data base.
+	RowID string `json:"rowId"`
+	// Asset must be of different type - to look into.
+	Asset    int    `json:"assetNo"`
+	Problems string `json:"hasProblems"`
+	Comment  string `json:"comment"`
+	// This should be different from address and is of format address/labNo.
+	Location string `json:"locationId"`
 }
 
 // Validate returns an error if the given Rack object has incorrect values.
@@ -122,9 +132,15 @@ func (r *Rack) Validate(ctx context.Context) error {
 	return r.BaseResource.Validate(ctx)
 }
 
-func NewRack(row, name, owner, group string) *Rack {
+func NewRack(row, rowID, name, locate, owner, group string) *Rack {
 	return &Rack{
 		BaseResource: *zebra.NewBaseResource(RackType(), name, owner, group),
 		Row:          row,
+		// added info to correspond to data in the db.
+		RowID: rowID,
+		// Asset: assets,
+		// Problems: prob,
+		// Comment:  comments,
+		Location: locate,
 	}
 }
