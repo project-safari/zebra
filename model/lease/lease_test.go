@@ -121,6 +121,20 @@ func TestOwner(t *testing.T) {
 	assert.Equal("tester@quality.com", l.Owner())
 }
 
+func TestMock(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	rs := MockLease(10)
+	assert.NotEmpty(rs)
+	assert.Len(rs, 10)
+
+	ctx := context.Background()
+	for _, r := range rs {
+		assert.Nil(r.Validate(ctx))
+	}
+}
+
 func getEmptyLease() *Lease {
 	d, err := time.ParseDuration("4h")
 	if err != nil {

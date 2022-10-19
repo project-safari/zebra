@@ -11,6 +11,7 @@ import (
 	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/model/compute"
 	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/model/lease"
 	"github.com/project-safari/zebra/model/network"
 	"github.com/project-safari/zebra/model/user"
 	"github.com/project-safari/zebra/store"
@@ -60,6 +61,7 @@ func herdCmd() *cobra.Command {
 	rootCmd.Flags().Int16("lab", DefaultResourceSize, "number of labs")
 
 	rootCmd.Flags().Int16("user", DefaultUserSize, "number of users")
+	rootCmd.Flags().Int16("lease", DefaultResourceSize, "number of seases")
 
 	return rootCmd
 }
@@ -124,6 +126,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	resources = genResources(cmd, "rack", dc.MockRack, resources)
 	resources = genResources(cmd, "lab", dc.MockLab, resources)
 	resources = genResources(cmd, "user", user.MockUser, resources)
+	resources = genResources(cmd, "lease", lease.MockLease, resources)
 
 	return storeResources(resources, fs)
 }

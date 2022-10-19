@@ -3,6 +3,7 @@ package lease
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -158,4 +159,27 @@ func (l *Lease) Validate(ctx context.Context) error {
 	}
 
 	return l.BaseResource.Validate(ctx)
+}
+
+func MockLease(num int) []zebra.Resource {
+	rs := make([]zebra.Resource, 0, num)
+
+	req := []*ResourceReq{
+		{
+			Type:  "VLANPool",
+			Group: "sj-building-20",
+			Name:  "blah blah give a name",
+			Count: 1,
+		},
+	}
+
+	for i := 1; i <= num; i++ {
+		dur := time.Hour
+		lease := NewLease(fmt.Sprintf("mock-user-%d@zebra.local", i),
+			dur,
+			req)
+		rs = append(rs, lease)
+	}
+
+	return rs
 }
