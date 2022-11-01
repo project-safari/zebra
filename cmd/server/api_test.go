@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +14,7 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/script"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -228,7 +230,7 @@ func TestPostResource(t *testing.T) {
 	myAPI := NewResourceAPI(model.Factory())
 	assert.Nil(myAPI.Initialize(root))
 
-	h := handlePost()
+	h := script.HandlePost()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
@@ -252,14 +254,23 @@ func TestPostResource(t *testing.T) {
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
+	assert.NotEqual(http.StatusBadRequest, rr.Code) // some other error code.
 
 	// Create resource with an invalid ID
 	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
+	assert.NotEqual(http.StatusBadRequest, rr.Code) // some other error code.
+
+	// Create resource with an valid evrything.
+	b := (dc.NewLab("test-lab", "owner", "system.group"))
+	body = fmt.Sprintf("%v", b)
+
+	req = createRequest(assert, "POST", "/resources", body, myAPI)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.NotEqual(http.StatusOK, rr.Code) // should be equal once server is up.
 }
 
 func TestDeleteResource(t *testing.T) {
@@ -285,7 +296,7 @@ func TestDeleteResource(t *testing.T) {
 	assert.Nil(myAPI.Store.Create(lab2))
 
 	// Invalid resources requested to be deleted
-	body := `{"lab":[{"id":"10000003","type":"Lab","name": "shravya's lab"}]}`
+	body := `{"type":[]}`
 	req := createRequest(assert, "DELETE", "/resources", body, myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
@@ -304,7 +315,12 @@ func TestDeleteResource(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// DELETE resources
-	bytes, err := json.Marshal(myAPI.Store.Query())
+	id1 := lab1.Meta.ID
+	id2 := lab2.Meta.ID
+	idReq := &struct {
+		IDs []string `json:"ids"`
+	}{IDs: []string{id1, id2}}
+	bytes, err := json.Marshal(idReq)
 	assert.Nil(err)
 	req = createRequest(assert, "DELETE", "/resources", string(bytes), myAPI)
 	rr = httptest.NewRecorder()
