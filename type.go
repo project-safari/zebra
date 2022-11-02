@@ -5,12 +5,17 @@ import (
 )
 
 var (
+	// ErrTypeDescriptionEmpty occurs if the description is empty.
 	ErrTypeDescriptionEmpty = errors.New("type description is empty")
-	ErrTypeNameEmpty        = errors.New("type name is empty")
-	ErrTypeEmpty            = errors.New("type is empty")
-	ErrWrongType            = errors.New("type mismatch")
+	// ErrTypeNameEmpty occurs if the name is empty.
+	ErrTypeNameEmpty = errors.New("type name is empty")
+	// ErrTypeEmpty occurs if the type is empty.
+	ErrTypeEmpty = errors.New("type is empty")
+	// ErrWrongType occurs if there is a type mismatch.
+	ErrWrongType = errors.New("type mismatch")
 )
 
+// A Type struct represents the type for the resources, with name and descriotion.
 type Type struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -30,6 +35,7 @@ func (t Type) Validate() error {
 	return nil
 }
 
+// A ResourceFactory interface represents the series of operations that can be performed on resources.
 type ResourceFactory interface {
 	New(string) Resource
 	Add(Type, TypeConstructor) ResourceFactory

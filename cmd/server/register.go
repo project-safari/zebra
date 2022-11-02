@@ -12,6 +12,7 @@ import (
 	"gojini.dev/web"
 )
 
+// Function that prepares the registration adapter, returns a web.Adapter.
 func registerAdapter() web.Adapter {
 	return func(nextHandler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -27,6 +28,9 @@ func registerAdapter() web.Adapter {
 	}
 }
 
+// Function for the register handler,
+//
+// It takes in a http.ResponseWriter abd a pointer to http.Request.
 func registerHandler(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	log := logr.FromContextOrDiscard(ctx)
@@ -84,6 +88,8 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 	log.Info("Registry succeeded", "user", regReq.Name)
 }
 
+// Function for write the response to a registration request.
+// Takes in a logr.Logger, a http.ResponseWriter, and a pointer to user.User.
 func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.User) {
 	bytes, err := json.Marshal(newuser)
 	if err != nil {
@@ -101,6 +107,7 @@ func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.Us
 	}
 }
 
+// Function that returns a pointer to the auth.Role.
 func DefaultRole() *auth.Role {
 	read, _ := auth.NewPriv("", false, true, false, false)
 	role := &auth.Role{
@@ -111,6 +118,7 @@ func DefaultRole() *auth.Role {
 	return role
 }
 
+// Function that deletes a user and returns an error or nil in the absence therefore.
 func deleteUser(u *user.User, store zebra.Store) error {
 	if err := store.Delete(u); err != nil {
 		return err
@@ -119,6 +127,7 @@ func deleteUser(u *user.User, store zebra.Store) error {
 	return nil
 }
 
+// Function to change the password, given a pointer to user.User and a string with the new password.
 func changePassword(u *user.User, newpass string) {
 	u.PasswordHash = user.HashPassword(newpass)
 }

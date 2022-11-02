@@ -9,6 +9,7 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+// Function that returns a zabra type of a lease request.
 func Type() zebra.Type {
 	return zebra.Type{
 		Name:        "system.lease",
@@ -23,6 +24,8 @@ func Empty() zebra.Resource {
 	return l
 }
 
+// A ResourceReq struct represents a Request for a lease with type, an associated group, a name,
+// a count - number - of requested resources, and two arrays - for filters and for resources.
 type ResourceReq struct {
 	Type      string           `json:"type"`
 	Group     string           `json:"group"`
@@ -32,6 +35,9 @@ type ResourceReq struct {
 	Resources []zebra.Resource `json:"resources,omitempty"`
 }
 
+// An ESX struct represents a Lease for a certain resource,
+// with its zebra.BaseResource data, a mutex lock, a duration for the lease,
+// a pointer to the request and an associated activation time.
 type Lease struct {
 	zebra.BaseResource
 	lock           sync.RWMutex
@@ -40,11 +46,16 @@ type Lease struct {
 	ActivationTime time.Time      `json:"activationTime"`
 }
 
+// Errors that can occur with leases.
 var (
 	ErrLeaseActivate = errors.New("tried to activate lease but request has not been satisfied entirely")
 	ErrLeaseValid    = errors.New("lease is not valid")
 )
 
+// Function on a pointer to ResourceReq.
+// The function appends resources to a lease request.
+//
+// It takes in a zebra.Resource and returns an error or nil in the absence thereof.
 func (r *ResourceReq) Assign(res zebra.Resource) error {
 	if r.Resources == nil {
 		r.Resources = make([]zebra.Resource, 0)
@@ -55,6 +66,10 @@ func (r *ResourceReq) Assign(res zebra.Resource) error {
 	return nil
 }
 
+// / Function on a pointer to ResourceReq.
+// The function verifies if a request was satisfied.
+//
+// It returns a boolean value.
 func (r *ResourceReq) IsSatisfied() bool {
 	return len(r.Resources) == r.Count
 }
@@ -121,6 +136,10 @@ func (l *Lease) IsSatisfied() bool {
 	return true
 }
 
+// Function on a pointer to Lease.
+// The function checks if a lease is valid.
+//
+// It returns a boolean value.
 func (l *Lease) IsValid() bool {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
@@ -129,6 +148,10 @@ func (l *Lease) IsValid() bool {
 	return time.Now().Before(l.ActivationTime.Add(l.Duration)) && l.Status.State == zebra.Active
 }
 
+// Function on a pointer to Lease.
+// The function checks if a lease expired.
+//
+// It returns a boolean value.
 func (l *Lease) IsExpired() bool {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
@@ -137,6 +160,8 @@ func (l *Lease) IsExpired() bool {
 	return time.Now().After(l.ActivationTime.Add(l.Duration)) || l.Status.State == zebra.Inactive
 }
 
+// Function on a pointer to ResourceReq.
+// It returns a pointer to the lease's respective ResourceReq.
 func (l *Lease) RequestList() []*ResourceReq {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
@@ -144,6 +169,7 @@ func (l *Lease) RequestList() []*ResourceReq {
 	return l.Request
 }
 
+// Validate funtcion for Lease.
 func (l *Lease) Validate(ctx context.Context) error {
 	if l.Duration.Hours() > zebra.DefaultMaxDuration {
 		return ErrLeaseValid

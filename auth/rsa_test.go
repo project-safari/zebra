@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for creating a new rsa identity.
 func TestNewRsaIdentity(t *testing.T) {
 	t.Parallel()
 
@@ -53,6 +54,7 @@ func TestNewRsaIdentity(t *testing.T) {
 	assert.Nil(x.UnmarshalText(b))
 }
 
+// Test function for errors that can occur with unMarshaling.
 func TestUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -105,6 +107,7 @@ func TestUnmarshalErrors(t *testing.T) {
 	assert.NotNil(x.UnmarshalText(badType))
 }
 
+// Test function for encryption.
 func TestEncrypt(t *testing.T) {
 	t.Parallel()
 

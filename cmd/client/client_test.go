@@ -12,11 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Constant values for paths to files that contain user credential info.
 const (
 	testCACertFile  = "../../simulator/zebra-ca.crt"
 	testUserKeyFile = "../../simulator/user.key"
 )
 
+// Test function for a new client.
 func TestNewClient(t *testing.T) {
 	t.Parallel()
 
@@ -66,6 +68,7 @@ func TestNewClient(t *testing.T) {
 	assert.NotNil(e)
 }
 
+// Test function fot the TSL client.
 func TestTLSClient(t *testing.T) {
 	t.Parallel()
 
@@ -92,6 +95,7 @@ func TestTLSClient(t *testing.T) {
 	assert.Nil(e)
 }
 
+// Test function for client.
 func TestClientDo(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -141,6 +145,8 @@ func TestClientDo(t *testing.T) {
 	assert.Equal(http.StatusOK, code)
 }
 
+// Mock function to create/start a server to be used in tests.
+// Returns a pointer to a httptest.
 func makeServer(assert *assert.Assertions) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		fmt.Println(req.URL.Path)

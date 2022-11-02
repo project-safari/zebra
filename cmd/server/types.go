@@ -8,6 +8,8 @@ import (
 	"github.com/project-safari/zebra/model"
 )
 
+// Function that helps handle the request types.
+// Returns a httprouter.Handle and takes in nothing.
 func handleTypes() httprouter.Handle {
 	allTypes := model.Factory()
 

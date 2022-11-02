@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// possible errors wit user credentials.
 var (
 	ErrNoCACert     = errors.New("zebra CA certificate file is not conifugred")
 	ErrNoConfig     = errors.New("zebra config file is not specified")
@@ -21,12 +22,18 @@ var (
 	ErrNoPrivateKey = errors.New("user private key is not configured")
 )
 
+// Struct for client information,
+// contans pointers to Config and http.Client and an http.Header.
 type Client struct {
 	cfg *Config
 	c   *http.Client
 	h   http.Header
 }
 
+// Function that initiates a new client.
+//
+// Takes in a pointer to the Config struct,
+// returns a pointer ro Client and a potential error or nil if there is no error.
 func NewClient(cfg *Config) (*Client, error) {
 	if cfg == nil {
 		return nil, ErrNoConfig
@@ -66,18 +73,43 @@ func NewClient(cfg *Config) (*Client, error) {
 	}, nil
 }
 
+// Operation function on Client, given a pointer to Client - get.
+//
+// Function takes in a string for path, and two interfaces: in and out.
+// It executes the do operation function on the given pointer,
+// and returns the resp.StatusCode as an int and an error, or nil if there is no error.
+//
+// Uses "GET".
 func (c *Client) Get(path string, in, out interface{}) (int, error) {
 	return c.do(context.Background(), "GET", path, in, out)
 }
 
+// Operation function on Client, given a pointer to Client - delete.
+//
+// Function takes in a string for path, and two interfaces: in and out.
+// It executes the do operation function on the given pointer,
+// and returns the resp.StatusCode as an int and an error, or nil if there is no error.
+//
+// Uses "DELETE".
 func (c *Client) Delete(path string, in, out interface{}) (int, error) {
 	return c.do(context.Background(), "DELETE", path, in, out)
 }
 
+// Operation function on Client, given a pointer to Client - post.
+//
+// Function takes in a string for path, and two interfaces: in and out.
+// It executes the do operation function on the given pointer,
+// and returns the resp.StatusCode as an int and an error, or nil if there is no error.
+//
+// Uses "POST".
 func (c *Client) Post(path string, in, out interface{}) (int, error) {
 	return c.do(context.Background(), "POST", path, in, out)
 }
 
+// Operation function on Client, given a pointer to Client - do.
+//
+// Function takes in a string for path, and two interfaces: in and out.
+// It returns the resp.StatusCode as an int and an error, or nil if there is no error.
 func (c *Client) do(ctx context.Context, method, path string, in, out interface{}) (int, error) {
 	url := fmt.Sprintf("%s/%s", c.cfg.ServerAddress, path)
 	buf := bytes.NewBuffer([]byte{})
@@ -121,6 +153,8 @@ func (c *Client) do(ctx context.Context, method, path string, in, out interface{
 	return resp.StatusCode, nil
 }
 
+// Function to initiate a tsl client, given a pointer to the Config struct.
+// It returns a pointer to the http.Client and an error, or nil if there is no error.
 func tlsClient(cfg *Config) (*http.Client, error) {
 	if cfg == nil {
 		return nil, ErrNoConfig

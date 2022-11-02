@@ -15,6 +15,9 @@ import (
 	"gojini.dev/web"
 )
 
+// Function to set up the logger.
+//
+// It takes in a pointer to config.Store and returns a context.Context.
 func setupLogger(cfgStore *config.Store) context.Context {
 	ctx := context.Background()
 	zl := zerolog.New(os.Stderr).Level(zerolog.DebugLevel)
@@ -23,6 +26,9 @@ func setupLogger(cfgStore *config.Store) context.Context {
 	return logr.NewContext(ctx, logger.WithName("zebra"))
 }
 
+// Function that sets up the adapter.
+//
+// It takes in a context.Context and a pointer to config.Store and returns a web.Adapter.
 func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 	log := logr.FromContextOrDiscard(ctx)
 
@@ -74,6 +80,11 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 	}
 }
 
+// Function to initialize an admin user.
+//
+// It takes in a logr.Logger, zebra.Store, and a pointer to config.Store.
+//
+// It returns an error or nil in the absence thereof.
 func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) error {
 	admin := new(user.User)
 

@@ -7,11 +7,15 @@ import (
 	"strings"
 )
 
+// Errors that can occur with keys/priviledges.
 var (
-	ErrResourceKeyEmpty  = errors.New("resource key is empty")
-	ErrInvalidPrivileges = errors.New("atleast one or atmost four privileges must be set")
+	// ErrResourceKeyEmpty occurs if the resource key is empty.
+	ErrResourceKeyEmpty = errors.New("resource key is empty")
+	// ErrInvalidPrivileges if the number of priviledges is outside of the set bounds.
+	ErrInvalidPrivileges = errors.New("at least one or at most four privileges must be set")
 )
 
+// Possible priviledges.
 type Priv struct {
 	c bool
 	r bool
@@ -20,6 +24,8 @@ type Priv struct {
 	k *ResourceKey
 }
 
+// Function to create a new priviledge.
+// Returns a pointer to the Priv struct and an error, or nil in the absence thereof.
 func NewPriv(k string, c bool, r bool, u bool, d bool) (*Priv, error) {
 	rk, e := NewKey(k)
 	if e != nil {

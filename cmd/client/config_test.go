@@ -7,8 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Constant for sample path to file that is used in tests.
 const testCfgFile = "./test_config.yaml"
 
+// Test function for setting up the configuration.
 func TestConfig(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

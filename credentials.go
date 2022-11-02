@@ -23,6 +23,7 @@ type Credentials struct {
 	Keys    map[string]string `json:"keys,omitempty"`
 }
 
+// Function that returns a credentials struct with login ID and a pair of keys.
 func NewCredentials(loginID string) Credentials {
 	return Credentials{
 		LoginID: loginID,
@@ -30,6 +31,12 @@ func NewCredentials(loginID string) Credentials {
 	}
 }
 
+// Operation function on the credentials - add.
+//
+// This function adds a new set of key-value pairs with
+// password and corresponding ssh key.
+//
+// It returns an error or nil in the absence thereof.
 func (c Credentials) Add(key string, value string) error {
 	validKeys := map[string]string{"password": "", "ssh-key": ""}
 	if _, ok := validKeys[key]; !ok {

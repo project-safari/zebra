@@ -8,6 +8,7 @@ import (
 	"gojini.dev/web"
 )
 
+// Function for the refresh adapter, returns a web.Adapter.
 func refreshAdapter() web.Adapter {
 	return func(nextHandler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {

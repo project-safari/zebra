@@ -23,6 +23,7 @@ func test() *cobra.Command {
 	return showCmd
 }
 
+// Function that tests the client.
 func TestClient(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -69,7 +70,7 @@ func TestClient(t *testing.T) {
 	assert.NotNil(cli)
 }
 
-// tests for adding new show command(s).
+// Tests for adding new show command(s).
 func TestNewZebraCommand(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -78,7 +79,7 @@ func TestNewZebraCommand(t *testing.T) {
 	assert.NotNil(cmd)
 }
 
-// tests for resources.
+// Tests for resources.
 func TestShowRes(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -97,7 +98,7 @@ func TestShowRes(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// showing lease status and information.
+// Showing lease status and information.
 func TestShowLease(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -116,7 +117,7 @@ func TestShowLease(t *testing.T) {
 	assert.NotNil(res)
 }
 
-// tests for server resource types (server, esx, vcenter, vm).
+// Tests for server resource types (server, esx, vcenter, vm).
 func TestShowServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -353,7 +354,7 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 
 	assert.NotNil(resMap)
 
-	rack := dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+	rack := dc.NewRack("test_row", "test_row_id", "test_rack", "test_location", "test_owner", "test_group")
 	assert.Nil(resMap.Add(rack))
 
 	printResources(resMap)
@@ -610,7 +611,8 @@ func TestPrintRacks(t *testing.T) {
 
 	fact := model.Factory()
 	resMap := zebra.NewResourceMap(fact)
-	rack := dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+
+	rack := dc.NewRack("test_row", "test_row_id", "test_rack", "test_location", "test_owner", "test_group")
 	assert.Nil(resMap.Add(rack))
 
 	listed := resMap.Resources["dc.rack"].Resources

@@ -33,6 +33,7 @@ func creds(r *http.Request) (string, string) {
 	return user, string(bt)
 }
 
+// Function that returns a pointer to an http.Request for a request created using an rsa key.
 func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 	ctx := req.Context()
 	log := logr.FromContextOrDiscard(ctx)
