@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for label functions.
 func TestLabels(t *testing.T) {
 	t.Parallel()
 
@@ -57,6 +58,7 @@ func TestLabels(t *testing.T) {
 	assert.False(labels.MatchNotIn("blah"))
 }
 
+// Test function for checking if a label value is in a set.
 func TestIsIn(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -67,6 +69,7 @@ func TestIsIn(t *testing.T) {
 	assert.False(zebra.IsIn("hey", list))
 }
 
+// Test function for the label validation.
 func TestLabelsValidation(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -7,6 +7,9 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+// Function that generates "mock" servers as sample data.
+//
+// It takes in the number of resources to generate and returns a list of zebra resources.
 func MockServer(num int) []zebra.Resource {
 	models := []string{"SERVER-MODEL-1", "SERVER-MODEL-2", "SERVER-MODEL-3"}
 	rs := make([]zebra.Resource, 0, num)
@@ -29,6 +32,9 @@ func MockServer(num int) []zebra.Resource {
 	return rs
 }
 
+// Function that generates "mock" esx servers as sample data.
+//
+// It takes in the number of resources to generate and returns a list of zebra resources.
 func MockESX(num int) []zebra.Resource {
 	rs := make([]zebra.Resource, 0, num)
 
@@ -49,6 +55,9 @@ func MockESX(num int) []zebra.Resource {
 	return rs
 }
 
+// Function that generates "mock" vcenters as sample data.
+//
+// It takes in the number of resources to generate and returns a list of zebra resources.
 func MockVCenter(num int) []zebra.Resource {
 	rs := make([]zebra.Resource, 0, num)
 
@@ -68,6 +77,9 @@ func MockVCenter(num int) []zebra.Resource {
 	return rs
 }
 
+// Function that generates "mock" vms as sample data.
+//
+// It takes in the number of resources to generate and returns a list of zebra resources.
 func MockVM(num int) []zebra.Resource {
 	rs := make([]zebra.Resource, 0, num)
 

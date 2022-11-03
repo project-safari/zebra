@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function that examines the valid creation/generation of a mock server.
 func TestMockServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -22,6 +23,7 @@ func TestMockServer(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock esx server.
 func TestMockESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -36,6 +38,7 @@ func TestMockESX(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock vcenter.
 func TestMockVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -50,6 +53,7 @@ func TestMockVCenter(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock vm.
 func TestMockVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

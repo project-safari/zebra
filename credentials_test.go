@@ -7,6 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test functions that checks functions which deal with user credentais.
+//
+// This test function works by adding series of new credentaials and checking for user-password correct matches.
 func TestCredentials(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

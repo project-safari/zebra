@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function that verifies the validation function for the meta operations.
 func TestMetaValidate(t *testing.T) {
 	t.Parallel()
 

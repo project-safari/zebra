@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for determination of a resource's type.
 func TestDetermineType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -74,6 +75,8 @@ func TestDetermineType(t *testing.T) {
 	assert.Equal(result, "")
 }
 
+// Test function for determining the ID of a resource
+//
 //nolint:funlen
 func TestDetermineIDMeaning(t *testing.T) {
 	t.Parallel()
@@ -139,8 +142,7 @@ func TestDetermineIDMeaning(t *testing.T) {
 	assert.Equal(result, "unclassified")
 }
 
-// Test for reading json.
-
+// Test function for reading json.
 func TestRead(t *testing.T) {
 	t.Parallel()
 
@@ -174,6 +176,7 @@ func (f mockReader) Read(b []byte) (int, error) {
 	return 0, io.EOF
 }
 
+// Mock function for creating label requests, to be used in tests.
 func makeLabelRequest(assert *assert.Assertions, resources *script.ResourceAPI, labels ...string) *http.Request {
 	ctx := context.WithValue(context.Background(), script.ResourcesCtxKey, resources)
 	ctx = context.WithValue(ctx, script.AuthCtxKey, "test-label")
@@ -191,6 +194,7 @@ func makeLabelRequest(assert *assert.Assertions, resources *script.ResourceAPI, 
 	return req
 }
 
+// Test function for the all data function, used in migration.
 func TestAllData(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -207,6 +211,8 @@ func TestAllData(t *testing.T) {
 	assert.NotNil((rackArr))
 }
 
+// Test function for creating a resource of a given type, based on data extracted from the db.
+//
 //nolint:funlen
 func TestCreateRes(t *testing.T) {
 	t.Parallel()
@@ -292,6 +298,7 @@ func (f fakeReader) Read(b []byte) (int, error) {
 	return 0, io.EOF
 }
 
+// Test function for reading json.
 func TestReadJSON(t *testing.T) {
 	t.Parallel()
 
@@ -313,6 +320,7 @@ func TestReadJSON(t *testing.T) {
 	assert.NotNil(script.ReadJSON(context.Background(), req, nil))
 }
 
+// Test function for determining the parent ID.
 func TestDetermineParentType(t *testing.T) {
 	t.Parallel()
 
@@ -336,6 +344,7 @@ func TestDetermineParentType(t *testing.T) {
 	assert.Equal("network.switch", testParent)
 }
 
+// Test function for getting parent type based on a child's type.
 func TestGetParent(t *testing.T) {
 	t.Parallel()
 
@@ -362,6 +371,10 @@ func TestGetParent(t *testing.T) {
 	assert.Equal(testParent, "dc.rack")
 }
 
+// Test for the createRequests helper function,
+// which is used to initiate POST requests, by reusing the existing POST request,
+// found in the cmd package.
+//
 //nolint:lll
 func TestCreateRequests(t *testing.T) {
 	t.Parallel()

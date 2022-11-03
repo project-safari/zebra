@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Tests for creating claims and JWT tokens.
 func TestClaims(t *testing.T) {
 	t.Parallel()
 

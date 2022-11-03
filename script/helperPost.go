@@ -36,7 +36,7 @@ func ReadJSON(ctx context.Context, req *http.Request, data interface{}) error {
 	return err
 }
 
-// Validate all resources in a resource map.
+// Function to validate all resources in a resource map.
 func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
 	// Check all resources to make sure they are valid
 	for _, l := range resMap.Resources {
@@ -73,6 +73,7 @@ func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	}
 }
 
+// The ResourceAPI struct contains data for the APIs.
 type ResourceAPI struct {
 	factory zebra.ResourceFactory
 	Store   zebra.Store

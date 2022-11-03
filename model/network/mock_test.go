@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function that examines the valid creation/generation of a mock switch.
 func TestMockSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -22,6 +23,7 @@ func TestMockSwitch(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock vlan pool.
 func TestMockVLANPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -36,6 +38,7 @@ func TestMockVLANPool(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock IP address pool.
 func TestMockIPAddressPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

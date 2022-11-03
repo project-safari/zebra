@@ -29,6 +29,7 @@ func TestBaseResource(t *testing.T) {
 	assert.Equal("abracadabra", res.GetMeta().ID)
 }
 
+// Test function for getting the status of a resource.
 func TestGettingStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

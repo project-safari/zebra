@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for a new ID store.
 func TestNewIDStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -16,6 +17,7 @@ func TestNewIDStore(t *testing.T) {
 	assert.NotNil(store.NewIDStore(resMap))
 }
 
+// Test function for initializing an ID store.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -28,6 +30,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(rs.Initialize())
 }
 
+// Test function for ID store wipe.
 func TestWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -41,6 +44,7 @@ func TestWipe(t *testing.T) {
 	assert.Nil(rs.Wipe())
 }
 
+// Test function for clearing an ID store.
 func TestClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -68,6 +72,7 @@ func TestClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
+// Test function for loading an ID store.
 func TestLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -91,6 +96,7 @@ func TestLoad(t *testing.T) {
 	assert.Len(resources.Resources["dummy-2"].Resources, 1)
 }
 
+// // Test function for creating an ID store.
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -120,6 +126,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(rs.Create(r1))
 }
 
+// Test function for ID store delete.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -144,6 +151,7 @@ func TestDelete(t *testing.T) {
 	assert.Nil(rs.Delete(r2))
 }
 
+// Test function for an ID store query.
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -162,3 +162,5 @@ password: 1234
                 The column of interest from this table is:
 
                 1. user, which is the name / role of a user that owns / manages a particular resource.    
+
+The data is used to create resources and post them by making use of the POST API found in the cmd package.

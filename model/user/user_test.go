@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Tests for the user functions.
 func TestUser(t *testing.T) { //nolint:funlen
 	t.Parallel()
 

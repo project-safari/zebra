@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function that examines the valid creation/generation of a mock dc.
 func TestMockDC(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -22,6 +23,7 @@ func TestMockDC(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock lab.
 func TestMockLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -36,6 +38,7 @@ func TestMockLab(t *testing.T) {
 	}
 }
 
+// Test function that examines the valid creation/generation of a mock rack.
 func TestMockRack(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

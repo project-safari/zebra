@@ -14,6 +14,7 @@ import (
 
 const Creds string = "Credentials"
 
+// Test function for creating a new server.
 func TestServer(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -45,6 +46,7 @@ func TestServer(t *testing.T) {
 	assert.Nil(s.Validate(ctx))
 }
 
+// Test function for creating a new esx server.
 func TestESX(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -71,6 +73,7 @@ func TestESX(t *testing.T) {
 	assert.Nil(e.Validate(ctx))
 }
 
+// Test function for creating a new vcenter.
 func TestVCenter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -94,6 +97,7 @@ func TestVCenter(t *testing.T) {
 	assert.Nil(v.Validate(ctx))
 }
 
+// Test function for creating a new vm.
 func TestVM(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

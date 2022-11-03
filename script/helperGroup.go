@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Determine the specific type of a resource.
+// Function to determine the specific type of a resource.
 // nolint
 func DetermineType(means string, resName string) string {
 	name := strings.ToLower(resName)
@@ -82,7 +82,7 @@ func GetParent(childStrType string) string {
 	return means
 }
 
-// Determine type of a parent based on the parent and child IDs.
+// Function to determine type of a parent based on the parent and child IDs.
 //
 //nolint:cyclop
 func DetermineParentType(parentID string, childID string, childName string) string {
@@ -116,7 +116,7 @@ func DetermineParentType(parentID string, childID string, childName string) stri
 	return means
 }
 
-// Get the parent ID information from the database.
+// Function to get the parent ID information from the database.
 func ProvideParent(objtypeID string, db *sql.DB) string {
 	parentType := ""
 	statement := "SELECT parent_objtype_id  FROM ObjectParentCompat WHERE  child_objtype_id = ?"
@@ -139,7 +139,7 @@ func ProvideParent(objtypeID string, db *sql.DB) string {
 	return parentType
 }
 
-// Get the parent's type ID from the database.
+// Function to get the parent's type ID from the database.
 func ParentWhatTypeID(childType string, db *sql.DB) string {
 	parent := ""
 
@@ -191,7 +191,7 @@ func ParentIndividualID(childIndividualID string, db *sql.DB) string {
 	return parIndividualID
 }
 
-// Get the full group/relation between a resource and its parent based on all the obtained data.
+// Function to get the full group/relation between a resource and its parent based on all the obtained data.
 func ParentChildRelation(childentityID string, db *sql.DB) (string, string) {
 	parEntityID := ""
 	parEntityDescription := ""
