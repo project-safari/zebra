@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// errFake is a mock error to be used in tests
+// errFake is a mock error to be used in tests.
 var errFake = errors.New("fake error")
 
 type fakeReader struct {

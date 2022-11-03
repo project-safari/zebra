@@ -12,7 +12,7 @@ const (
 	DefaultMaxDuration = 4
 )
 
-// Errors that can occur when
+// Errors that can occur whenmetadata is empty.
 var (
 	ErrNameEmpty = errors.New("name is empty")
 	ErrIDEmpty   = errors.New("id is empty")

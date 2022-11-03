@@ -80,10 +80,10 @@ func MockVCenter(num int) []zebra.Resource {
 // Function that generates "mock" vms as sample data.
 //
 // It takes in the number of resources to generate and returns a list of zebra resources.
-func MockVM(num int) []zebra.Resource {
-	rs := make([]zebra.Resource, 0, num)
+func MockVM(number int) []zebra.Resource {
+	res := make([]zebra.Resource, 0, number)
 
-	for i := 1; i <= num; i++ {
+	for i := 1; i <= number; i++ {
 		s := NewVM(
 			fmt.Sprintf("mock-esx-%d", i),
 			fmt.Sprintf("mock-vm-%d", i),
@@ -94,8 +94,8 @@ func MockVM(num int) []zebra.Resource {
 		s.Credentials = zebra.NewCredentials("admin")
 		_ = s.Credentials.Add("password", fmt.Sprintf("VMSecret%d!!!", i))
 
-		rs = append(rs, s)
+		res = append(res, s)
 	}
 
-	return rs
+	return res
 }

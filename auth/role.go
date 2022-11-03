@@ -24,7 +24,7 @@ type Priv struct {
 	k *ResourceKey
 }
 
-// Function to create a new priviledge.
+// Function to create a new privilege.
 // Returns a pointer to the Priv struct and an error, or nil in the absence thereof.
 func NewPriv(k string, c bool, r bool, u bool, d bool) (*Priv, error) {
 	rk, e := NewKey(k)

@@ -90,7 +90,7 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// Funciton that returns a lease's status as a string.
+// Function that returns a lease's status as a string.
 func (l LeaseStatus) String() string {
 	strs := map[LeaseStatus]string{Leased: "leased", Free: "free", Setup: "setup"}
 	lstr, ok := strs[l]
@@ -130,7 +130,7 @@ func (l *LeaseStatus) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// Funciton that returns a lease's state as a string.
+// Function that returns a lease's state as a string.
 func (s State) String() string {
 	strs := map[State]string{Active: "active", Inactive: "inactive"}
 	sstr, ok := strs[s]

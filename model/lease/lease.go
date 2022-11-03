@@ -141,6 +141,7 @@ func (l *Lease) IsSatisfied() bool {
 //
 // It returns a boolean value.
 func (l *Lease) IsValid() bool {
+	// first locks rw for reading.
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
@@ -152,12 +153,12 @@ func (l *Lease) IsValid() bool {
 // The function checks if a lease expired.
 //
 // It returns a boolean value.
-func (l *Lease) IsExpired() bool {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
+func (les *Lease) IsExpired() bool {
+	les.lock.RLock()
+	defer les.lock.RUnlock()
 
 	// Return if lease is expired
-	return time.Now().After(l.ActivationTime.Add(l.Duration)) || l.Status.State == zebra.Inactive
+	return time.Now().After(les.ActivationTime.Add(les.Duration)) || les.Status.State == zebra.Inactive
 }
 
 // Function on a pointer to ResourceReq.
