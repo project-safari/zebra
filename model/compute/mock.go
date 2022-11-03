@@ -38,7 +38,7 @@ func MockServer(num int) []zebra.Resource {
 func MockESX(num int) []zebra.Resource {
 	rs := make([]zebra.Resource, 0, num)
 
-	for i := 1; i <= num; i++ {
+	for i := 1; i < num+1; i++ {
 		s := NewESX(
 			fmt.Sprintf("mock-server-%d", i),
 			fmt.Sprintf("mock-esx-%d", i),
