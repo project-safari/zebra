@@ -81,20 +81,24 @@ func MockVCenter(num int) []zebra.Resource {
 //
 // It takes in the number of resources to generate and returns a list of zebra resources.
 func MockVM(number int) []zebra.Resource {
-	res := make([]zebra.Resource, 0, number)
+	res := []zebra.Resource{}
 
-	for i := 1; i <= number; i++ {
-		s := NewVM(
-			fmt.Sprintf("mock-esx-%d", i),
-			fmt.Sprintf("mock-vm-%d", i),
-			"mocker",
-			"vm",
-		)
-		s.ManagementIP = net.IP{13, 13, 13, byte(i)}
-		s.Credentials = zebra.NewCredentials("admin")
-		_ = s.Credentials.Add("password", fmt.Sprintf("VMSecret%d!!!", i))
+	if number >= 0 {
+		res = make([]zebra.Resource, 0, number)
 
-		res = append(res, s)
+		for i := 1; i <= number; i++ {
+			s := NewVM(
+				fmt.Sprintf("mock-esx-%d", i),
+				fmt.Sprintf("mock-vm-%d", i),
+				"mocker",
+				"vm",
+			)
+			s.ManagementIP = net.IP{13, 13, 13, byte(i)}
+			s.Credentials = zebra.NewCredentials("admin")
+			_ = s.Credentials.Add("password", fmt.Sprintf("VMSecret%d!!!", i))
+
+			res = append(res, s)
+		}
 	}
 
 	return res
