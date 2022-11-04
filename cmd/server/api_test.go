@@ -56,21 +56,14 @@ func TestQuery(t *testing.T) {
 
 	qr.IDs = []string{"0100000001"}
 	req = makeQueryRequest(assert, api, qr)
+	req.URL.RawQuery = "ids=01000000001"
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
 
 	qr.IDs = []string{}
 	qr.Types = []string{"VLANPool"}
 	req = makeQueryRequest(assert, api, qr)
-	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusOK, rr.Code)
-
-	qr.Types = []string{}
-	qr.Labels = []zebra.Query{
-		{Op: zebra.MatchEqual, Key: "test", Values: []string{"test"}},
-		{Op: zebra.MatchIn, Key: "test2", Values: []string{"test1", "test2"}},
-	}
-	req = makeQueryRequest(assert, api, qr)
+	req.URL.RawQuery = "types=dc.lab"
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
 }
@@ -234,29 +227,38 @@ func TestPostResource(t *testing.T) {
 		h(w, r, nil)
 	})
 
-	body := `{"lab":[{"id":"0100000003","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
+	lab1 := dc.NewLab("Lab1", "test_owner", "test_group")
+
+	resmap := zebra.NewResourceMap(myAPI.factory)
+	assert.Nil(resmap.Add(lab1))
+	b, err := json.Marshal(resmap)
+	assert.Nil(err)
 
 	// Create new resource
-	req := createRequest(assert, "POST", "/resources", body, myAPI)
+	req := createRequest(assert, "POST", "/resources", string(b), myAPI)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.NotEqual(http.StatusOK, rr.Code)
+	assert.Equal(http.StatusOK, rr.Code)
 
 	// Update existing resource
-	req = createRequest(assert, "POST", "/resources", body, myAPI)
+	req = createRequest(assert, "POST", "/resources", string(b), myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.NotEqual(http.StatusOK, rr.Code)
+	assert.Equal(http.StatusOK, rr.Code)
 
-	// Create resource with an invalid type, won't read properly
-	body = `{"lab":[{"id":"","type":"test","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
-	req = createRequest(assert, "POST", "/resources", body, myAPI)
+	// Create resource with an invalid ID
+	lab2 := dc.NewLab("Lab2", "test_owner", "test_group")
+	lab2.Meta.ID = ""
+	assert.Nil(resmap.Add(lab2))
+	b, err = json.Marshal(resmap)
+	assert.Nil(err)
+	req = createRequest(assert, "POST", "/resources", string(b), myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
-	// Create resource with an invalid ID
-	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
+	// Invaild body
+	body := `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)

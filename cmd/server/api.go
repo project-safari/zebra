@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
@@ -129,27 +130,16 @@ func handleQuery() httprouter.Handle {
 			return
 		}
 
-		var resources *zebra.ResourceMap
-
+		resources := api.Store.Query()
 		// Get resources based on primary key (ID, Type, or Label)
-		switch {
-		case len(qr.IDs) != 0:
-			resources = api.Store.QueryUUID(qr.IDs)
-		case len(qr.Types) != 0:
-			resources = api.Store.QueryType(qr.Types)
-		case len(qr.Labels) != 0:
-			q := qr.Labels[0]
-			qr.Labels = qr.Labels[1:]
-			// Can safely ignore error because we have already validated the query
-			resources, _ = api.Store.QueryLabel(q)
-		default:
-			resources = api.Store.Query()
-		}
-
-		// Filter further based on label queries
-		for _, q := range qr.Labels {
-			// Can safely ignore error because we have already validated the query
-			resources, _ = store.FilterLabel(q, resources)
+		// Label Query currently doesn't work using url parameters
+		if parames := req.URL.Query(); len(parames) != 0 {
+			switch {
+			case len(parames["ids"]) != 0:
+				resources = api.Store.QueryUUID(strings.Split(parames["ids"][0], ","))
+			case len(parames["types"]) != 0:
+				resources = api.Store.QueryType(strings.Split(parames["types"][0], ","))
+			}
 		}
 
 		log.Info("successfully queried resources")
