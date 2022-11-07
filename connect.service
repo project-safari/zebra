@@ -1,0 +1,22 @@
+[Unit]
+Description=sapshah@sapshah-cs-bld.insieme.local
+ConditionPathExists= // some path goes here
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+WorkingDirectory= // some path goes here
+ExecStart= // some path goes here
+
+Restart=on-failure
+RestartSec=10
+
+ExecStartPre=/bin/mkdir -p // some path goes here
+ExecStartPre=/bin/chown syslog:adm // some path goes here
+ExecStartPre=/bin/chmod 775 // some path goes here
+
+[Install]
+WantedBy=multi-user.target
