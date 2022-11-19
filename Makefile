@@ -14,7 +14,7 @@ zebra: $(GO_SRC) go.mod go.sum
 zebra-server: $(GO_SRC) go.mod go.sum
 	$(call build_zebra_server)
 
-herd: $(GO_SRC) go.mod go.sum
+herd:  $(GO_SRC) go.mod go.sum
 	$(call build_herd)
 
 bin: zebra zebra-server herd
