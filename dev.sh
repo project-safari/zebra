@@ -1,3 +1,3 @@
 #!/bin/sh\
 
-cd zebra && make simulator & cd zebra_ui && npm start
+cd zebra && make simulator & cd zebra-ui & npm start
