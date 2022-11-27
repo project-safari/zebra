@@ -1,3 +1,4 @@
 #!/bin/sh\
 
-cd zebra && make simulator & cd zebra-ui & npm start
+(cd /Users/eachim/desktop/zebra-all/zebras/zebra; make simulator) &
+(cd /Users/eachim/desktop/zebra-all/zebras/zebra-ui; npm start) &
