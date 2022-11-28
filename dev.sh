@@ -1,4 +1,15 @@
-#!/bin/sh\
+#!/bin/sh
 
-(cd /Users/eachim/desktop/zebra-all/zebras/zebra; make simulator) &
-(cd /Users/eachim/desktop/zebra-all/zebras/zebra-ui; npm start) &
+if which node > /dev/null
+    then
+        echo "node is installed, skipping..."
+    else
+        npm install -g npm
+    fi
+
+path="$(pwd)"
+pathBackend=$path"/zebra"
+pathUI=$path"/zebra-ui"
+
+(cd $pathBackend; make simulator) &
+(cd $pathUI; npm i --legacy-peer-deps; npm start) &

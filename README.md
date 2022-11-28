@@ -16,4 +16,27 @@ As of now, we have not determined a way in which Zebra will read input data to m
 A user represents an temporary owner of a resource. Each user will be associated with a role. This role (such as developer, admin, client, etc.) determines the user's permissions. Once authenticated, a user will be allowed to reserve resources according to their role permissions. Once Zebra allocates a resource to the user, Zebra logs that the user is in current possession of the resource. Once the user is finished, Zebra will release the resource to be allocated to other users.
 As of now, we have not determined how to create/delete/authenticate users to begin reserving resources.
 
+### How to run Zebra ###
+Zebra can be run by executing a simple script. This script can be found outside of this directory, in the parent directory, where the UI and backend are also situated.
+
+* For a Linux/Ubuntu based system, simply navigate to that directory and use the following commands in terminal:
+
+    1. chmod +x dev.sh
+
+    2. run ./dev.sh
+
+* For a Windows based system, follow the following steps*:
+
+    1. Start -> Settings -> Update&Security. Under the ‘Use Developer Features’, select ‘Developer mode’.
+
+    2. Selecting the developer mode will pop an alert. Click yes, and let the computer restart.
+
+    3. Go to Control Panel -> Programs and Features -> Turn Windows Features On and Off. In the window that appears, check the ‘Windows Subsystem for Linux’ option, and click OK.
+
+    4. This will trigger an alert asking for the system to be restarted to complete the installation of the required components. After the restart is complete, go to the command prompt, and type ‘bash’. Follow the instructions that appear to install bash from Windows store. After it is installed, it will be required to create a UNIX username. After completing the installation, exit the prompt.
+
+    5. To access the shell, simply type ‘bash’ in the Windows command prompt, and everything is good to go.
+
+    *Steps work with Windows 10 and above. Additionally, the 64-bit bersion of the OS is needed. Note that for previous Windows versions, emulators like Cygwin or Git need to be installed on the host machine.
+
 ### TO DO ###
