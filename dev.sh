@@ -12,4 +12,4 @@ pathBackend=$path"/zebra"
 pathUI=$path"/zebra-ui"
 
 (cd $pathBackend; make simulator) &
-(cd $pathUI; npm i --legacy-peer-deps; npm i mongoose; npm start) &
+(cd $pathUI; serve -s build) &
