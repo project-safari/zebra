@@ -5,8 +5,8 @@ import (
 	"errors"
 )
 
-var ErrorNotLeasable = errors.New(`resource is not leasable`)
-var ErrorNotAvailable = errors.New(`resource is not currntly available to be leased`)
+var ErrNotLeasable = errors.New(`resource is not leasable`)
+var ErrNotAvailable = errors.New(`resource is not currntly available to be leased`)
 
 // Resource interface is implemented by all resources and provides resource
 // validation and label selection methods.
@@ -36,7 +36,7 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 // function to see if the reource  leasable.
 func (r *BaseResource) Leasable() error {
 	if r.Status.LeaseStatus.CanLease() != nil {
-		return ErrorNotLeasable
+		return ErrNotLeasable
 	}
 
 	return nil
@@ -45,7 +45,7 @@ func (r *BaseResource) Leasable() error {
 // function to see if the reource  is currently available for lease.
 func (r *BaseResource) Available() error {
 	if r.Status.LeaseStatus.IsFree() != nil {
-		return ErrorNotAvailable
+		return ErrNotAvailable
 	}
 
 	return nil
