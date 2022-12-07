@@ -5,8 +5,10 @@ import (
 	"errors"
 )
 
-var ErrNotLeasable = errors.New(`resource is not leasable`)
-var ErrNotAvailable = errors.New(`resource is not currntly available to be leased`)
+var (
+	ErrNotLeasable  = errors.New(`resource is not leasable`)
+	ErrNotAvailable = errors.New(`resource is not currntly available to be leased`)
+)
 
 // Resource interface is implemented by all resources and provides resource
 // validation and label selection methods.
