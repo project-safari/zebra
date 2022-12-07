@@ -88,3 +88,27 @@ func TestUnmarshal(t *testing.T) {
 	assert.Equal(zebra.ErrFault, f.UnmarshalText([]byte("zzz")))
 	assert.Equal(zebra.ErrState, s.UnmarshalText([]byte("zzz")))
 }
+
+func TestStatusChecker(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	d, _ := dummyType()
+	res := zebra.NewBaseResource(d, "dummy", "dummy", "dummy")
+
+	// lease status 1 means not leasable.
+	res.Status.LeaseStatus = 2
+
+	assert.NotNil(res.Status.LeaseStatus.CanLease())
+
+	// lease status 1 means not free.
+	res.Status.LeaseStatus = 1
+
+	assert.NotNil(res.Status.LeaseStatus.IsFree())
+
+	// lease status 0 means free and available.
+	res.Status.LeaseStatus = 0
+
+	assert.Nil(res.Status.LeaseStatus.CanLease())
+	assert.Nil(res.Status.LeaseStatus.IsFree())
+}

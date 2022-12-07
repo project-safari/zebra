@@ -43,3 +43,27 @@ func TestGettingStatus(t *testing.T) {
 	res.Status.Fault = zebra.Fault(100)
 	assert.NotNil(res.Validate(ctx))
 }
+
+func TestLeasabilityAndAvailability(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	d, _ := dummyType()
+	res := zebra.NewBaseResource(d, "dummy", "dummy", "dummy")
+
+	// lease status 1 means not leasable
+	res.Status.LeaseStatus = 2
+
+	assert.NotNil(res.Leasable())
+
+	// lease status 1 means not free.
+	res.Status.LeaseStatus = 1
+
+	assert.NotNil(res.Available())
+
+	// lease status 0 means free and leasable.
+	res.Status.LeaseStatus = 0
+
+	assert.Nil(res.Available())
+	assert.Nil(res.Leasable())
+}
