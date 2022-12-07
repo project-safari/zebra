@@ -32,9 +32,18 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 	return nil
 }
 
-// function to see if the reource IS leasable.
+// function to see if the reource  leasable.
 func (r *BaseResource) Leasable() error {
 	if r.Status.LeaseStatus.CanLease() != nil {
+		return ErrorNotLeasable
+	}
+
+	return nil
+}
+
+// function to see if the reource  is currently available for lease.
+func (r *BaseResource) Available() error {
+	if r.Status.LeaseStatus.IsFree() != nil {
 		return ErrorNotLeasable
 	}
 
