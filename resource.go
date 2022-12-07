@@ -2,7 +2,10 @@ package zebra
 
 import (
 	"context"
+	"errors"
 )
+
+var ErrorNotLeasable = errors.New(`resource is not leasable`)
 
 // Resource interface is implemented by all resources and provides resource
 // validation and label selection methods.
@@ -24,6 +27,15 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 
 	if err := r.Status.Validate(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// function to see if the reource IS leasable.
+func (r *BaseResource) Leasable() error {
+	if r.Status.LeaseStatus.CanLease() != nil {
+		return ErrorNotLeasable
 	}
 
 	return nil

@@ -43,7 +43,7 @@ var (
 	ErrLeaseStatus   = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
 	ErrState         = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
 	ErrCreatedTime   = errors.New(`createdTime is incorrect, must be before current time`)
-	ErrorNotLeasable = errors.New(`resource is not leasable`)
+	ErrSetupResource = errors.New(`resource type is setup, must be ["leased", "free"] to be available for lease`)
 )
 
 func (f *Fault) String() string {
@@ -57,11 +57,12 @@ func (f *Fault) String() string {
 	return fstr
 }
 
-func (l LeaseStatus) Leasable() error {
+// function to see if the lease status of a resource allows it to be leased.
+func (l LeaseStatus) CanLease() error {
 	lstr := l.String()
 
 	if lstr == "setup" {
-		return ErrorNotLeasable
+		return ErrSetupResource
 	}
 
 	return nil
