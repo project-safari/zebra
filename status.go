@@ -39,10 +39,11 @@ const (
 const Unknown = "unknown"
 
 var (
-	ErrFault       = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
-	ErrLeaseStatus = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
-	ErrState       = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
-	ErrCreatedTime = errors.New(`createdTime is incorrect, must be before current time`)
+	ErrFault         = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
+	ErrLeaseStatus   = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
+	ErrState         = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
+	ErrCreatedTime   = errors.New(`createdTime is incorrect, must be before current time`)
+	ErrorNotLeasable = errors.New(`resource is not leasable`)
 )
 
 func (f *Fault) String() string {
@@ -54,6 +55,16 @@ func (f *Fault) String() string {
 	}
 
 	return fstr
+}
+
+func (l LeaseStatus) Leasable() error {
+	lstr := l.String()
+
+	if lstr == "setup" {
+		return ErrorNotLeasable
+	}
+
+	return nil
 }
 
 func (f *Fault) MarshalText() ([]byte, error) {
