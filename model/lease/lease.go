@@ -59,6 +59,20 @@ func (r *ResourceReq) IsSatisfied() bool {
 	return len(r.Resources) == r.Count
 }
 
+// function to notify user once lease is satisfied.
+func (r *ResourceReq) Notify() {
+	satisfactionStatus := r.IsSatisfied()
+
+	if satisfactionStatus == true {
+		SendNotification()
+	}
+}
+
+func SendNotification() {
+	// function to send the email.
+
+}
+
 // Return a new lease pointer with default values.
 func NewLease(userEmail string, dur time.Duration, req []*ResourceReq) *Lease {
 	// Set default values, don't set activation time yet
