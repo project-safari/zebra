@@ -34,17 +34,25 @@ func NewContainer() *Container {
 	}
 }
 
+func (l Lease) GetEmail() string {
+	// return "user@zebra.project-safari.io"
+	return l.Status.UsedBy
+}
+
 // function to notify user once lease is satisfied.
-func (r *ResourceReq) Notify() {
-	satisfactionStatus := r.IsSatisfied()
+func (l Lease) Notify() {
+	satisfactionStatus := l.IsSatisfied()
 
 	strOne := "This is a notification to let you know that your lease request for resource "
 	strTwo := " is satisfied.\nLog back in to check it out!"
-	message := strOne + r.Name + " " + r.Type + strTwo
-	user := "user@zebra.project-safari.io"
 
-	if satisfactionStatus == true {
-		r.SendNotification("Zebra Lease Request Satisfied", message, user)
+	for each := 0; each < len(l.Request); each++ {
+		message := strOne + l.Request[each].Name + " " + l.Request[each].Type + strTwo
+		user := l.GetEmail()
+
+		if satisfactionStatus == true {
+			l.Request[each].SendNotification("Zebra Lease Request Satisfied", message, user)
+		}
 	}
 }
 
