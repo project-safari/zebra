@@ -10,17 +10,17 @@ import (
 	"sync"
 )
 
+//nolint:gochecknoglobals
 var (
-	From_mail     = "admin@zebra.project-safari.io"
-	Mail_password = "Riddikulus"
-	SMTP_Host     = os.Getenv("HOST")
-	Mail_subject  string
-	Mail_body     string
+	FromMail     = "admin@zebra.project-safari.io"
+	Mailpassword = "Riddikulus"
+	SMTPhost     = os.Getenv("HOST")
+	MailSubject  string
+	MailBody     string
 
 	from      *mail.Address
 	auth      smtp.Auth
 	tlsconfig *tls.Config
-	mailwg    sync.WaitGroup
 )
 
 type Container struct {
@@ -34,13 +34,13 @@ func NewContainer() *Container {
 	}
 }
 
-func (l Lease) GetEmail() string {
+func (l *Lease) GetEmail() string {
 	// return "user@zebra.project-safari.io"
 	return l.Status.UsedBy
 }
 
 // function to notify user once lease is satisfied.
-func (l Lease) Notify() {
+func (l *Lease) Notify() {
 	satisfactionStatus := l.IsSatisfied()
 
 	strOne := "This is a notification to let you know that your lease request for resource "
@@ -50,18 +50,20 @@ func (l Lease) Notify() {
 		message := strOne + l.Request[each].Name + " " + l.Request[each].Type + strTwo
 		user := l.GetEmail()
 
-		if satisfactionStatus == true {
+		if satisfactionStatus {
 			l.Request[each].SendNotification("Zebra Lease Request Satisfied", message, user)
 		}
 	}
 }
 
 // function to email notification.
+//
+//nolint:gomnd,funlen
 func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	to := mail.Address{Name: "", Address: recipient}
 
-	Mail_subject = subject
-	Mail_body = msg
+	MailSubject = subject
+	MailBody = msg
 
 	// initialize new container object
 	container := NewContainer()
@@ -70,7 +72,7 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	container.m.Lock()
 	container.Headers["From"] = from.String()
 	container.Headers["To"] = to.String()
-	container.Headers["Subject"] = Mail_subject
+	container.Headers["Subject"] = MailSubject
 	// unlock mutex after function returns
 	defer container.m.Unlock()
 
@@ -79,34 +81,34 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	for k, v := range container.Headers {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
-	message += "\r\n" + Mail_body
 
-	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", SMTP_Host, 465), tlsconfig)
+	message += "\r\n" + MailBody
+
+	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", SMTPhost, 465), tlsconfig)
 	if err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
-	c, err := smtp.NewClient(conn, SMTP_Host)
+	c, err := smtp.NewClient(conn, SMTPhost)
 	if err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
 	// Auth
 	if err = c.Auth(auth); err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
 	// To && From
 	if err = c.Mail(from.Address); err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
 	if err = c.Rcpt(to.Address); err != nil {
 		log.Printf("Error sending mail %v", err)
+	}
+
+	if err != nil {
 		return
 	}
 
@@ -114,22 +116,23 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	w, err := c.Data()
 	if err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
 	_, err = w.Write([]byte(message))
 	if err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
 	err = w.Close()
 	if err != nil {
 		log.Printf("Error sending mail %v", err)
-		return
 	}
 
 	if err = c.Quit(); err != nil {
+		return
+	}
+
+	if err != nil {
 		return
 	}
 }
