@@ -21,6 +21,8 @@ var (
 	ErrNoPrivateKey = errors.New("user private key is not configured")
 )
 
+// var timeLimitedClient = http.Client{Timeout: 18000 * time.Second}
+
 type Client struct {
 	cfg *Config
 	c   *http.Client
@@ -67,14 +69,20 @@ func NewClient(cfg *Config) (*Client, error) {
 }
 
 func (c *Client) Get(path string, in, out interface{}) (int, error) {
+	c.c.Timeout = time.Duration(1) * time.Minute
+	// add 1 min. timeout for get request.
 	return c.do(context.Background(), "GET", path, in, out)
 }
 
 func (c *Client) Delete(path string, in, out interface{}) (int, error) {
+	c.c.Timeout = time.Duration(1) * time.Minute
+	// add 1 min. timeout for delete request.
 	return c.do(context.Background(), "DELETE", path, in, out)
 }
 
 func (c *Client) Post(path string, in, out interface{}) (int, error) {
+	c.c.Timeout = time.Duration(1) * time.Minute
+	// add 1 min. timeout for post request.
 	return c.do(context.Background(), "POST", path, in, out)
 }
 
