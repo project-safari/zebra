@@ -151,6 +151,8 @@ func tlsClient(cfg *Config) (*http.Client, error) {
 	transport.TLSClientConfig.RootCAs = caCertPool
 	transport.TLSClientConfig.MinVersion = tls.VersionTLS13
 
+	transport.ForceAttemptHTTP2 = true
+
 	client := new(http.Client)
 	client.Timeout = time.Duration(1) * time.Minute
 	client.Transport = transport
