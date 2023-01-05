@@ -1,6 +1,6 @@
 // Migration Script for data - it can be used to fetch,
 // add, and use the data inside zebra.
-package main
+package migration
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,9 +17,7 @@ import (
 	//nolint:gci
 
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/model/compute"
 	"github.com/project-safari/zebra/model/dc"
-	"github.com/project-safari/zebra/model/network"
 	"github.com/project-safari/zebra/script"
 
 	// this is needed for mysql access.
@@ -47,6 +46,63 @@ type Racktables struct {
 	Group     string `json:"systemGroup"`
 }
 
+type ResourceAPI struct {
+	factory zebra.ResourceFactory
+	Store   zebra.Store
+}
+
+type CtxKey string
+
+const (
+	ResourcesCtxKey = CtxKey("resources")
+)
+
+func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
+	return &ResourceAPI{
+		factory: factory,
+		Store:   nil,
+	}
+}
+
+// Determine the specific type of a resource.
+// nolint
+func determineType(means string, resName string) string {
+	name := strings.ToLower(resName)
+	typ := ""
+
+	if means == "Shelf" {
+		typ = "dc.rack"
+	} else if means == "Compute" {
+		if strings.Contains(name, "esx") {
+			typ = "compute.esx"
+		} else if strings.Contains(name, "jenkins") || strings.Contains(name, "server") || strings.Contains(name, "srv") || strings.Contains(name, "vintella") {
+			typ = "compute.server"
+		} else if strings.Contains(name, "datacenter") || strings.Contains(name, "dc") || strings.Contains(name, "bld") {
+			typ = "dc.datacenter"
+		} else if strings.Contains(name, "dmz") || strings.Contains(name, "vlan") || strings.Contains(name, "asa") || strings.Contains(name, "bridge") {
+			typ = "network.vlanPool"
+		} else if strings.Contains(name, "vleaf") || strings.Contains(name, "switch") || strings.Contains(name, "sw") || strings.Contains(name, "aci") {
+			typ = "network.switch"
+		} else if strings.Contains(name, "vm") || strings.Contains(name, "capic") || strings.Contains(name, "frodo") {
+			typ = "compute.vm"
+		} else if strings.Contains(name, "vapic") || strings.Contains(name, "vpod") {
+			typ = "compute.vcenter"
+		} else if strings.Contains(name, "ipc") {
+			typ = "network.ipAddressPool"
+		}
+	} else if means == "Other" {
+		if strings.Contains(name, "chasis") || strings.Contains(name, "ixia") || strings.Contains(name, "rack") {
+			typ = "dc.rack"
+		} else if strings.Contains(name, "nexus") || strings.Contains(name, "sw") || strings.Contains(name, "switch") || strings.Contains(name, "n3k") {
+			typ = "network.switch"
+		}
+	} else {
+		typ = means
+	}
+
+	return typ
+}
+
 // Get resource type by id.
 // nolint
 func determineIDMeaning(id string, name string) string {
@@ -72,7 +128,7 @@ func determineIDMeaning(id string, name string) string {
 		means = "/"
 	}
 
-	final = script.DetermineType(means, name)
+	final = determineType(means, name)
 
 	if final == "/" {
 		final = "unclassified"
@@ -83,8 +139,8 @@ func determineIDMeaning(id string, name string) string {
 	return this
 }
 
-//nolint:funlen
-func main() {
+//nolint:funlen, cyclop
+func Do() []Racktables {
 	var rt Racktables
 
 	RackArr := []Racktables{}
@@ -121,8 +177,12 @@ func main() {
 
 			ownedBy := getUserDetails(rt.IP, db)
 			rt.Owner = ownedBy
+
+			if rt.IP == "" || net.ParseIP(rt.IP) == nil {
+				rt.IP = "127.0.0.1"
+			}
 		} else {
-			rt.IP = "null"
+			rt.IP = "127.0.0.1"
 
 			ownedBy := "null"
 			rt.Owner = ownedBy
@@ -177,13 +237,22 @@ func main() {
 		fmt.Println(err.Error())
 	}
 
+	// all data gets posted by reusing handle from API post resources.
 	allData(RackArr)
+
+	return RackArr
+}
+
+// used to post data.
+func Post() {
+	postData := Do()
+	allData(postData)
 }
 
 func allData(rackArr []Racktables) {
 	factory := zebra.Factory()
 
-	myAPI := script.NewResourceAPI(factory)
+	myAPI := NewResourceAPI(factory)
 
 	h := script.HandlePost()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -193,7 +262,7 @@ func allData(rackArr []Racktables) {
 	for i := 0; i < (len(rackArr)); i++ {
 		res := rackArr[i]
 
-		_, eachRes := createResFromData(res)
+		_, _, eachRes := createResFromData(res)
 
 		// Create new resource on zebra with post request.
 		req := createRequests("POST", "/resources", eachRes, myAPI)
@@ -203,14 +272,14 @@ func allData(rackArr []Racktables) {
 }
 
 func createRequests(method string, url string,
-	body string, api *script.ResourceAPI,
+	body string, api *ResourceAPI,
 ) *http.Request {
-	ctx := context.WithValue(context.Background(), script.ResourcesCtxKey, api)
+	ctx := context.WithValue(context.Background(), ResourcesCtxKey, api)
 	req, _ := http.NewRequestWithContext(ctx, method, url, nil)
 
 	if body != "" {
 		req.Body = ioutil.NopCloser(bytes.NewBufferString(body))
-		print("Added   ", body, "  successfully!\n")
+		print("Posted   ", body, "  successfully!\n")
 	}
 
 	return req
@@ -219,6 +288,8 @@ func createRequests(method string, url string,
 // Get IPs from db based on type id.
 func getIPDetaiLs(objectID string, db *sql.DB) string {
 	var rt Racktables
+
+	var IPnum string
 
 	statement := "SELECT ip FROM IPv4Allocation WHERE object_id = ?"
 
@@ -232,7 +303,9 @@ func getIPDetaiLs(objectID string, db *sql.DB) string {
 
 	for results.Next() {
 		// for each row, scan the result into our tag composite object
-		err = results.Scan(&rt.IP)
+		err = results.Scan(&IPnum)
+
+		rt.IP = IPnum
 
 		if err != nil {
 			panic(err.Error()) // proper error handling instead of panic in your app
@@ -388,90 +461,80 @@ func getUserDetails(resIP string, db *sql.DB) string {
 // Returns a zebra.Resource and a string version of the resource struct to be used with APIs.
 //
 //nolint:cyclop, funlen, lll
-func createResFromData(res Racktables) (zebra.Resource, string) {
+func createResFromData(res Racktables) (zebra.Resource, string, string) {
 	resType := res.Type
 
 	switch resType {
-	case "dc.datacenetr":
-		addR := dc.NewDatacenter(res.Location, res.Name, res.Owner, res.Group)
-		print("Added dc " + res.Name + "\n")
-		// this := `{"datacenter":[{"id":` + res.ID + `,"type:"` + resType + `,"name:"` + res.Name + `,owner:` + res.Owner + "}]}"
+	case "dc.dataceneter":
+		addR := dc.NewDatacenter(res.Location, res.Name, res.Owner, "system.group-datacenter"+"-"+res.Group)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "dc", this
 
 	case "dc.lab":
-		addR := dc.NewLab(res.Name, res.Owner, res.Group)
-		print("Added lab " + res.Name + "\n")
-		// this := `{"lab":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + "}]}"
+		addR := dc.NewLab(res.Name, res.Owner, "system.group-datacenter-lab"+"-"+res.Group)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "lab", this
 
 	case "dc.rack", "dc.shelf":
-		addR := dc.NewRack(res.RowName, res.RowID, res.Name, res.Location, res.Owner, res.Group)
-		print("Added rack " + res.Name + "\n")
-		// this := `{"rack":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + `,"Row":` + res.RowName + `,"RowID":` + res.RowID + `,"Asset":` + res.AssetNo + `,"RowID":` + res.RowID + `,"Problems":` + res.Problems + `,"Location":` + res.Location + "}]}"
+		addR := dc.NewRack(res.RowName, res.RowID, res.Name, res.Location, res.Owner, "system.group-datacenter-lab-rack"+"-"+res.Group)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "rack", this
 
 	case "compute.server":
-		addR := compute.NewServer("serial", "model", res.Name, res.Owner, res.Group)
-		print("Added server " + res.Name + "\n")
-		// this := `{"server":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + `,"boardIP":` + res.IP + "}]}"
+		addR := serverFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "server", this
 
 	case "compute.esx":
-		addR := compute.NewESX(res.ID, res.Name, res.Owner, res.Group)
-		print("Added esx " + res.Name + "\n")
-		// this := `{"esx":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + `,"ip":` + res.IP + "}]}"
+		addR := esxFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "esx", this
 
 	case "compute.vm":
-		addR := compute.NewVM("esx??", res.Name, res.Owner, res.Group)
-		print("Added esx" + res.Name + "\n")
-		// this := `{"vm":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + `,"ip":` + res.IP + "}]}"
+		addR := vmFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "vm", this
 
-	case "compute.vcenetr":
-		addR := compute.NewVCenter(res.Name, res.Owner, res.Group)
-		print("Added vc " + res.Name + "\n")
-		// this := `{"vcenter":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + `,"ip":` + res.IP + "}]}"
+	case "compute.vceneter":
+		addR := vcenterFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "vcenter", this
 
 	case "network.switch":
-		addR := network.NewSwitch(res.Name, res.Owner, res.Group)
-		print("Added sw " + res.Name + "\n")
-		// this := `{"switch":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + `,"managementIp":` + res.IP + `,"numPorts":` + strconv.Itoa(res.Port) + "}]}"
+		addR := switchFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "switch", this
 
 	case "network.ipaddresspool":
-		addR := network.NewIPAddressPool(res.Name, res.Owner, res.Group)
-		print("Added IPpool" + res.Name + "\n")
-		// this := `{"IPAddressPool":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + "}]}"
+		addR := addressPoolFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "ip-address-pool", this
 
 	case "network.vlanpool":
-		addR := network.NewVLANPool(res.Name, res.ObjtypeID, res.Group)
-		print("Added vlan" + res.Name + "\n")
-		// this := `{"VLANPool":[{"id":` + res.ID + `,"type":` + resType + `,"name":` + res.Name + `,"owner":` + res.Owner + "}]}"
+		addR := vlanFiller(res)
+
 		this := fmt.Sprintf("%v", addR)
 
-		return addR, this
+		return addR, "vlan-pool", this
 	}
 
-	return nil, ""
+	return nil, "", ""
 }

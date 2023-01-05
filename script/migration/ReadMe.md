@@ -2,7 +2,7 @@
 
 This ReadMe file contains information about the structure of the databases and about how migration works.
 
-MigrationFromRacktables.go is a script to provide data migration from the racktables database to the Zebra tool.
+MigrationFromRacktables.go is a script to provide data migration from the racktables database to the Zebra tool. In this branch, it also has the gropu data.
 
 The database that is used for this script is a MariaDB database. The user should be advised that the MariaDB mysql user utilized here has the following credentials: 
                     
