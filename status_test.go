@@ -89,6 +89,7 @@ func TestUnmarshal(t *testing.T) {
 	assert.Equal(zebra.ErrState, s.UnmarshalText([]byte("zzz")))
 }
 
+// Test for the status of a lease.
 func TestStatusChecker(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

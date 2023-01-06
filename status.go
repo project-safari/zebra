@@ -58,7 +58,7 @@ func (f *Fault) String() string {
 	return fstr
 }
 
-// function to see if the lease status of a resource allows it to be leased.
+// Function to see if the lease status of a resource allows it to be leased.
 func (l LeaseStatus) CanLease() error {
 	if l.String() == "setup" {
 		return ErrSetupResource
@@ -67,7 +67,7 @@ func (l LeaseStatus) CanLease() error {
 	return nil
 }
 
-// function to see if the lease status of a resource is free for leasing.
+// Function to see if the lease status of a resource is free for leasing.
 func (l LeaseStatus) IsFree() error {
 	if l.String() == "leased" {
 		return ErrLeaseInPlace
@@ -98,6 +98,7 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
+// Function to get string version of a lease's status.
 func (l LeaseStatus) String() string {
 	strs := map[LeaseStatus]string{Leased: "leased", Free: "free", Setup: "setup"}
 	lstr, ok := strs[l]

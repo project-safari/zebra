@@ -5,12 +5,14 @@ import (
 	"errors"
 )
 
+// Errors related to a resource's ability to be leased.
+// A resource may be temporarily unavailable, or not leasable.
 var (
 	ErrNotLeasable  = errors.New(`resource is not leasable`)
 	ErrNotAvailable = errors.New(`resource is not currntly available to be leased`)
 )
 
-// Resource interface is implemented by all resources and provides resource
+// Resource interface is implemented by all resources and provides resource,
 // validation and label selection methods.
 type Resource interface {
 	Validate(ctx context.Context) error
@@ -35,7 +37,7 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 	return nil
 }
 
-// function to see if the reource  leasable.
+// Function to see if the reource  leasable.
 func (r *BaseResource) Leasable() error {
 	if r.Status.LeaseStatus.CanLease() != nil {
 		return ErrNotLeasable
@@ -44,7 +46,7 @@ func (r *BaseResource) Leasable() error {
 	return nil
 }
 
-// function to see if the reource  is currently available for lease.
+// Function to see if the reource  is currently available for lease.
 func (r *BaseResource) Available() error {
 	if r.Status.LeaseStatus.IsFree() != nil {
 		return ErrNotAvailable

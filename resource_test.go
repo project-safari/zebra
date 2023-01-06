@@ -29,6 +29,7 @@ func TestBaseResource(t *testing.T) {
 	assert.Equal("abracadabra", res.GetMeta().ID)
 }
 
+// Test for getting the status of a resource.
 func TestGettingStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -44,6 +45,7 @@ func TestGettingStatus(t *testing.T) {
 	assert.NotNil(res.Validate(ctx))
 }
 
+// Test for the ability of a resource to be leased.
 func TestLeasabilityAndAvailability(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
