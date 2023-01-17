@@ -56,9 +56,19 @@ func (l *Lease) Notify() {
 	}
 }
 
+func (l *Lease) NotifyActive() {
+	strOne := "This is a notification to let you know that your lease request for resource "
+	strTwo := " has been activated.\nCheck back later to see if it's satisfited."
+
+	message := strOne + l.Name + strTwo
+	user := l.GetEmail()
+
+	l.SendNotification("Zebra Lease Request Satisfied", message, user)
+}
+
 // function to email notification.
 //
-//nolint:gomnd,funlen
+//nolint:gomnd
 func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	to := mail.Address{Name: "", Address: recipient}
 
