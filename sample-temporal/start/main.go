@@ -1,47 +1,61 @@
 package main
 
 import (
-    "context"
-    "fmt"
-    "hello-world-temporal/app"
-    "log"
+	"context"
+	"fmt"
+	"hello-world-temporal/app"
+	"log"
 
-    "go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/client"
 )
 
 func main() {
 
-    // Create the client object just once per process
-    c, err := client.Dial(client.Options{})
-    if err != nil {
-        log.Fatalln("unable to create Temporal client", err)
-    }
-    defer c.Close()
+	// Create the client object just once per process
+	c, err := client.Dial(client.Options{})
+	if err != nil {
+		log.Fatalln("unable to create Temporal client", err)
+	}
+	defer c.Close()
 
-    options := client.StartWorkflowOptions{
-        ID:        "greeting-workflow",
-        TaskQueue: app.GreetingTaskQueue,
-    }
+	options := client.StartWorkflowOptions{
+		ID:        "greeting-workflow",
+		TaskQueue: app.GreetingTaskQueue,
+	}
 
-    // Start the Workflow
-    name := "World"
-    we, err := c.ExecuteWorkflow(context.Background(), options, app.GreetingWorkflow, name)
-    if err != nil {
-        log.Fatalln("unable to complete Workflow", err)
-    }
+	// Start the Workflow
+	name := getName()
+	we, err := c.ExecuteWorkflow(context.Background(), options, app.GreetingWorkflow, name)
+	if err != nil {
+		log.Fatalln("unable to complete Workflow", err)
+	}
 
-    // Get the results
-    var greeting string
-    err = we.Get(context.Background(), &greeting)
-    if err != nil {
-        log.Fatalln("unable to get Workflow result", err)
-    }
+	// Get the results
+	var greeting string
+	err = we.Get(context.Background(), &greeting)
+	if err != nil {
+		log.Fatalln("unable to get Workflow result", err)
+	}
 
-    printResults(greeting, we.GetID(), we.GetRunID())
+	printResults(greeting, we.GetID(), we.GetRunID())
 }
 
 func printResults(greeting string, workflowID, runID string) {
-    fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
-    fmt.Printf("\n%s\n\n", greeting)
+	fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
+	fmt.Printf("\n%s\n\n", greeting)
 }
 
+func getName() string {
+	fmt.Println("Enter Your First Name: ")
+
+	// var then variable name then variable type
+	var first string
+
+	// Taking input from user
+	fmt.Scanln(&first)
+	fmt.Println("Enter Second Last Name: ")
+	var second string
+	fmt.Scanln(&second)
+
+	return first + " " + second
+}
