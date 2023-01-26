@@ -1,5 +1,7 @@
 package main
 
+// Sample Temporal by Eva Achim.
+
 import (
 	"hello-world-temporal/app"
 	"log"

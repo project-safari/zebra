@@ -1,5 +1,7 @@
 package app
 
+// Sample Temporal by Eva Achim.
+
 import (
 	"context"
 	"fmt"
