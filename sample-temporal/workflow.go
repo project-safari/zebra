@@ -1,5 +1,6 @@
 package app
 
+// Contains the workflow that helps complete one/more activities.
 // Sample Temporal by Eva Achim
 
 import (

@@ -1,5 +1,7 @@
 package main
 
+// Contains the workflow that helps complete one/more activities.
+// Execution.
 // Sample Temporal by Eva Achim.
 
 import (

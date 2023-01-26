@@ -1,5 +1,7 @@
 package main
 
+// Contains the workflow that helps complete one/more activities.
+// Execution.
 // Sample Temporal by Eva Achim.
 
 import (
@@ -25,14 +27,14 @@ func main() {
 		TaskQueue: app.GreetingTaskQueue,
 	}
 
-	// The  Workflow
+	// The  Workflow.
 	name := getName()
 	we, err := c.ExecuteWorkflow(context.Background(), options, app.GreetingWorkflow, name)
 	if err != nil {
 		log.Fatalln("unable to complete Workflow", err)
 	}
 
-	// Get the results
+	// Get the results.
 	var greeting string
 	err = we.Get(context.Background(), &greeting)
 	if err != nil {
@@ -42,11 +44,13 @@ func main() {
 	printResults(greeting, we.GetID(), we.GetRunID())
 }
 
+// Print the results.
 func printResults(greeting string, workflowID, runID string) {
 	fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
 	fmt.Printf("\n%s\n\n", greeting)
 }
 
+// Get user imput.
 func getName() string {
 	fmt.Println("Enter Your First Name: ")
 

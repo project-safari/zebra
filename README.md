@@ -6,3 +6,5 @@ worker/main.go
 start/main.go
 
 ### By Eva Achim.
+
+Docker is also needed.
