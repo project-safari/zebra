@@ -81,13 +81,14 @@ func startServer(cfgStore *config.Store) error {
 	auth := authAdapter()
 	refresh := refreshAdapter()
 	routes := routeHandler()
+	static := staticAdaptor()
 
 	// The order of wrap matters, routes is the final handler that is being
 	// wrapped. setup, login and register are unauthenticated APIs that serve
 	// as a way to bootstrap authentication. auth, refresh and all endpoints
 	// registered by routes must be authenticated either via a jwt in the cookie
 	// or via a rsa key token in the header.
-	handler := web.Wrap(routes, setup, login, register, auth, refresh)
+	handler := web.Wrap(routes, setup, login, register, static, auth, refresh)
 
 	webServer := web.NewServer(serverCfg, handler)
 
