@@ -1,21 +1,20 @@
 package app
 
 import (
-    "time"
+	"time"
 
-    "go.temporal.io/sdk/workflow"
+	"go.temporal.io/sdk/workflow"
 )
 
 func GreetingWorkflow(ctx workflow.Context, name string) (string, error) {
-    options := workflow.ActivityOptions{
-        StartToCloseTimeout: time.Second * 5,
-    }
+	options := workflow.ActivityOptions{
+		StartToCloseTimeout: time.Second * 5,
+	}
 
-    ctx = workflow.WithActivityOptions(ctx, options)
+	ctx = workflow.WithActivityOptions(ctx, options)
 
-    var result string
-    err := workflow.ExecuteActivity(ctx, ComposeGreeting, name).Get(ctx, &result)
+	var result string
+	err := workflow.ExecuteActivity(ctx, ComposeGreeting, name).Get(ctx, &result)
 
-    return result, err
+	return result, err
 }
-

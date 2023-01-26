@@ -23,7 +23,7 @@ func main() {
 		TaskQueue: app.GreetingTaskQueue,
 	}
 
-	// Start the Workflow
+	// The  Workflow
 	name := getName()
 	we, err := c.ExecuteWorkflow(context.Background(), options, app.GreetingWorkflow, name)
 	if err != nil {
@@ -48,13 +48,17 @@ func printResults(greeting string, workflowID, runID string) {
 func getName() string {
 	fmt.Println("Enter Your First Name: ")
 
-	// var then variable name then variable type
+	// first name
 	var first string
 
-	// Taking input from user
+	// Taking input from user.
 	fmt.Scanln(&first)
 	fmt.Println("Enter Second Last Name: ")
+
+	// second name
 	var second string
+
+	// Taking input from the user.
 	fmt.Scanln(&second)
 
 	return first + " " + second
