@@ -21,6 +21,7 @@ func refreshAdapter() web.Adapter {
 			ctx := req.Context()
 			log := logr.FromContextOrDiscard(ctx)
 			jwtClaims, ok := ctx.Value(ClaimsCtxKey).(*auth.Claims)
+
 			if !ok {
 				log.Error(nil, "claims not in context")
 				res.WriteHeader(http.StatusUnauthorized)

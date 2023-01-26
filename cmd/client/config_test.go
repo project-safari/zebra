@@ -27,7 +27,7 @@ func TestConfig(t *testing.T) {
 
 	assert.Nil(execRootCmd())
 
-	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "config", "init", "https://127.0.0.1:6666")
+	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "config", "init", "https://127.0.0.1:8080")
 
 	assert.Nil(execRootCmd())
 

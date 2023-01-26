@@ -17,7 +17,17 @@ zebra-server: $(GO_SRC) go.mod go.sum
 herd: $(GO_SRC) go.mod go.sum
 	$(call build_herd)
 
-bin: zebra zebra-server herd
+bin: ui-assets zebra zebra-server herd
+
+.PHONY:
+ui-assets:
+	rm -rf ./cmd/server/build
+	rm -rf zebra-ui
+	git clone https://github.com/project-safari/zebra-ui.git
+	cd ./zebra-ui && npm ci
+	cd ./zebra-ui && npm run build
+	mv ./zebra-ui/build ./cmd/server
+	rm -rf zebra-ui
 
 lint: ./.golangcilint.yaml
 	./bin/golangci-lint --version || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.46.2 
@@ -28,11 +38,11 @@ simulator-setup: bin
 	rm -rf ./simulator/simulator-store && ./herd --store ./simulator/simulator-store
 	rm -f ./simulator/zebra-simulator.json
 	rm -f ./simulator/admin.yaml
-	./zebra -c ./simulator/admin.yaml config init https://127.0.0.1:6666
+	./zebra -c ./simulator/admin.yaml config init https://127.0.0.1:8080
 	./zebra -c ./simulator/admin.yaml config email admin@zebra.project-safari.io
 	./zebra -c ./simulator/admin.yaml config user admin
 	./zebra -c ./simulator/admin.yaml config ca-cert ./simulator/zebra-ca.crt
-	./zebra-server -c ./simulator/zebra-simulator.json init --auth-key "AvadaKedavra" --user="./simulator/admin.yaml" --password "Riddikulus" --cert "./simulator/zebra-server.crt" --key "./simulator/zebra-server.key" -a "tcp://127.0.0.1:6666" --store="./simulator/simulator-store"
+	./zebra-server -c ./simulator/zebra-simulator.json init --auth-key "AvadaKedavra" --user="./simulator/admin.yaml" --password "Riddikulus" --cert "./simulator/zebra-server.crt" --key "./simulator/zebra-server.key" -a "tcp://127.0.0.1:8080" --store="./simulator/simulator-store"
 
 .PHONY: check-licenses
 check-licenses:
