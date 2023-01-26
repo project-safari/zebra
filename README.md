@@ -5,6 +5,6 @@ To test it, one needs to run the following:
 worker/main.go
 start/main.go
 
-### By Eva Achim.
+By Eva Achim.
 
-Docker is also needed.
+Docker is also needed, as well as the temporal repo.
