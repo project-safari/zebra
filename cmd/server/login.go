@@ -68,6 +68,10 @@ func loginAdapter() web.Adapter {
 			respondWithClaims(ctx, res, claims, authKey)
 
 			log.Info("login succeeded", "user", user.Email)
+
+			this := NotifyLogin(user.Email)
+			zebra.SendAccountNotification(this)
+
 		})
 	}
 }
