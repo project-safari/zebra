@@ -6,6 +6,7 @@ import (
 
 	"log"
 	"sync"
+	"time"
 
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -13,6 +14,106 @@ import (
 	"github.com/temporalio/samples-go/helloworld"
 )
 
+const TaskQueue = "GREETING_TASK_QUEUE"
+
+func main() {
+	var count = 2
+	var wg sync.WaitGroup
+
+	wg.Add(count)
+
+	go firstClient(&wg)
+
+	defer wg.Done()
+
+	go secondClient(&wg)
+
+	wg.Wait()
+}
+
+func printResults(greeting string, workflowID, runID string) {
+	fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
+	fmt.Printf("\n%s\n\n", greeting)
+}
+
+func getName() string {
+	fmt.Println("Enter Your First Name: ")
+
+	// first name
+	var first string
+
+	// Taking input from user.
+	fmt.Scanln(&first)
+	fmt.Println("Enter Second Last Name: ")
+
+	// second name
+	var second string
+
+	// Taking input from the user.
+	fmt.Scanln(&second)
+
+	return first + " " + second
+}
+
+func secondClient(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	time.Sleep(time.Second * 2)
+
+	// Create the client object just once per process
+	c, err := client.Dial(client.Options{})
+	if err != nil {
+		log.Fatalln("unable to create Temporal client", err)
+	}
+	defer c.Close()
+
+	options := client.StartWorkflowOptions{
+		ID:        "greeting-workflow",
+		TaskQueue: TaskQueue,
+	}
+
+	// The  Workflow
+	name := getName()
+	we, err := c.ExecuteWorkflow(context.Background(), options, helloworld.Workflow, name)
+	if err != nil {
+		log.Fatalln("unable to complete Workflow", err)
+	}
+
+	// Get the results
+	var greeting string
+	err = we.Get(context.Background(), &greeting)
+	if err != nil {
+		log.Fatalln("unable to get Workflow result", err)
+	}
+
+	printResults(greeting, we.GetID(), we.GetRunID())
+
+}
+
+func firstClient(wg *sync.WaitGroup) {
+	defer wg.Done()
+	// Create the client object just once per process
+	c, err := client.Dial(client.Options{})
+	if err != nil {
+		log.Fatalln("unable to create Temporal client", err)
+	}
+	defer c.Close()
+
+	// This worker hosts both Workflow and Activity functions
+	w := worker.New(c, TaskQueue, worker.Options{})
+	w.RegisterWorkflow(helloworld.Workflow)
+	w.RegisterActivity(helloworld.Activity)
+
+	// Start listening to the Task Queue
+	err = w.Run(worker.InterruptCh())
+	if err != nil {
+		log.Fatalln("unable to start Worker", err)
+	}
+
+	wg.Done()
+}
+
+/*
 func main() {
 	var count = 2
 	var wg sync.WaitGroup
@@ -36,7 +137,7 @@ func getName() string {
 
 	// Taking input from user.
 	fmt.Scanln(&first)
-	fmt.Println("Enter Your Last Name: ")
+	fmt.Println("Enter Second Last Name: ")
 
 	// second name
 	var second string
@@ -47,7 +148,7 @@ func getName() string {
 	return first + " " + second
 }
 
-func firstClient(wg *sync.WaitGroup) {
+func secondClient(wg *sync.WaitGroup) {
 	// The client and worker are heavyweight objects that should be created once per process.
 	c, err := client.Dial(client.Options{})
 	if err != nil {
@@ -66,7 +167,7 @@ func firstClient(wg *sync.WaitGroup) {
 	}
 }
 
-func secondClient(wg *sync.WaitGroup) {
+func firstClient(wg *sync.WaitGroup) {
 	// The client is a heavyweight object that should be created once per process.
 	c, err := client.Dial(client.Options{})
 	if err != nil {
@@ -95,3 +196,4 @@ func secondClient(wg *sync.WaitGroup) {
 	log.Println("Workflow result:", result)
 
 }
+*/
