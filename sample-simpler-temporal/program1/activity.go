@@ -1,16 +1,35 @@
 package helloworld
 
 import (
+	// TODO(cretz): Remove when tagged
 	"context"
+	"fmt"
 	"time"
 
-	"go.temporal.io/sdk/activity"
-	"go.temporal.io/sdk/workflow"
-
-	// TODO(cretz): Remove when tagged
 	_ "go.temporal.io/sdk/contrib/tools/workflowcheck/determinism"
+	"go.temporal.io/sdk/workflow"
 )
 
+// Workflow is a Hello World workflow definition.
+func Workflow(ctx workflow.Context, name string) (string, error) {
+	options := workflow.ActivityOptions{
+		StartToCloseTimeout: time.Second * 5,
+	}
+
+	ctx = workflow.WithActivityOptions(ctx, options)
+
+	var result string
+	err := workflow.ExecuteActivity(ctx, Activiy, name).Get(ctx, &result)
+
+	return result, err
+}
+
+func Activiy(ctx context.Context, name string) (string, error) {
+	greeting := fmt.Sprintf("Hello %s!", name)
+	return greeting, nil
+}
+
+/*
 // Workflow is a Hello World workflow definition.
 func Workflow(ctx workflow.Context, name string) (string, error) {
 	ao := workflow.ActivityOptions{
@@ -38,3 +57,4 @@ func Activity(ctx context.Context, name string) (string, error) {
 	logger.Info("Activity", "name", name)
 	return "Hello " + name + "!", nil
 }
+*/

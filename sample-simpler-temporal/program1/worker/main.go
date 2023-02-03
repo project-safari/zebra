@@ -9,21 +9,24 @@ import (
 	"github.com/temporalio/samples-go/helloworld"
 )
 
+const TaskQueue = "GREETING_TASK_QUEUE"
+
 func main() {
-	// The client and worker are heavyweight objects that should be created once per process.
+	// Create the client object just once per process
 	c, err := client.Dial(client.Options{})
 	if err != nil {
-		log.Fatalln("Unable to create client", err)
+		log.Fatalln("unable to create Temporal client", err)
 	}
 	defer c.Close()
 
-	w := worker.New(c, "hello-world", worker.Options{})
-
+	// This worker hosts both Workflow and Activity functions
+	w := worker.New(c, TaskQueue, worker.Options{})
 	w.RegisterWorkflow(helloworld.Workflow)
 	w.RegisterActivity(helloworld.Activity)
 
+	// Start listening to the Task Queue
 	err = w.Run(worker.InterruptCh())
 	if err != nil {
-		log.Fatalln("Unable to start worker", err)
+		log.Fatalln("unable to start Worker", err)
 	}
 }

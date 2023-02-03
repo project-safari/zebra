@@ -11,39 +11,61 @@ import (
 	"github.com/temporalio/samples-go/helloworld"
 )
 
+const TaskQueue = "GREETING_TASK_QUEUE"
+
 func printResults(greeting string, workflowID, runID string) {
 	fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
 	fmt.Printf("\n%s\n\n", greeting)
 }
 
+func getName() string {
+	fmt.Println("Enter Your First Name: ")
+
+	// first name
+	var first string
+
+	// Taking input from user.
+	fmt.Scanln(&first)
+	fmt.Println("Enter Second Last Name: ")
+
+	// second name
+	var second string
+
+	// Taking input from the user.
+	fmt.Scanln(&second)
+
+	return first + " " + second
+}
+
 func main() {
-	// The client is a heavyweight object that should be created once per process.
+
+	// Create the client object just once per process
 	c, err := client.Dial(client.Options{})
 	if err != nil {
-		log.Fatalln("Unable to create client", err)
+		log.Fatalln("unable to create Temporal client", err)
 	}
 	defer c.Close()
 
-	workflowOptions := client.StartWorkflowOptions{
-		ID:        "hello_world_workflowID",
-		TaskQueue: "hello-world",
+	options := client.StartWorkflowOptions{
+		ID:        "greeting-workflow",
+		TaskQueue: TaskQueue,
 	}
 
-	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, helloworld.Workflow, "Temporal")
+	// The  Workflow
+	name := getName()
+	we, err := c.ExecuteWorkflow(context.Background(), options, helloworld.Workflow, name)
 	if err != nil {
-		log.Fatalln("Unable to execute workflow", err)
+		log.Fatalln("unable to complete Workflow", err)
 	}
 
-	log.Println("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
-
-	// Synchronously wait for the workflow completion.
-	var result string
-	err = we.Get(context.Background(), &result)
+	// Get the results
+	var greeting string
+	err = we.Get(context.Background(), &greeting)
 	if err != nil {
-		log.Fatalln("Unable get workflow result", err)
+		log.Fatalln("unable to get Workflow result", err)
 	}
-	// log.Println("Workflow result:", result)
-	printResults(result, we.GetID(), we.GetRunID())
+
+	printResults(greeting, we.GetID(), we.GetRunID())
 
 }
 
