@@ -68,6 +68,11 @@ certs:
 	cd ./simulator && go test
 
 simulator: bin certs simulator-setup
+	git clone https://github.com/project-safari/zebra-ui.git
+	cd ./zebra-ui && npm install 
+	cd ./zebra-ui && npm run build
+	mv ./zebra-ui/build ./cmd/server
+	rm -rf zebra-ui
 	./zebra-server --config ./simulator/zebra-simulator.json
 
 test: $(GO_SRC) certs simulator-setup
