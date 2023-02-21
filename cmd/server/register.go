@@ -8,6 +8,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/model/noifications"
 	"github.com/project-safari/zebra/model/user"
 	"gojini.dev/web"
 )
@@ -82,6 +83,9 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 
 	responseRegister(log, res, newuser)
 	log.Info("Registry succeeded", "user", regReq.Name)
+
+	this := noifications.NotifyRegister()
+	noifications.SendAccountNotification("New Account Created", this, regReq.Email)
 }
 
 func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.User) {
