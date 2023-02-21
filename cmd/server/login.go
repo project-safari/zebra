@@ -8,6 +8,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
+	"github.com/project-safari/zebra/model/noifications"
 	"github.com/project-safari/zebra/model/user"
 	"gojini.dev/web"
 )
@@ -68,6 +69,9 @@ func loginAdapter() web.Adapter {
 			respondWithClaims(ctx, res, claims, authKey)
 
 			log.Info("login succeeded", "user", user.Email)
+
+			this := noifications.NotifyLogin()
+			noifications.SendAccountNotification("New Login into Your Account", this, user.Email)
 		})
 	}
 }
