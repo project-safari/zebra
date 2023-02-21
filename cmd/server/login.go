@@ -72,7 +72,6 @@ func loginAdapter() web.Adapter {
 
 			this := noifications.NotifyLogin()
 			noifications.SendAccountNotification("New Login into Your Account", this, user.Email)
-
 		})
 	}
 }
