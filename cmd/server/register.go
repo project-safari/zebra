@@ -84,8 +84,8 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 	responseRegister(log, res, newuser)
 	log.Info("Registry succeeded", "user", regReq.Name)
 
-	this := noifications.NotifyRegister()
-	noifications.SendAccountNotification("New Account Created", this, regReq.Email)
+	this, noteType := noifications.NotifyRegister()
+	noifications.SendAccountNotification("New Account Created", this, regReq.Email, noteType)
 }
 
 func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.User) {
