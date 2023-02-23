@@ -34,7 +34,21 @@ var (
 	tlsconfig *tls.Config
 )
 
-func SendAccountNotification(subject, msg string, recipient string) {
+type NoteActions struct {
+	Notified bool
+	NoteType string
+}
+
+func (note *NoteActions) Sent() {
+	note.Notified = true
+}
+
+func (note *NoteActions) Type(this string) {
+	note.NoteType = this
+}
+
+func SendAccountNotification(subject, msg string, recipient string, kind string) {
+	notif := new(NoteActions)
 	to := mail.Address{Name: "", Address: recipient}
 
 	MailSubject = subject
@@ -110,4 +124,7 @@ func SendAccountNotification(subject, msg string, recipient string) {
 	if err != nil {
 		return
 	}
+
+	notif.Sent()
+	notif.Type(kind)
 }
