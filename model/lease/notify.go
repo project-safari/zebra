@@ -59,7 +59,9 @@ func (l *Lease) Notify() {
 // function to email notification.
 //
 //nolint:gomnd,funlen
-func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
+func (r *ResourceReq) SendNotification(subject, msg string, recipient string, kind string) {
+	notif := new(NoteActions)
+
 	to := mail.Address{Name: "", Address: recipient}
 
 	MailSubject = subject
@@ -135,4 +137,7 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	if err != nil {
 		return
 	}
+
+	notif.Sent()
+	notif.Type(kind)
 }
