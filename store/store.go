@@ -111,7 +111,6 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	if err := res.Validate(context.Background()); err != nil {
 		return err
 	}
-
 	defer rs.qu.LeaseSatisfied()
 	defer rs.qu.Process()
 	rs.lock.Lock()

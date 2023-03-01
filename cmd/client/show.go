@@ -123,7 +123,6 @@ func NewShow() *cobra.Command { //nolint:funlen
 		Args:         cobra.MaximumNArgs(1),
 		SilenceUsage: true,
 	})
-
 	leasecmd := &cobra.Command{
 		Use:          "lease",
 		Short:        "show datacenter lease information",
@@ -460,13 +459,11 @@ func usedBy(r zebra.Resource) string {
 
 func getUserLeases(email string, res []zebra.Resource) []zebra.Resource {
 	var ulease []zebra.Resource
-
 	for _, r := range res {
 		if r.GetMeta().Owner == email {
 			ulease = append(ulease, r)
 		}
 	}
-
 	return ulease
 }
 
