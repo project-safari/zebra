@@ -157,6 +157,17 @@ func (s Status) Validate() error {
 	return nil
 }
 
+func (s *Status) UpdateLeaseState(num int) {
+	switch {
+	case num == 0:
+		s.LeaseStatus = 0
+	case num == 1:
+		s.LeaseStatus = 1
+	default:
+		s.LeaseStatus = 2
+	}
+}
+
 // DefaultStatus returns a Status object with starting values (i.e. healthy
 // resource in a free state, active, no user, and create time as right now).
 func DefaultStatus() Status {
@@ -164,6 +175,6 @@ func DefaultStatus() Status {
 		Fault:       None,
 		LeaseStatus: Free,
 		UsedBy:      "",
-		State:       Inactive,
+		State:       Active,
 	}
 }

@@ -28,4 +28,9 @@ func TestLease(t *testing.T) {
 		"lease", "Server")
 
 	assert.NotNil(execRootCmd())
+
+	os.Args = append([]string{"zebra"}, "-c", "../../simulator/admin.yaml",
+		"lease", "dc.rack")
+
+	assert.NotNil(execRootCmd())
 }

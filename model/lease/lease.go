@@ -3,6 +3,7 @@ package lease
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -24,12 +25,12 @@ func Empty() zebra.Resource {
 }
 
 type ResourceReq struct {
-	Type      string           `json:"type"`
-	Group     string           `json:"group"`
-	Name      string           `json:"name"`
-	Count     int              `json:"count"`
-	Filters   []zebra.Query    `json:"filters,omitempty"`
-	Resources []zebra.Resource `json:"resources,omitempty"`
+	Type      string        `json:"type"`
+	Group     string        `json:"group"`
+	Name      string        `json:"name"`
+	Count     int           `json:"count"`
+	Filters   []zebra.Query `json:"filters,omitempty"`
+	Resources []string      `json:"resources,omitempty"`
 }
 
 type Lease struct {
@@ -47,10 +48,10 @@ var (
 
 func (r *ResourceReq) Assign(res zebra.Resource) error {
 	if r.Resources == nil {
-		r.Resources = make([]zebra.Resource, 0)
+		r.Resources = make([]string, 0)
 	}
 
-	r.Resources = append(r.Resources, res)
+	r.Resources = append(r.Resources, res.GetMeta().ID)
 
 	return nil
 }
@@ -158,4 +159,27 @@ func (l *Lease) Validate(ctx context.Context) error {
 	}
 
 	return l.BaseResource.Validate(ctx)
+}
+
+func MockLease(num int) []zebra.Resource {
+	rs := make([]zebra.Resource, 0, num)
+
+	req := []*ResourceReq{
+		{
+			Type:  "network.vlanPool",
+			Group: "location",
+			Name:  "blah blah give a name",
+			Count: 1,
+		},
+	}
+
+	for i := 1; i <= num; i++ {
+		dur := time.Hour
+		lease := NewLease(fmt.Sprintf("mock-user-%d@zebra.local", i),
+			dur,
+			req)
+		rs = append(rs, lease)
+	}
+
+	return rs
 }

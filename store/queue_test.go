@@ -1,4 +1,4 @@
-package lease_test
+package store_test
 
 import (
 	"net"
@@ -74,11 +74,11 @@ func TestNewQueue(t *testing.T) {
 	factory := model.Factory()
 	assert.NotNil(factory)
 
-	store := store.NewResourceStore(root, factory)
-	err := store.Initialize()
+	stores := store.NewResourceStore(root, factory)
+	err := stores.Initialize()
 	assert.Nil(err)
 
-	q := lease.NewQueue(store)
+	q := store.NewQueue(stores)
 	assert.NotNil(q)
 }
 
@@ -91,16 +91,16 @@ func TestProcess(t *testing.T) {
 	factory := model.Factory()
 	assert.NotNil(factory)
 
-	store := makeStore(root, factory, assert)
-	q := lease.NewQueue(store)
+	stores := makeStore(root, factory, assert)
+	q := store.NewQueue(stores)
 	assert.NotNil(q)
 
-	key1 := lease.Key{
+	key1 := store.Key{
 		Type:  "compute.server",
 		Group: "san-jose-building-14",
 	}
 
-	key2 := lease.Key{
+	key2 := store.Key{
 		Type:  "compute.vm",
 		Group: "san-jose-building-18",
 	}

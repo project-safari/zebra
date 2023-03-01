@@ -124,13 +124,15 @@ func NewShow() *cobra.Command { //nolint:funlen
 		SilenceUsage: true,
 	})
 
-	showCmd.AddCommand(&cobra.Command{
+	leasecmd := &cobra.Command{
 		Use:          "lease",
 		Short:        "show datacenter lease information",
 		RunE:         showLeases,
 		Args:         cobra.MaximumNArgs(1),
 		SilenceUsage: true,
-	})
+	}
+	leasecmd.Flags().BoolP("request", "r", true, "show the resource requests of the users lease(s)")
+	showCmd.AddCommand(leasecmd)
 
 	showCmd.AddCommand(&cobra.Command{
 		Use:          "user",
@@ -373,12 +375,24 @@ func showLeases(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	cfgFile := cmd.Flag("config").Value.String()
+
+	cfg, err := Load(cfgFile)
+	if err != nil {
+		return err
+	}
+
 	if code != http.StatusOK {
 		return ErrQuery
 	}
 
+	reqbool := cmd.Flag("request").Value.String()
 	if l, ok := resMap.Resources["system.lease"]; ok {
-		printLeases(l.Resources)
+		if reqbool != cmd.Flag("request").DefValue {
+			printResourceReq(getUserLeases(cfg.Email, l.Resources))
+		} else {
+			printLeases(l.Resources)
+		}
 	}
 
 	return nil
@@ -444,16 +458,31 @@ func usedBy(r zebra.Resource) string {
 	return s
 }
 
+func getUserLeases(email string, res []zebra.Resource) []zebra.Resource {
+	var ulease []zebra.Resource
+
+	for _, r := range res {
+		if r.GetMeta().Owner == email {
+			ulease = append(ulease, r)
+		}
+	}
+
+	return ulease
+}
+
 func printResources(resources *zebra.ResourceMap) {
 	tw := table.NewWriter()
-	tw.AppendHeader(table.Row{"Name", "Type", "Status"})
+	tw.AppendHeader(table.Row{"Name", "ID", "Type", "Group(s)", "Status", "Lease State"})
 
 	for t, l := range resources.Resources {
 		for _, resource := range l.Resources {
 			tw.AppendRow(table.Row{
 				resource.GetMeta().Name,
+				resource.GetMeta().ID,
 				t,
+				resource.GetMeta().Labels,
 				state(resource),
+				resource.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -464,17 +493,23 @@ func printResources(resources *zebra.ResourceMap) {
 // print server resource types - servers, esx, vcenters, vms.
 func printServers(servers []zebra.Resource) {
 	tw := table.NewWriter()
-	tw.AppendHeader(table.Row{"Name", "Board IP", "Model", "Serialnumber", "User", "Status"})
+	tw.AppendHeader(table.Row{
+		"Name", "ID", "Board IP", "Group(s)",
+		"Model", "Serialnumber", "User", "Status", "Lease State",
+	})
 
 	for _, s := range servers {
 		if server, ok := s.(*compute.Server); ok {
 			tw.AppendRow(table.Row{
 				server.GetMeta().Name,
+				server.GetMeta().ID,
 				server.BoardIP,
+				server.GetMeta().Labels,
 				server.Model,
 				server.SerialNumber,
 				usedBy(server),
 				state(server),
+				server.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -484,17 +519,23 @@ func printServers(servers []zebra.Resource) {
 
 func printESX(manyESX []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Name", "Server ID", "IP", "Credentials", "User", "Status"})
+	data.AppendHeader(table.Row{
+		"Name", "ID", "Server ID", "Group(s)", "IP",
+		"Credentials", "User", "Status", "Lease State",
+	})
 
 	for _, e := range manyESX {
 		if esx, ok := e.(*compute.ESX); ok {
 			data.AppendRow(table.Row{
 				esx.GetMeta().Name,
+				esx.GetMeta().ID,
 				esx.ServerID,
+				esx.GetMeta().Labels,
 				esx.IP.String(),
 				esx.Credentials.Keys,
 				usedBy(esx),
 				state(esx),
+				esx.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -504,13 +545,15 @@ func printESX(manyESX []zebra.Resource) {
 
 func printVCenters(manyVC []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Name", "IP", "Credentials", "User", "Status"})
+	data.AppendHeader(table.Row{"Name", "ID", "IP", "Group(s)", "Credentials", "User", "Status", "Lease State"})
 
 	for _, vc := range manyVC {
 		if vcenter, ok := vc.(*compute.VCenter); ok {
 			data.AppendRow(table.Row{
 				vcenter.GetMeta().Name,
+				vcenter.GetMeta().ID,
 				vcenter.IP.String(),
+				vcenter.GetMeta().Labels,
 				vcenter.Credentials.Keys,
 				usedBy(vcenter),
 				state(vcenter),
@@ -523,18 +566,24 @@ func printVCenters(manyVC []zebra.Resource) {
 
 func printVM(manyVM []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Name", "IP", "Credentials", "ESXID", "VCID", "User", "Status"})
+	data.AppendHeader(table.Row{
+		"Name", "ID", "IP", "Group(s)", "Credentials",
+		"ESXID", "VCID", "User", "Status", "Lease State",
+	})
 
 	for _, vm := range manyVM {
 		if machine, ok := vm.(*compute.VM); ok {
 			data.AppendRow(table.Row{
 				machine.GetMeta().Name,
+				machine.GetMeta().ID,
 				machine.ManagementIP.String(),
+				machine.GetMeta().Labels,
 				machine.Credentials.Keys,
 				machine.ESXID,
 				machine.VCenterID,
 				usedBy(machine),
 				state(machine),
+				machine.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -545,15 +594,18 @@ func printVM(manyVM []zebra.Resource) {
 // print dc resource types - datacenter, lab, rack.
 func printDatacenters(dcs []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Name", "Address", "User", "Status"})
+	data.AppendHeader(table.Row{"Name", "ID", "Address", "Group(s)", "User", "Status", "Lease State"})
 
 	for _, d := range dcs {
 		if dc, ok := d.(*dc.Datacenter); ok {
 			data.AppendRow(table.Row{
 				dc.GetMeta().Name,
+				dc.GetMeta().ID,
 				dc.Address,
+				dc.GetMeta().Labels,
 				usedBy(dc),
 				state(dc),
+				dc.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -563,14 +615,18 @@ func printDatacenters(dcs []zebra.Resource) {
 
 func printLabs(labs []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Name", "User", "Status"})
+	data.AppendHeader(table.Row{"Name", "ID", "User", "Group(s)", "Type", "Status", "Lease Status"})
 
 	for _, lb := range labs {
 		if lab, ok := lb.(*dc.Lab); ok {
 			data.AppendRow(table.Row{
 				lab.GetMeta().Name,
+				lab.Meta.ID,
 				usedBy(lab),
+				lab.GetMeta().Labels,
+				lab.GetMeta().Type.Name,
 				state(lab),
+				lab.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -580,15 +636,18 @@ func printLabs(labs []zebra.Resource) {
 
 func printRacks(racks []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Name", "Row", "User", "Status"})
+	data.AppendHeader(table.Row{"Name", "ID", "Row", "Group(s)", "User", "Status", "Lease State"})
 
 	for _, r := range racks {
 		if rack, ok := r.(*dc.Rack); ok {
 			data.AppendRow(table.Row{
 				rack.GetMeta().Name,
+				rack.GetMeta().ID,
 				rack.Row,
+				rack.GetMeta().Labels,
 				usedBy(rack),
 				state(rack),
+				rack.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -599,7 +658,7 @@ func printRacks(racks []zebra.Resource) {
 // print network resource types: vlan, switch, IPAddressPool.
 func printVlans(vlans []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"VLanPool", "User", "Status"})
+	data.AppendHeader(table.Row{"VLanPool", "ID", "User", "Group(s)", "Status", "Lease State"})
 
 	for _, v := range vlans {
 		vlan, ok := v.(*network.VLANPool)
@@ -607,8 +666,11 @@ func printVlans(vlans []zebra.Resource) {
 		if ok {
 			data.AppendRow(table.Row{
 				vlan.String(),
+				vlan.GetMeta().ID,
 				usedBy(vlan),
+				vlan.GetMeta().Labels,
 				state(vlan),
+				vlan.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -619,21 +681,24 @@ func printVlans(vlans []zebra.Resource) {
 func printSwitches(switches []zebra.Resource) {
 	data := table.NewWriter()
 	data.AppendHeader(table.Row{
-		"Name", "Management IP", "Credentials",
-		"Serial Number", "Model", "Ports", "User", "Status",
+		"Name", "ID", "Management IP", "Group(s)", "Credentials",
+		"Serial Number", "Model", "Ports", "User", "Status", "Lease State",
 	})
 
 	for _, s := range switches {
 		if sw, ok := s.(*network.Switch); ok {
 			data.AppendRow(table.Row{
 				sw.GetMeta().Name,
+				sw.GetMeta().ID,
 				sw.ManagementIP.String(),
+				sw.GetMeta().Labels,
 				sw.Credentials.Keys,
 				sw.SerialNumber,
 				sw.Model,
 				sw.NumPorts,
 				usedBy(sw),
 				state(sw),
+				sw.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -643,14 +708,17 @@ func printSwitches(switches []zebra.Resource) {
 
 func printIPs(ips []zebra.Resource) {
 	data := table.NewWriter()
-	data.AppendHeader(table.Row{"Subnets", "User", "Status"})
+	data.AppendHeader(table.Row{"Subnets", "ID", "User", "Group(s)", "Status", "Lease State"})
 
 	for _, addr := range ips {
 		if pool, ok := addr.(*network.IPAddressPool); ok {
 			data.AppendRow(table.Row{
 				pool.Subnets,
+				pool.GetMeta().ID,
 				usedBy(pool),
+				pool.GetMeta().Labels,
 				state(pool),
+				pool.GetStatus().LeaseStatus,
 			})
 		}
 	}
@@ -710,4 +778,28 @@ func printUsers(users []zebra.Resource) {
 	}
 
 	fmt.Println(data.Render())
+}
+
+func printResourceReq(leases []zebra.Resource) {
+	tw := table.NewWriter()
+	tw.AppendHeader(table.Row{
+		"Name", "Type", "Group", "Count", "Resources Assigned",
+	})
+
+	// print the table here.
+	for _, s := range leases {
+		if l, ok := s.(*lease.Lease); ok {
+			for _, req := range l.Request {
+				tw.AppendRow(table.Row{
+					req.Name,
+					req.Type,
+					req.Group,
+					req.Count,
+					req.Resources,
+				})
+			}
+		}
+	}
+
+	fmt.Println(tw.Render())
 }
