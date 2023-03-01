@@ -10,6 +10,7 @@ type Resource interface {
 	Validate(ctx context.Context) error
 	GetMeta() Meta
 	GetStatus() Status
+	UpdateStatus() *Status
 }
 
 type BaseResource struct {
@@ -35,6 +36,10 @@ func (r *BaseResource) GetMeta() Meta {
 
 func (r *BaseResource) GetStatus() Status {
 	return r.Status
+}
+
+func (r *BaseResource) UpdateStatus() *Status {
+	return &r.Status
 }
 
 func NewBaseResource(rType Type, name, owner, group string) *BaseResource {

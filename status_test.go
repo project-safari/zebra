@@ -16,7 +16,7 @@ func TestDefaultStatus(t *testing.T) {
 	assert.Equal(zebra.None, s.Fault)
 	assert.Equal(zebra.Free, s.LeaseStatus)
 	assert.Equal("", s.UsedBy)
-	assert.Equal(zebra.Inactive, s.State)
+	assert.Equal(zebra.Active, s.State)
 }
 
 func TestValidateStatus(t *testing.T) {

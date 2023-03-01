@@ -16,6 +16,7 @@ func routeHandler() http.Handler {
 	router.GET("/api/v1/resources", handleQuery())
 	router.POST("/api/v1/resources", handlePost())
 	router.DELETE("/api/v1/resources", handleDelete())
+	router.POST(("/api/v1/lease"), handleLease())
 
 	return router
 }
