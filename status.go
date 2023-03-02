@@ -58,6 +58,7 @@ func (f *Fault) String() string {
 	return fstr
 }
 
+// ///
 // Function to see if the lease status of a resource allows it to be leased.
 func (l LeaseStatus) CanLease() error {
 	if l.String() == "setup" {
@@ -67,6 +68,7 @@ func (l LeaseStatus) CanLease() error {
 	return nil
 }
 
+// //
 // Function to see if the lease status of a resource is free for leasing.
 func (l LeaseStatus) IsFree() error {
 	if l.String() == "leased" {

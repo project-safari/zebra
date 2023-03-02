@@ -3,6 +3,7 @@ package zebra
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 // Errors related to a resource's ability to be leased.
@@ -10,6 +11,7 @@ import (
 var (
 	ErrNotLeasable  = errors.New(`resource is not leasable`)
 	ErrNotAvailable = errors.New(`resource is not currntly available to be leased`)
+	ErrTooLong      = errors.New(`lease request took too long`)
 )
 
 // Resource interface is implemented by all resources and provides resource,
@@ -25,6 +27,44 @@ type BaseResource struct {
 	Status Status `json:"status,omitempty"`
 }
 
+// //
+
+// Function to change the status.
+func (r *BaseResource) ChangeStatus(value string) {
+	if r.Leasable() == nil {
+		if r.Expired(3) != nil {
+			r.Status.State = Inactive
+
+		}
+
+		switch value {
+		case "leased":
+			r.Status.LeaseStatus = 1
+			r.Status.State = State(Leased)
+
+		case "freed":
+			r.Status.LeaseStatus = 0
+			r.Status.State = Active
+
+		}
+	} else {
+		r.Status.LeaseStatus = 2
+	}
+}
+
+// //
+// Function to time the duration for lease satisfaction.
+func (r *BaseResource) Expired(maxTime int) error {
+	now := time.Now()
+	timeDifference := now.Sub(r.Meta.ModificationTime)
+
+	if timeDifference > time.Duration(maxTime) {
+		return ErrTooLong
+	}
+
+	return nil
+}
+
 func (r *BaseResource) Validate(ctx context.Context) error {
 	if err := r.Meta.Validate(); err != nil {
 		return err
@@ -37,7 +77,8 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 	return nil
 }
 
-// Function to see if the reource  leasable.
+// ///
+// Function to see if the resource  leasable.
 func (r *BaseResource) Leasable() error {
 	if r.Status.LeaseStatus.CanLease() != nil {
 		return ErrNotLeasable
@@ -46,6 +87,7 @@ func (r *BaseResource) Leasable() error {
 	return nil
 }
 
+// ///
 // Function to see if the reource  is currently available for lease.
 func (r *BaseResource) Available() error {
 	if r.Status.LeaseStatus.IsFree() != nil {
