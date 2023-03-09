@@ -30,6 +30,8 @@ type BaseResource struct {
 // //
 
 // Function to change the status.
+// should a status change be needed, call this function and
+// pass a string value for the event that triggers the chenge.
 func (r *BaseResource) ChangeStatus(value string) {
 	if r.Leasable() == nil {
 		if r.Expired(3) != nil {
@@ -40,25 +42,39 @@ func (r *BaseResource) ChangeStatus(value string) {
 		switch value {
 		case "leased":
 			r.Status.LeaseStatus = 1
-			r.Status.State = State(Leased)
+			r.Status.State = Active
 
 		case "freed":
 			r.Status.LeaseStatus = 0
-			r.Status.State = Active
+			r.Status.State = Inactive
 
 		}
 	} else {
 		r.Status.LeaseStatus = 2
 	}
+
+	// May want to add more cases:
+	//
+	// a resource is in the process of being reserved --> can add a pending status/state.
+	//
+	// a resource is defficient --> can add a state to represent this (could also split into multiple).
 }
+
+/*
+func (r *BaseResource) StatusEvent() string {
+
+}
+*/
 
 // //
 // Function to time the duration for lease satisfaction.
+// This function should be used if the lease has/has not been satisfied
+// within an alloted time frame.
 func (r *BaseResource) Expired(maxTime int) error {
 	now := time.Now()
 	timeDifference := now.Sub(r.Meta.ModificationTime)
 
-	if timeDifference > time.Duration(maxTime) {
+	if time.Duration(timeDifference) > time.Duration(maxTime) {
 		return ErrTooLong
 	}
 
@@ -78,7 +94,7 @@ func (r *BaseResource) Validate(ctx context.Context) error {
 }
 
 // ///
-// Function to see if the resource  leasable.
+// Function to see if the resource is leasable.
 func (r *BaseResource) Leasable() error {
 	if r.Status.LeaseStatus.CanLease() != nil {
 		return ErrNotLeasable
