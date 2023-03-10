@@ -39,10 +39,12 @@ const (
 const Unknown = "unknown"
 
 var (
-	ErrFault       = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
-	ErrLeaseStatus = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
-	ErrState       = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
-	ErrCreatedTime = errors.New(`createdTime is incorrect, must be before current time`)
+	ErrFault         = errors.New(`fault is incorrect, must be in ["none", "minor", "major", "critical"]`)
+	ErrLeaseStatus   = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
+	ErrState         = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
+	ErrCreatedTime   = errors.New(`createdTime is incorrect, must be before current time`)
+	ErrSetupResource = errors.New(`resource status type is setup, must be ["leased", "free"] to be available for lease`)
+	ErrLeaseInPlace  = errors.New(`lease is already in place, status must be "free" to lease a leasable resource`)
 )
 
 func (f *Fault) String() string {
@@ -54,6 +56,26 @@ func (f *Fault) String() string {
 	}
 
 	return fstr
+}
+
+// ///
+// Function to see if the lease status of a resource allows it to be leased.
+func (l LeaseStatus) CanLease() error {
+	if l.String() == "setup" {
+		return ErrSetupResource
+	}
+
+	return nil
+}
+
+// //
+// Function to see if the lease status of a resource is free for leasing.
+func (l LeaseStatus) IsFree() error {
+	if l.String() == "leased" {
+		return ErrLeaseInPlace
+	}
+
+	return nil
 }
 
 func (f *Fault) MarshalText() ([]byte, error) {
@@ -78,6 +100,7 @@ func (f *Fault) UnmarshalText(data []byte) error {
 	return nil
 }
 
+// Function to get string version of a lease's status.
 func (l LeaseStatus) String() string {
 	strs := map[LeaseStatus]string{Leased: "leased", Free: "free", Setup: "setup"}
 	lstr, ok := strs[l]
