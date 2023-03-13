@@ -51,7 +51,7 @@ func (l *Lease) Notify() {
 		user := l.GetEmail()
 
 		if satisfactionStatus {
-			l.Request[each].SendNotification("Zebra Lease Request Satisfied", message, user)
+			l.Request[each].SendNotification("Zebra Lease Request Satisfied", message, user, "lease")
 		}
 	}
 }
@@ -60,7 +60,7 @@ func (l *Lease) Notify() {
 //
 //nolint:gomnd,funlen
 func (r *ResourceReq) SendNotification(subject, msg string, recipient string, kind string) {
-	notif := new(NoteActions)
+	// notif := new(NoteActions)
 
 	to := mail.Address{Name: "", Address: recipient}
 
@@ -138,6 +138,6 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string, ki
 		return
 	}
 
-	notif.Sent()
-	notif.Type(kind)
+	// notif.Sent()
+	// notif.Type(kind)
 }
