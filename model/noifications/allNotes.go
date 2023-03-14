@@ -47,6 +47,7 @@ func (note *NoteActions) Type(this string) {
 	note.NoteType = this
 }
 
+// nolint: funlen, gomnd
 func SendAccountNotification(subject, msg string, recipient string, kind string) {
 	notif := new(NoteActions)
 	to := mail.Address{Name: "", Address: recipient}
