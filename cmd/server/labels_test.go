@@ -13,6 +13,7 @@ import (
 
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/model"
+	"github.com/project-safari/zebra/model/dc"
 	"github.com/project-safari/zebra/store"
 	"github.com/stretchr/testify/assert"
 )

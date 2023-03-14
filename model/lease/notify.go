@@ -60,12 +60,12 @@ func (l *Lease) Notify() {
 //
 //nolint:gomnd,funlen
 func (r *ResourceReq) SendNotification(subject, msg string, recipient string, kind string) {
-	// notif := new(NoteActions)
-
 	to := mail.Address{Name: "", Address: recipient}
 
 	MailSubject = subject
 	MailBody = msg
+
+	// notif := new(NoteActions)
 
 	// initialize new container object
 	container := NewContainer()
@@ -134,10 +134,11 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string, ki
 		return
 	}
 
+	// notif.Sent()
+	// notif.Type(kind)
+
 	if err != nil {
 		return
 	}
 
-	// notif.Sent()
-	// notif.Type(kind)
 }
