@@ -17,10 +17,10 @@ var (
 	SMTPhost     = os.Getenv("HOST")
 	MailSubject  string
 	MailBody     string
-
-	from      *mail.Address
-	auth      smtp.Auth
-	tlsconfig *tls.Config
+	to           *mail.Address
+	from         *mail.Address
+	auth         smtp.Auth
+	tlsconfig    *tls.Config
 )
 
 type Container struct {
@@ -41,52 +41,73 @@ func (l *Lease) GetEmail() string {
 
 // function to notify user once lease is satisfied.
 func (l *Lease) Notify() {
-	satisfactionStatus := l.IsSatisfied()
-
-	strOne := "This is a notification to let you know that your lease request for resource "
+	strOne := "This is a notification to let you know that your lease request has been satisfied."
+	strThree := "for resource "
 	strTwo := " is satisfied.\nLog back in to check it out!"
 
-	for each := 0; each < len(l.Request); each++ {
-		message := strOne + l.Request[each].Name + " " + l.Request[each].Type + strTwo
+	message := strOne
+
+	for _, r := range l.Request {
+		message += strTwo + r.Name + " " + r.Type + strThree
 		user := l.GetEmail()
 
-		if satisfactionStatus {
-			l.Request[each].SendNotification("Zebra Lease Request Satisfied", message, user)
+		if r.IsSatisfied() {
+			l.SendNotification("Zebra Lease Request Satisfied", message, user)
 		}
 	}
 }
 
 func (l *Lease) NotifyActive() {
-	strOne := "This is a notification to let you know that your lease request for resource "
-	strTwo := " has been activated.\nCheck back later to see if it's satisfited."
+	if l != nil {
+		strOne := "This is a notification to let you know that your lease request "
+		strTwo := "has been activated.\nCheck back later to see if it's satisfited."
 
-	for each := 0; each < len(l.Request); each++ {
-		message := strOne + l.Request[each].Name + " " + l.Request[each].Type + strTwo
-		user := l.GetEmail()
+		message := strOne + strTwo
+		// user := l.GetEmail()
 
-		l.Request[each].SendNotification("Zebra Lease Request Placed", message, user)
+		l.SendNotification("Zebra Lease Request Placed", message, "")
 	}
 }
 
-// function to email notification.
-//
-//nolint:gomnd
-func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
-	to := mail.Address{Name: "", Address: recipient}
+func setHeaders() *Container {
+	container := NewContainer() // initialize new container object
 
-	MailSubject = subject
-	MailBody = msg
-
-	// initialize new container object
-	container := NewContainer()
 	// call mutex.lock to avoid multiple writes to
 	// one header instance from running goroutines
+
 	container.m.Lock()
 	container.Headers["From"] = from.String()
 	container.Headers["To"] = to.String()
 	container.Headers["Subject"] = MailSubject
 	// unlock mutex after function returns
 	defer container.m.Unlock()
+
+	return container
+}
+
+// function to email notification.
+//
+//nolint:gomnd, funlen, cyclop
+func (l *Lease) SendNotification(subject, msg string, recipient string) {
+	to := mail.Address{Name: "", Address: recipient}
+
+	MailSubject = subject
+	MailBody = msg
+
+	// initialize new container object
+	/*
+		container := NewContainer()
+			// call mutex.lock to avoid multiple writes to
+			// one header instance from running goroutines
+			container.m.Lock()
+			container.Headers["From"] = from.String()
+			container.Headers["To"] = to.String()
+			container.Headers["Subject"] = MailSubject
+			// unlock mutex after function returns
+			defer container.m.Unlock()
+	*/
+
+	container := setHeaders()
 
 	// Setup message
 	message := ""
