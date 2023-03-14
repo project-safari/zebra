@@ -17,10 +17,10 @@ var (
 	SMTPhost     = os.Getenv("HOST")
 	MailSubject  string
 	MailBody     string
-
-	from      *mail.Address
-	auth      smtp.Auth
-	tlsconfig *tls.Config
+	to           *mail.Address
+	from         *mail.Address
+	auth         smtp.Auth
+	tlsconfig    *tls.Config
 )
 
 type Container struct {
