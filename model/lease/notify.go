@@ -68,6 +68,7 @@ func setHeaders() *Container {
 	container.Headers["Subject"] = MailSubject
 	// unlock mutex after function returns
 	defer container.m.Unlock()
+
 	return container
 }
 
