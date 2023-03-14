@@ -41,30 +41,29 @@ func (l *Lease) GetEmail() string {
 
 // function to notify user once lease is satisfied.
 func (l *Lease) Notify() {
-	satisfactionStatus := l.IsSatisfied()
-
-	strOne := "This is a notification to let you know that your lease request for resource "
+	strOne := "This is a notification to let you know that your lease request has been satisfied."
+	strThree := "for resource "
 	strTwo := " is satisfied.\nLog back in to check it out!"
 
-	for each := 0; each < len(l.Request); each++ {
-		message := strOne + l.Request[each].Name + " " + l.Request[each].Type + strTwo
+	message := strOne
+
+	for _, r := range l.Request {
+
+		message += strTwo + r.Name + " " + r.Type + strThree
 		user := l.GetEmail()
 
-		if satisfactionStatus {
-			l.Request[each].SendNotification("Zebra Lease Request Satisfied", message, user)
+		if r.IsSatisfied() {
+			l.SendNotification("Zebra Lease Request Satisfied", message, user)
 		}
 	}
 }
 
 func (l *Lease) NotifyActive() {
-	strOne := "This is a notification to let you know that your lease request for resource "
-	strTwo := " has been activated.\nCheck back later to see if it's satisfited."
+	if l != nil {
+		message := "This is a notification to let you know that your lease request has been activated.\nCheck back later to see if it's satisfited."
+		// user := l.GetEmail()
 
-	for each := 0; each < len(l.Request); each++ {
-		message := strOne + l.Request[each].Name + " " + l.Request[each].Type + strTwo
-		user := l.GetEmail()
-
-		l.Request[each].SendNotification("Zebra Lease Request Placed", message, user)
+		l.SendNotification("Zebra Lease Request Placed", message, "")
 	}
 }
 
@@ -87,7 +86,7 @@ func setHeaders() *Container {
 // function to email notification.
 //
 //nolint:gomnd, funlen, cyclop
-func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
+func (r Lease) SendNotification(subject, msg string, recipient string) {
 	to := mail.Address{Name: "", Address: recipient}
 
 	MailSubject = subject
