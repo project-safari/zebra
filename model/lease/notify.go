@@ -78,7 +78,7 @@ func (l *Lease) SendNotification(subject, msg string, recipient string) {
 	MailSubject = subject
 	MailBody = msg
 
-	container := setHeaders()
+	container := notifications.SetHeaders()
 
 	// Setup message
 	message := ""
