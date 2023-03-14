@@ -48,7 +48,6 @@ func (l *Lease) Notify() {
 	message := strOne
 
 	for _, r := range l.Request {
-
 		message += strTwo + r.Name + " " + r.Type + strThree
 		user := l.GetEmail()
 
@@ -60,7 +59,10 @@ func (l *Lease) Notify() {
 
 func (l *Lease) NotifyActive() {
 	if l != nil {
-		message := "This is a notification to let you know that your lease request has been activated.\nCheck back later to see if it's satisfited."
+		strOne := "This is a notification to let you know that your lease request "
+		strTwo := "has been activated.\nCheck back later to see if it's satisfited."
+
+		message := strOne + strTwo
 		// user := l.GetEmail()
 
 		l.SendNotification("Zebra Lease Request Placed", message, "")
