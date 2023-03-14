@@ -86,7 +86,7 @@ func setHeaders() *Container {
 // function to email notification.
 //
 //nolint:gomnd, funlen, cyclop
-func (l Lease) SendNotification(subject, msg string, recipient string) {
+func (l *Lease) SendNotification(subject, msg string, recipient string) {
 	to := mail.Address{Name: "", Address: recipient}
 
 	MailSubject = subject
