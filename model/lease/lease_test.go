@@ -15,7 +15,6 @@ func TestNewLease(t *testing.T) {
 
 	l := getLease()
 	assert.NotNil(l)
-
 }
 
 func TestActivate(t *testing.T) {
