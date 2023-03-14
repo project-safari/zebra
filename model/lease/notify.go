@@ -8,6 +8,8 @@ import (
 	"net/smtp"
 	"os"
 	"sync"
+
+	"github.com/project-safari/zebra/model/notifications"
 )
 
 //nolint:gochecknoglobals
