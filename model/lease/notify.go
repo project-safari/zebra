@@ -17,10 +17,10 @@ var (
 	SMTPhost     = os.Getenv("HOST")
 	MailSubject  string
 	MailBody     string
-
-	from      *mail.Address
-	auth      smtp.Auth
-	tlsconfig *tls.Config
+	to           *mail.Address
+	from         *mail.Address
+	auth         smtp.Auth
+	tlsconfig    *tls.Config
 )
 
 type Container struct {
@@ -68,9 +68,25 @@ func (l *Lease) NotifyActive() {
 	}
 }
 
+func setHeaders() *Container {
+	container := NewContainer() // initialize new container object
+
+	// call mutex.lock to avoid multiple writes to
+	// one header instance from running goroutines
+
+	container.m.Lock()
+	container.Headers["From"] = from.String()
+	container.Headers["To"] = to.String()
+	container.Headers["Subject"] = MailSubject
+	// unlock mutex after function returns
+	defer container.m.Unlock()
+
+	return container
+}
+
 // function to email notification.
 //
-//nolint:gomnd, funlen
+//nolint:gomnd, funlen, cyclop
 func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	to := mail.Address{Name: "", Address: recipient}
 
@@ -78,15 +94,19 @@ func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	MailBody = msg
 
 	// initialize new container object
-	container := NewContainer()
-	// call mutex.lock to avoid multiple writes to
-	// one header instance from running goroutines
-	container.m.Lock()
-	container.Headers["From"] = from.String()
-	container.Headers["To"] = to.String()
-	container.Headers["Subject"] = MailSubject
-	// unlock mutex after function returns
-	defer container.m.Unlock()
+	/*
+		container := NewContainer()
+			// call mutex.lock to avoid multiple writes to
+			// one header instance from running goroutines
+			container.m.Lock()
+			container.Headers["From"] = from.String()
+			container.Headers["To"] = to.String()
+			container.Headers["Subject"] = MailSubject
+			// unlock mutex after function returns
+			defer container.m.Unlock()
+	*/
+
+	container := setHeaders()
 
 	// Setup message
 	message := ""
