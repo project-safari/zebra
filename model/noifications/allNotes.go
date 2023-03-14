@@ -47,7 +47,7 @@ func (note *NoteActions) Type(this string) {
 	note.NoteType = this
 }
 
-func setHeaders() *Container {
+func SetHeaders() *Container {
 	container := NewContainer() // initialize new container object
 
 	// call mutex.lock to avoid multiple writes to
@@ -73,19 +73,7 @@ func SendAccountNotification(subject, msg string, recipient string, kind string)
 	MailSubject = subject
 	MailBody = msg
 
-	/*// initialize new container object
-	container := NewContainer()
-	// call mutex.lock to avoid multiple writes to
-	// one header instance from running goroutines
-	container.m.Lock()
-	container.Headers["From"] = from.String()
-	container.Headers["To"] = to.String()
-	container.Headers["Subject"] = MailSubject
-	// unlock mutex after function returns
-	defer container.m.Unlock()
-	*/
-
-	container := setHeaders()
+	container := SetHeaders()
 
 	// Setup message
 	message := ""
