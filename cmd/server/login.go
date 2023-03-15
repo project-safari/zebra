@@ -70,8 +70,8 @@ func loginAdapter() web.Adapter {
 
 			log.Info("login succeeded", "user", user.Email)
 
-			this := noifications.NotifyLogin()
-			noifications.SendAccountNotification("New Login into Your Account", this, user.Email)
+			this, noteType := noifications.NotifyLogin()
+			noifications.SendAccountNotification("New Login into Your Account", this, user.Email, noteType)
 		})
 	}
 }

@@ -70,7 +70,7 @@ func (l *Lease) NotifyActive() {
 
 // function to email notification.
 //
-//nolint:gomnd
+//nolint:gomnd, funlen, cyclop, lll
 func (r *ResourceReq) SendNotification(subject, msg string, recipient string) {
 	to := mail.Address{Name: "", Address: recipient}
 
