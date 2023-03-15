@@ -1,5 +1,6 @@
 package noifications
 
+// nolint: lll
 func NotifyRegister() (string, string) {
 	NoteType = "r"
 
