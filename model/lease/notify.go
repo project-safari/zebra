@@ -8,8 +8,6 @@ import (
 	"net/smtp"
 	"os"
 	"sync"
-
-	"github.com/project-safari/zebra/model/notifications"
 )
 
 //nolint:gochecknoglobals
@@ -71,6 +69,23 @@ func (l *Lease) NotifyActive() {
 	}
 }
 
+// nolint
+func SetHeaders() *Container {
+	container := NewContainer() // initialize new container object
+
+	// call mutex.lock to avoid multiple writes to
+	// one header instance from running goroutines
+
+	container.m.Lock()
+	container.Headers["From"] = from.String()
+	container.Headers["To"] = to.String()
+	container.Headers["Subject"] = MailSubject
+	// unlock mutex after function returns
+	defer container.m.Unlock()
+
+	return container
+}
+
 // function to email notification.
 //
 //nolint:gomnd, funlen, cyclop
@@ -80,7 +95,7 @@ func (l *Lease) SendNotification(subject, msg string, recipient string) {
 	MailSubject = subject
 	MailBody = msg
 
-	container := notifications.SetHeaders()
+	container := SetHeaders()
 
 	// Setup message
 	message := ""
