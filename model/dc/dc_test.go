@@ -34,6 +34,7 @@ func TestDatacenter(t *testing.T) {
 	assert.Nil(d.Validate(ctx))
 }
 
+// TestLab is a test function for the validate function on a lab resource.
 func TestLab(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -64,6 +65,6 @@ func TestRack(t *testing.T) {
 	r.Meta.Type.Name = name
 	assert.Equal(zebra.ErrWrongType, r.Validate(ctx))
 
-	r = dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+	r = dc.NewRack("test_row", "test_row_id", "test_rack", "test_location", "test_owner", "test_group")
 	assert.Nil(r.Validate(ctx))
 }

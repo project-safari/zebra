@@ -106,7 +106,7 @@ func genResources(cmd *cobra.Command,
 	return resources
 }
 
-// run for each resource.
+// Run for each resource.
 func run(cmd *cobra.Command, _ []string) error {
 	rootDir := cmd.Flag("store").Value.String()
 	fs := initStore(rootDir)
@@ -128,6 +128,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	return storeResources(resources, fs)
 }
 
+// Function that initializes the values.
 func intVal(cmd *cobra.Command, flag string) int {
 	v := cmd.Flag(flag).Value.String()
 	i, _ := strconv.Atoi(v)
@@ -135,6 +136,7 @@ func intVal(cmd *cobra.Command, flag string) int {
 	return i
 }
 
+// Function that initializes the store.
 func initStore(rootDir string) *store.FileStore {
 	fs := store.NewFileStore(rootDir, model.Factory())
 	if e := fs.Initialize(); e != nil {

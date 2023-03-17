@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for setting up a default status.
 func TestDefaultStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -19,6 +20,7 @@ func TestDefaultStatus(t *testing.T) {
 	assert.Equal(zebra.Inactive, s.State)
 }
 
+// Test function for valodating the status.
 func TestValidateStatus(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -41,6 +43,7 @@ func TestValidateStatus(t *testing.T) {
 	assert.Nil(s.Validate())
 }
 
+// Test function for converting status/state/fault values to their string version.
 func TestString(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -56,6 +59,7 @@ func TestString(t *testing.T) {
 	assert.Equal("unknown", s.String())
 }
 
+// Test function to marshal / unMarshal for state data for a resource.
 func TestUnmarshal(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

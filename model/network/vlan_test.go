@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for operations of vlan pool and for validation thereof.
 func TestVLANPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -32,6 +33,7 @@ func TestVLANPool(t *testing.T) {
 	assert.NotNil(v1.Validate(ctx))
 }
 
+// Test function for creating a new vlan.
 func TestNewVlan(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

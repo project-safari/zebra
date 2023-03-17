@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Mock function to get a resource map, to be used in tests.
 func getResMap() *zebra.ResourceMap {
 	f := factory()
 
@@ -24,6 +25,7 @@ func getResMap() *zebra.ResourceMap {
 	return resMap
 }
 
+// Test function to create a new resource store.
 func TestNewResourceStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -35,6 +37,7 @@ func TestNewResourceStore(t *testing.T) {
 	assert.NotNil(store.NewResourceStore(root, factory()))
 }
 
+// Test function for initializing a resource store.
 func TestStoreInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -48,6 +51,7 @@ func TestStoreInitialize(t *testing.T) {
 	assert.Nil(rs.Initialize())
 }
 
+// Test function for a resource store wipe.
 func TestStoreWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -62,6 +66,7 @@ func TestStoreWipe(t *testing.T) {
 	assert.Nil(rs.Wipe())
 }
 
+// Test function for a resource store delete.
 func TestStoreDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -94,6 +99,7 @@ func TestStoreDelete(t *testing.T) {
 	assert.NotNil(rs.Delete(f.New("dummy-2")))
 }
 
+// Test function for a resource store load.
 func TestStoreLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -126,6 +132,7 @@ func TestStoreLoad(t *testing.T) {
 	assert.Len(resources.Resources["dummy-1"].Resources, 2)
 }
 
+// Test function for creating resource store.
 func TestStoreCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -160,6 +167,7 @@ func TestStoreCreate(t *testing.T) {
 	assert.Len(resources.Resources["dummy-1"].Resources, 1)
 }
 
+// Test function for a resource store's label query.
 func TestStoreQueryLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -203,6 +211,7 @@ func TestStoreQueryLabel(t *testing.T) {
 	assert.NotNil(err)
 }
 
+// Test function for a resource store query.
 func TestStoreQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -228,6 +237,7 @@ func TestStoreQuery(t *testing.T) {
 	assert.Len(resources.Resources["dummy-1"].Resources, 10)
 }
 
+// Test function for a resource store's uuid query.
 func TestStoreQueryUUID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -259,6 +269,7 @@ func TestStoreQueryUUID(t *testing.T) {
 	assert.Len(resources.Resources["dummy-1"].Resources, 5)
 }
 
+// Test function for a resource store's type query.
 func TestStoreQueryType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -292,6 +303,7 @@ func TestStoreQueryType(t *testing.T) {
 	assert.Len(resources.Resources["dummy-2"].Resources, 5)
 }
 
+// Test function for a resource store's label filter.
 func TestStoreFilterUUID(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -310,6 +322,7 @@ func TestStoreFilterUUID(t *testing.T) {
 	assert.Equal(id, resMap.Resources["dummy-1"].Resources[0].GetMeta().ID)
 }
 
+// Test function for a resource store's type filter.
 func TestStoreFilterType(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -332,6 +345,7 @@ func TestStoreFilterType(t *testing.T) {
 	assert.Equal(0, len(resMap.Resources))
 }
 
+// Test function for a resource store's label filter.
 func TestStoreFilterLabel(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -370,12 +384,14 @@ func TestStoreFilterLabel(t *testing.T) {
 	assert.Empty(resMap.Resources)
 }
 
+// propRes is a struct that contains mock data to be used in tests.
 type propRes struct {
 	zebra.BaseResource
 	Prop1 string `json:"prop1"`
 	Prop2 string `json:"prop2"`
 }
 
+// Mock function to manipulate mock data to be used in tests.
 func propType() (zebra.Type, zebra.TypeConstructor) {
 	t := zebra.Type{Name: "propType", Description: "dummy prop resource"}
 
@@ -388,6 +404,7 @@ func propType() (zebra.Type, zebra.TypeConstructor) {
 	}
 }
 
+// Test function for a resource store's property filter.
 func TestStoreFilterProperty(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -430,6 +447,7 @@ func TestStoreFilterProperty(t *testing.T) {
 	assert.NotNil(resMap)
 }
 
+// Test function for a resource store clear.
 func TestStoreClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -458,6 +476,7 @@ func TestStoreClear(t *testing.T) {
 	assert.Empty(resources.Resources)
 }
 
+// Test function for a resource store's property query.
 func TestStoreQueryProperty(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	assert := assert.New(t)

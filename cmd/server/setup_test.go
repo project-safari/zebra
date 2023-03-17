@@ -81,6 +81,7 @@ const storeCfgAdapter = `
   }
 `
 
+// Test function for the setup.
 func TestSetup(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -112,6 +113,7 @@ func TestSetup(t *testing.T) {
 	assert.NotNil(setupAdapter(ctx, cfgStore))
 }
 
+// Test function for the setup adapter.
 func TestSetupAdapter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

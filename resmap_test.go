@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Mock function that returns a new zebra.Resource to be used in tests.
+// It crates a new zebra.BaseResource of type dummy.
 func dummyCtr() zebra.Resource {
 	r := new(zebra.BaseResource)
 	r.Meta.Type.Name = "dummy"
@@ -15,6 +17,7 @@ func dummyCtr() zebra.Resource {
 	return r
 }
 
+// Test function for creating resource lists.
 func TestNewResourceList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -23,6 +26,7 @@ func TestNewResourceList(t *testing.T) {
 	assert.NotNil(zebra.NewResourceList(ctr))
 }
 
+// Test function for copying resource lists.
 func TestCopyResourceList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -99,6 +103,7 @@ func TestErrorMarshalUnmarshal(t *testing.T) {
 	assert.NotNil(resMap.UnmarshalJSON([]byte(`{"VLANPool":[{"id":"0100000001", "type":123}]}`)))
 }
 
+// Test function for creating resource maps.
 func TestNewResourceMap(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -106,6 +111,7 @@ func TestNewResourceMap(t *testing.T) {
 	assert.NotNil(zebra.NewResourceMap(nil))
 }
 
+// Test function for copying resource maps.
 func TestCopyResourceMap(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -130,6 +136,7 @@ func TestCopyResourceMap(t *testing.T) {
 	assert.Equal(1, len(resB.Resources["dummy"].Resources))
 }
 
+// Test function for deliting resource lists and resource maps.
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for the initialization of a command.
 func TestInitCmd(t *testing.T) {
 	t.Parallel()
 

@@ -12,6 +12,7 @@ const (
 	DefaultMaxDuration = 4
 )
 
+// Errors that can occur whenmetadata is empty.
 var (
 	ErrNameEmpty = errors.New("name is empty")
 	ErrIDEmpty   = errors.New("id is empty")
@@ -30,6 +31,8 @@ type Meta struct {
 	Labels           Labels    `json:"labels"`
 }
 
+// Function to generate new metadata for a resource, givena type, a name, a group, and owner.
+// Returns a Meta struct.
 func NewMeta(resType Type, name string, group string, owner string) Meta {
 	t := time.Now()
 	labels := Labels{}

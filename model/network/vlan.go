@@ -11,6 +11,7 @@ import (
 
 var ErrInvalidRange = errors.New("range bounds are invalid, start is greater than end")
 
+// Function that returns a zabra type of name VlanPool and network category.
 func VLANPoolType() zebra.Type {
 	return zebra.Type{
 		Name:        "network.vlanPool",
@@ -50,6 +51,10 @@ func (v *VLANPool) String() string {
 	return fmt.Sprintf("%d-%d", v.RangeStart, v.RangeEnd)
 }
 
+// Function that creates a new resource of type vlan.
+//
+// It takes in a name, an owner, and a group,
+// and returns a pointer to VLANPool.
 func NewVLANPool(name, owner, group string) *VLANPool {
 	r := zebra.NewBaseResource(VLANPoolType(), name, owner, group)
 
@@ -58,6 +63,9 @@ func NewVLANPool(name, owner, group string) *VLANPool {
 	}
 }
 
+// Function that generates "mock" VLANPools as sample data.
+//
+// It takes in the number of resources to generate and returns a list of zebra resources.
 func MockVLANPool(num int) []zebra.Resource {
 	rs := make([]zebra.Resource, 0, num)
 	prevStart := uint16(1)

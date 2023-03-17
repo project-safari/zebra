@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for creating a new user.
 func TestCreateNewUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -36,6 +37,7 @@ func TestCreateNewUser(t *testing.T) {
 	assert.NotNil(testUser.PasswordHash)
 }
 
+// Test function for updating a user.
 func TestUpdateUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -58,6 +60,7 @@ func TestUpdateUser(t *testing.T) {
 	assert.NotEqual(oldpassword, testUser.PasswordHash)
 }
 
+// Test function for user delete.
 func TestDeleteUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -76,6 +79,7 @@ func TestDeleteUser(t *testing.T) {
 	assert.Empty(store.Query().Resources)
 }
 
+// RData is a struct that contains information for the rsa identity.
 type RData struct {
 	Name     string            `json:"name"`
 	Password string            `json:"password"`
@@ -83,6 +87,10 @@ type RData struct {
 	Key      *auth.RsaIdentity `json:"key"`
 }
 
+// Function to create a new RData struct.
+//
+// It takes in a name, password, email, and key, all as strings.
+// It returns a pointer to the RData struct.
 func newRData(name string, password string, email string, needKey bool) *RData {
 	return &RData{
 		Name:     name,
@@ -110,6 +118,7 @@ func (r *RData) Body() io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBuffer(v))
 }
 
+// / Test function fir registration.
 func TestRegister(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -160,6 +169,7 @@ func TestRegister(t *testing.T) {
 	testForward(assert, h)
 }
 
+// Test function for  user with no key.
 func TestNoKeyUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -191,6 +201,7 @@ func TestNoKeyUser(t *testing.T) {
 	assert.Equal(http.StatusInternalServerError, rr.Code)
 }
 
+// Test function for the same user.
 func TestSameUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -221,6 +232,7 @@ func TestSameUser(t *testing.T) {
 	assert.Equal(http.StatusForbidden, rr.Code)
 }
 
+// Test function for a bad / incorrect request.
 func TestBadRequest(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -256,6 +268,7 @@ func TestBadRequest(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// Test function for a single user delete.
 func TestDelete1User(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

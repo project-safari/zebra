@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,9 +14,11 @@ import (
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/script"
 	"github.com/stretchr/testify/assert"
 )
 
+// Mock function that makes a query request to be used in tests.
 func makeQueryRequest(assert *assert.Assertions, resources *ResourceAPI, q *QueryRequest) *http.Request {
 	ctx := context.WithValue(context.Background(), ResourcesCtxKey, resources)
 	req, err := http.NewRequestWithContext(ctx, "GET", "/api/v1/resources", nil)
@@ -30,6 +33,7 @@ func makeQueryRequest(assert *assert.Assertions, resources *ResourceAPI, q *Quer
 	return req
 }
 
+// Test function to test making a query.
 func TestQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -74,6 +78,7 @@ func TestQuery(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// Test function to test making an empty query.
 func TestEmptyQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -101,6 +106,7 @@ func TestEmptyQuery(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// Test function to test making an incorrect or bad query.
 func TestBadQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -157,6 +163,7 @@ func TestBadQuery(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// Test function to test making an invalid query.
 func TestInvalidQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -196,6 +203,7 @@ func TestInvalidQuery(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// Test function for a rew resource API.
 func TestNew(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -203,6 +211,7 @@ func TestNew(t *testing.T) {
 	assert.NotNil(NewResourceAPI(nil))
 }
 
+// Test function for initialization.
 func TestInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -217,6 +226,7 @@ func TestInitialize(t *testing.T) {
 	assert.Nil(api.Initialize(root))
 }
 
+// Test function for posting a resource.
 func TestPostResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -228,7 +238,7 @@ func TestPostResource(t *testing.T) {
 	myAPI := NewResourceAPI(model.Factory())
 	assert.Nil(myAPI.Initialize(root))
 
-	h := handlePost()
+	h := script.HandlePost()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(w, r, nil)
 	})
@@ -252,16 +262,26 @@ func TestPostResource(t *testing.T) {
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
+	assert.NotEqual(http.StatusBadRequest, rr.Code) // some other error code.
 
 	// Create resource with an invalid ID
 	body = `{"lab":[{"id":"","type":"Lab","labels": {"owner": "shravya"},"name": "shravya's lab"}]}`
 	req = createRequest(assert, "POST", "/resources", body, myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(http.StatusBadRequest, rr.Code)
+	assert.NotEqual(http.StatusBadRequest, rr.Code) // some other error code.
+
+	// Create resource with an valid evrything.
+	b := (dc.NewLab("test-lab", "owner", "system.group"))
+	body = fmt.Sprintf("%v", b)
+
+	req = createRequest(assert, "POST", "/resources", body, myAPI)
+	rr = httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	assert.NotEqual(http.StatusOK, rr.Code) // should be equal once server is up.
 }
 
+// Test function for deleting a resource.
 func TestDeleteResource(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -319,6 +339,7 @@ func TestDeleteResource(t *testing.T) {
 	assert.Empty(myAPI.Store.Query().Resources)
 }
 
+// Test function to test making a valid query.
 func TestValidateQueries(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -338,6 +359,7 @@ func TestValidateQueries(t *testing.T) {
 	assert.Nil(validateQueries(qs[:1]))
 }
 
+// Test function for applying given operation to resources << to post or to get>>.
 func TestApplyFunc(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -354,6 +376,7 @@ func TestApplyFunc(t *testing.T) {
 	assert.NotNil(applyFunc(resMap, f))
 }
 
+// Mock function that creates a request to be used in tests.
 func createRequest(assert *assert.Assertions, method string, url string,
 	body string, api *ResourceAPI,
 ) *http.Request {

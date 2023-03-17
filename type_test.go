@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Mock function to create a "mock" - dummy resource type.
+// To be used in tests.
 func dummyType() (zebra.Type, zebra.TypeConstructor) {
 	t := zebra.Type{
 		Name:        "dummy",
@@ -18,6 +20,7 @@ func dummyType() (zebra.Type, zebra.TypeConstructor) {
 	}
 }
 
+// Test function for adding resources to a zebra.ResourceFactory.
 func TestAddNew(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -40,6 +43,7 @@ func TestAddNew(t *testing.T) {
 	assert.False(ok)
 }
 
+// Test function to test the creation and usage of a zebra.ResourceFactory.
 func TestFactory(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -58,6 +62,7 @@ func TestFactory(t *testing.T) {
 	assert.NotNil(resA.Factory())
 }
 
+// Test function for adding.
 func TestAdd(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

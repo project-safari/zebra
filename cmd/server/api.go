@@ -8,15 +8,16 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/store"
 )
 
+// ResourceAPI is a struct that contains resources for the apis.
 type ResourceAPI struct {
 	factory zebra.ResourceFactory
 	Store   zebra.Store
 }
 
+// QueryRequest struct is a struct that contains data for possible requests.
 type QueryRequest struct {
 	IDs        []string      `json:"ids,omitempty"`
 	Types      []string      `json:"types,omitempty"`
@@ -24,8 +25,10 @@ type QueryRequest struct {
 	Properties []zebra.Query `json:"properties,omitempty"`
 }
 
+// ErrQueryRequest is an error that occurs if the GET request is invalid.
 var ErrQueryRequest = errors.New("invalid GET query request body")
 
+// Validate function for the query request.
 func (qr *QueryRequest) Validate(ctx context.Context) error {
 	id := len(qr.IDs) != 0
 	t := len(qr.Types) != 0
@@ -46,6 +49,7 @@ func (qr *QueryRequest) Validate(ctx context.Context) error {
 	return validateQueries(qr.Properties)
 }
 
+// Function that returns a new struct with resources for the API.
 func NewResourceAPI(factory zebra.ResourceFactory) *ResourceAPI {
 	return &ResourceAPI{
 		factory: factory,
@@ -85,20 +89,7 @@ func validateQueries(queries []zebra.Query) error {
 	return nil
 }
 
-// Validate all resources in a resource map.
-func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
-	// Check all resources to make sure they are valid
-	for _, l := range resMap.Resources {
-		for _, r := range l.Resources {
-			if err := r.Validate(ctx); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
+// Function thathandles a query and retursn a httprouter.Handle.
 func handleQuery() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
@@ -159,49 +150,7 @@ func handleQuery() httprouter.Handle {
 	}
 }
 
-func handlePost() httprouter.Handle {
-	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		ctx := req.Context()
-		log := logr.FromContextOrDiscard(ctx)
-		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
-
-		if !ok {
-			res.WriteHeader(http.StatusInternalServerError)
-
-			return
-		}
-
-		resMap := zebra.NewResourceMap(model.Factory())
-
-		// Read request, return error if applicable
-		if err := readJSON(ctx, req, resMap); err != nil {
-			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be created, could not read request")
-
-			return
-		}
-
-		if validateResources(ctx, resMap) != nil {
-			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be created, found invalid resource(s)")
-
-			return
-		}
-
-		// Add all resources to store
-		if applyFunc(resMap, api.Store.Create) != nil {
-			res.WriteHeader(http.StatusInternalServerError)
-			log.Info("internal server error while creating resources")
-
-			return
-		}
-
-		log.Info("successfully created resources")
-
-		res.WriteHeader(http.StatusOK)
-	}
-}
-
+// Function that handles a delete nad returns a httprouter.Handle.
 func handleDelete() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()

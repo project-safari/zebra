@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for key functions.
 func TestKey(t *testing.T) {
 	t.Parallel()
 
@@ -30,6 +31,8 @@ func TestKey(t *testing.T) {
 	assert.False(k.Match("/b/c/d"))
 }
 
+// Test function for functions that set up priviledges.
+//
 //nolint:funlen
 func TestPriv(t *testing.T) {
 	t.Parallel()

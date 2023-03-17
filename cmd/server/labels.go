@@ -7,6 +7,7 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+// Function that handles labels and returns a httprouter.Handle.
 func handleLabels() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
@@ -47,6 +48,7 @@ func handleLabels() httprouter.Handle {
 	}
 }
 
+// Function that creates a label set.
 func makeMatchSet(labels []string) map[string]struct{} {
 	matchSet := make(map[string]struct{}, len(labels))
 	for _, l := range labels {
@@ -84,6 +86,7 @@ func matchLabels(matchSet map[string]struct{}, rMap *zebra.ResourceMap) map[stri
 	return makeLabelValues(labelSet)
 }
 
+// Function that creates label values.
 func makeLabelValues(labelSet map[string]map[string]struct{}) map[string][]string {
 	labelVals := make(map[string][]string)
 

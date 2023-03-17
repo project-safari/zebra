@@ -10,6 +10,10 @@ import (
 
 var version string
 
+// Function that creates a new cobra command.
+//
+// It adds configuration, lease, and show commands to the root command
+// and returns a pointer to a cobra command.
 func New() *cobra.Command {
 	name := filepath.Base(os.Args[0])
 

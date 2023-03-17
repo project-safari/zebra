@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for creating a new type store.
 func TestTSNewTestStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -16,6 +17,7 @@ func TestTSNewTestStore(t *testing.T) {
 	assert.NotNil(store.NewTypeStore(resMap))
 }
 
+// Test function for initializing a type store.
 func TestTSInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -27,6 +29,7 @@ func TestTSInitialize(t *testing.T) {
 	assert.Nil(ts.Initialize())
 }
 
+// Test function for type store wipe.
 func TestTSWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -40,6 +43,7 @@ func TestTSWipe(t *testing.T) {
 	assert.Nil(ts.Wipe())
 }
 
+// Test function for type store clear.
 func TestTSClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -65,6 +69,7 @@ func TestTSClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
+// Test function for type store load.
 func TestTSLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -86,6 +91,7 @@ func TestTSLoad(t *testing.T) {
 	assert.Len(resources.Resources["dummy-2"].Resources, 1)
 }
 
+// Test function for creating a resource in a type store.
 func TestTSCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -128,6 +134,7 @@ func TestTSCreate(t *testing.T) {
 	assert.Len(resources.Resources["dummy-1"].Resources, 2)
 }
 
+// Test function to delete resource in a type store.
 func TestTSDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -152,6 +159,7 @@ func TestTSDelete(t *testing.T) {
 	assert.NotNil(ts.Delete(t2))
 }
 
+// Test function for a type store query.
 func TestTSQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

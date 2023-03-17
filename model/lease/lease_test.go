@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for creating a new lease.
 func TestNewLease(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -17,6 +18,7 @@ func TestNewLease(t *testing.T) {
 	assert.NotNil(l)
 }
 
+// Test function for activation of a lease.
 func TestActivate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -31,6 +33,7 @@ func TestActivate(t *testing.T) {
 	assert.False(l.ActivationTime.IsZero())
 }
 
+// Test function for deactivation of a lease.
 func TestDeactivate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -48,6 +51,7 @@ func TestDeactivate(t *testing.T) {
 	assert.Equal(zebra.Inactive, l.Status.State)
 }
 
+// Test function for leases of bad - incorrect - leases.
 func TestBadResources(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -69,6 +73,7 @@ func TestBadResources(t *testing.T) {
 	assert.Nil(l.Activate())
 }
 
+// Test function for valid but expired leases.
 func TestValidExpired(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -85,6 +90,7 @@ func TestValidExpired(t *testing.T) {
 	assert.True(l.IsExpired())
 }
 
+// Test function for validation of leases and their request(s).
 func TestValidate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -105,6 +111,8 @@ func TestValidate(t *testing.T) {
 	assert.NotNil(l.Validate(context.Background()))
 }
 
+// Test functuon that verifies the list of resources in a lease request
+// and ensures it has the appropriate length.
 func TestRequestList(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -113,6 +121,8 @@ func TestRequestList(t *testing.T) {
 	assert.Empty(l.RequestList())
 }
 
+// Test functuon that verifies that the identity the owner
+// of a resource and its lease (request) is as expected.
 func TestOwner(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -121,6 +131,8 @@ func TestOwner(t *testing.T) {
 	assert.Equal("tester@quality.com", l.Owner())
 }
 
+// Mock function that gets an empy lease request to be used in tests.
+// It returns a pointer to the Lease struct.
 func getEmptyLease() *Lease {
 	d, err := time.ParseDuration("4h")
 	if err != nil {
@@ -130,6 +142,8 @@ func getEmptyLease() *Lease {
 	return NewLease("tester@quality.com", d, make([]*ResourceReq, 0))
 }
 
+// Mock function that gets a lease request to be used in tests.
+// It returns a pointer to the Lease struct.
 func getLease() *Lease {
 	d, err := time.ParseDuration("4h")
 	if err != nil {
@@ -154,6 +168,8 @@ func getLease() *Lease {
 	return NewLease("tester@quality.com", d, resources)
 }
 
+// Mock function that a resource to be used in tests.
+// It returns a zebra.Resource.
 func getRes() zebra.Resource {
 	return zebra.NewBaseResource(
 		zebra.Type{Name: "dummy", Description: "dummy"},

@@ -13,6 +13,7 @@ import (
 	"gojini.dev/web"
 )
 
+// Test for the refresh api.
 func TestRefresh(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -42,6 +43,7 @@ func TestRefresh(t *testing.T) {
 	assert.NotNil(jwt)
 }
 
+// Mock function that makes a refresh request to be used in tests.
 func makeRefreshRequest(assert *assert.Assertions, claims *auth.Claims, authKey string) *http.Request {
 	ctx := context.WithValue(context.Background(), ClaimsCtxKey, claims)
 	ctx = context.WithValue(ctx, AuthCtxKey, authKey)
@@ -53,6 +55,7 @@ func makeRefreshRequest(assert *assert.Assertions, claims *auth.Claims, authKey 
 	return req
 }
 
+// Mock function for a forward operation.
 func testForward(assert *assert.Assertions, h web.Adapter) {
 	handler := web.Wrap(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusOK)
@@ -67,6 +70,7 @@ func testForward(assert *assert.Assertions, h web.Adapter) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// Test function for a forward operation.
 func TestRefreshForward(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -74,6 +78,7 @@ func TestRefreshForward(t *testing.T) {
 	testForward(assert, refreshAdapter())
 }
 
+// Test function for a bad refresh request.
 func TestBadRefreshRequest(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

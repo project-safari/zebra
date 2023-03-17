@@ -27,6 +27,7 @@ func factory() zebra.ResourceFactory {
 	return f
 }
 
+// Test function for initializing the filestore.
 func TestFileStoreInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -37,6 +38,7 @@ func TestFileStoreInitialize(t *testing.T) {
 	defer func() { os.RemoveAll("test_file_store_initialize") }()
 }
 
+// Test function for creating the filestore.
 func TestFileStoreCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -67,6 +69,7 @@ func TestFileStoreCreate(t *testing.T) {
 	assert.Nil(fs.Create(r))
 }
 
+// Test function for loading the filestore.
 func TestFSLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -95,6 +98,7 @@ func TestFSLoad(t *testing.T) {
 	assert.NotNil(resources)
 }
 
+// Test function for deliting the filestore.
 func TestFSDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -128,6 +132,7 @@ func TestFSDelete(t *testing.T) {
 	assert.NotNil(fs.Delete(resource))
 }
 
+// Test function for clearing the filestore.
 func TestFSClearStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -167,6 +172,7 @@ func TestFSClearStore(t *testing.T) {
 	assert.True(os.IsNotExist(err))
 }
 
+// Test function for filestore wipe.
 func TestFSWipeStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -184,6 +190,7 @@ func TestFSWipeStore(t *testing.T) {
 	assert.True(os.IsNotExist(err))
 }
 
+// Test function for a bad filestore load.
 func TestFSBadLoad1(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -211,6 +218,7 @@ func TestFSBadLoad1(t *testing.T) {
 	assert.NotNil(err)
 }
 
+// Test function for a bad filestore load.
 func TestFSBadLoad2(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -271,6 +279,7 @@ func TestFSBadLoad2(t *testing.T) {
 	assert.NotNil(err)
 }
 
+// Mock function to get the path to be used in tests.
 func getPath(root string, res zebra.Resource) string {
 	resID := res.GetMeta().ID
 

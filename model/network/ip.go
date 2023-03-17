@@ -19,6 +19,7 @@ type IPAddressPool struct {
 	Subnets []net.IPNet `json:"subnets"`
 }
 
+// Function that returns a zabra type of name IPAddressPool and network category.
 func IPAddressPoolType() zebra.Type {
 	return zebra.Type{
 		Name:        "network.ipAddressPool",
@@ -55,6 +56,10 @@ func (p *IPAddressPool) Validate(ctx context.Context) error {
 	return p.BaseResource.Validate(ctx)
 }
 
+// Function that creates a new resource of type ipaddresspool.
+//
+// It takes in a name, an owner, and a group,
+// and returns a pointer to IPAddressPool.
 func NewIPAddressPool(name, owner, group string) *IPAddressPool {
 	r := zebra.NewBaseResource(IPAddressPoolType(), name, owner, group)
 
@@ -63,6 +68,9 @@ func NewIPAddressPool(name, owner, group string) *IPAddressPool {
 	}
 }
 
+// Function that generates "mock" IPAddressPools as sample data.
+//
+// It takes in the number of resources to generate and returns a list of zebra resources.
 func MockIPAddressPool(num int) []zebra.Resource {
 	maxByte := 254
 	rs := make([]zebra.Resource, 0, num)

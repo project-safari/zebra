@@ -14,10 +14,14 @@ import (
 const ReadOnly = 0o600
 
 var (
-	ErrIdentityEmpty   = errors.New("identity is empty")
-	ErrBadPEMFile      = errors.New("bad PEM file")
+	// ErrIdentityEmpty occurs if the identity is empty.
+	ErrIdentityEmpty = errors.New("identity is empty")
+	// ErrBadPEMFile occurs if the PEM file is bad / malformed.
+	ErrBadPEMFile = errors.New("bad PEM file")
+	// ErrUnknownPEMBlock occurs if the PEM block is empty.
 	ErrUnknownPEMBlock = errors.New("unknown PEM block")
-	ErrNoPrivateKey    = errors.New("no private key")
+	// ErrNoPrivateKey occurs if there is no private key.
+	ErrNoPrivateKey = errors.New("no private key")
 )
 
 const RSAKeySize = 2048
@@ -29,6 +33,9 @@ type RsaIdentity struct {
 	private *rsa.PrivateKey
 }
 
+// Function that generates a rsa identity.
+//
+// It returns a pointer to the RSAidentity struct and an error, or nil, in the absence thereof.
 func Generate() (*RsaIdentity, error) {
 	priv, err := rsa.GenerateKey(rand.Reader, RSAKeySize)
 
@@ -38,6 +45,9 @@ func Generate() (*RsaIdentity, error) {
 	}, err
 }
 
+// Function to empty a rsa identity.
+//
+// It returns a pointer to the RSAidentity struct.
 func Empty() *RsaIdentity {
 	return &RsaIdentity{
 		private: nil,
@@ -45,6 +55,9 @@ func Empty() *RsaIdentity {
 	}
 }
 
+// Function to load a rsa identity from a rsa file, passed as a string path.
+//
+// It returns a pointer to the RSAidentity struct and an error, or nil, in the absence thereof.
 func Load(rsaFile string) (*RsaIdentity, error) {
 	rsaText, err := ioutil.ReadFile(rsaFile)
 	if err != nil {
@@ -59,6 +72,10 @@ func Load(rsaFile string) (*RsaIdentity, error) {
 	return id, nil
 }
 
+// Function on a pointer to the RsaIdentity pointer, to save a rsa identity.
+//
+// Function takes in a rsa file as a string path and returns an error or nil,
+// in the absence thereof.
 func (r *RsaIdentity) Save(rsaFile string) error {
 	data, err := r.MarshalText()
 	if err != nil {
@@ -68,6 +85,7 @@ func (r *RsaIdentity) Save(rsaFile string) error {
 	return ioutil.WriteFile(rsaFile, data, ReadOnly)
 }
 
+// Function to marshal for an rsa identity.
 func (r *RsaIdentity) MarshalText() ([]byte, error) {
 	if r.private != nil {
 		return pem.EncodeToMemory(&pem.Block{
@@ -86,6 +104,7 @@ func (r *RsaIdentity) MarshalText() ([]byte, error) {
 	return nil, ErrIdentityEmpty
 }
 
+// Function to unMarshal for an rsa identity.
 func (r *RsaIdentity) UnmarshalText(text []byte) error {
 	b, _ := pem.Decode(text)
 	if b == nil {

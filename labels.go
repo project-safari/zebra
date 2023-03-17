@@ -2,6 +2,7 @@ package zebra
 
 import "errors"
 
+// ErrLabel occurs if the mandatory system label is missing.
 var ErrLabel = errors.New("missing mandatory system label")
 
 // Labels are key/value pairs that can be attached to any resource. They are

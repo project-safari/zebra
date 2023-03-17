@@ -11,6 +11,7 @@ func main() {
 	}
 }
 
+// Function that executes the root cobra command.
 func execRootCmd() error {
 	rootCmd := New()
 

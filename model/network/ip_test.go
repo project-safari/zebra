@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for operations of IP address pool and for validation thereof.
 func TestIPAddressPool(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -33,6 +34,7 @@ func TestIPAddressPool(t *testing.T) {
 	assert.NotNil(ip1.Validate(ctx))
 }
 
+// Test function for creating a new IP.
 func TestNewIP(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

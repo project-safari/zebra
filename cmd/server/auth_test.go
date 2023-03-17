@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for the authentication adapter.
 func TestAuthAdapter(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -46,6 +47,7 @@ func TestAuthAdapter(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
+// Test function for the RSA key function.
 func TestRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -89,6 +91,7 @@ func TestRSAKey(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// Test function for the JWT.
 func TestJWT(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -126,6 +129,7 @@ func TestJWT(t *testing.T) {
 	assert.Equal(http.StatusOK, rr.Code)
 }
 
+// Test function for using a bad rsa key.
 func TestBadRSAKey(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -178,6 +182,7 @@ func TestBadRSAKey(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
+// Test function for using a bad JWT.
 func TestBadJWT(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

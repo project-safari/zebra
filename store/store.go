@@ -10,8 +10,10 @@ import (
 	"github.com/project-safari/zebra"
 )
 
+// ErrNilResource is an error that occurs if the resource to be created is nil <<null>>.
 var ErrNilResource = errors.New("nil resource not allowed")
 
+// ResourceStore is a struct that contains tools necessary for the resource store.
 type ResourceStore struct {
 	lock        sync.RWMutex
 	StorageRoot string
@@ -22,6 +24,7 @@ type ResourceStore struct {
 	ts          *TypeStore
 }
 
+// Function to create a new resource store.
 func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore {
 	return &ResourceStore{
 		lock:        sync.RWMutex{},
@@ -34,6 +37,7 @@ func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore
 	}
 }
 
+// Function to initialize a resource store.
 func (rs *ResourceStore) Initialize() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
@@ -55,6 +59,7 @@ func (rs *ResourceStore) Initialize() error {
 	return nil
 }
 
+// Function to wipe a resource store.
 func (rs *ResourceStore) Wipe() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
@@ -67,6 +72,7 @@ func (rs *ResourceStore) Wipe() error {
 	return nil
 }
 
+// Function to clear a resource store.
 func (rs *ResourceStore) Clear() error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
@@ -98,6 +104,7 @@ func (rs *ResourceStore) Load() (*zebra.ResourceMap, error) {
 	return rs.ts.Load()
 }
 
+// Function to create a resource in a resource store.
 func (rs *ResourceStore) Create(res zebra.Resource) error {
 	if res == nil {
 		return ErrNilResource
@@ -133,6 +140,7 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	return nil
 }
 
+// Function to delete a resource in a resource store.
 func (rs *ResourceStore) Delete(resource zebra.Resource) error {
 	if resource == nil || resource.Validate(context.Background()) != nil {
 		return zebra.ErrInvalidResource

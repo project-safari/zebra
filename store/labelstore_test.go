@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for  a new  label store.
 func TestNewTestStore(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -16,6 +17,7 @@ func TestNewTestStore(t *testing.T) {
 	assert.NotNil(store.NewLabelStore(resMap))
 }
 
+// Test function for initializing a label store.
 func TestLSInitialize(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -27,6 +29,7 @@ func TestLSInitialize(t *testing.T) {
 	assert.Nil(ls.Initialize())
 }
 
+// Test function for label store wipe.
 func TestLSWipe(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -40,6 +43,7 @@ func TestLSWipe(t *testing.T) {
 	assert.Nil(ls.Wipe())
 }
 
+// Test function for label store clear.
 func TestLSClear(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -67,6 +71,7 @@ func TestLSClear(t *testing.T) {
 	assert.Empty(len(resources.Resources))
 }
 
+// Test function for loading a label store.
 func TestLSLoad(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -104,6 +109,7 @@ func TestLSLoad(t *testing.T) {
 	}
 }
 
+// Test function for creating a new resource for a label store.
 func TestLSCreate(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -141,6 +147,7 @@ func TestLSCreate(t *testing.T) {
 	assert.Nil(ls.Create(r1))
 }
 
+// Test function for a label store delete.
 func TestLSDelete(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -172,6 +179,7 @@ func TestLSDelete(t *testing.T) {
 	assert.NotNil(ls.Delete(r2))
 }
 
+// Test function for a label store query.
 func TestLSQuery(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

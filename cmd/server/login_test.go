@@ -19,11 +19,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Mock const values for authentication to be used in tests.
 const (
 	authKey   = "abracadabra"
 	jiniWords = "youGetThreewishes!"
 )
 
+// Test function to find a user.
 func TestFindUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -43,6 +45,8 @@ func TestFindUser(t *testing.T) {
 	assert.NotNil(findUser(store, "email@domain"))
 }
 
+// Mock function to create a user to be used in tests.
+// It returns a pointer to user.User.
 func makeUser(assert *assert.Assertions) *user.User {
 	ctx := context.Background()
 	all, e := auth.NewPriv("", true, true, true, true)
@@ -63,6 +67,8 @@ func makeUser(assert *assert.Assertions) *user.User {
 	return jini
 }
 
+// Mock function to make a query store to be used in tests.
+// It returns a zebra.Store.
 func makeQueryStore(root string, assert *assert.Assertions, user *user.User) zebra.Store {
 	factory := model.Factory()
 	assert.NotNil(factory)
@@ -79,6 +85,8 @@ func makeQueryStore(root string, assert *assert.Assertions, user *user.User) zeb
 	return store
 }
 
+// Mock function to make a query store to be used in tests.
+// It returns a zebra.Store.
 func makeLoginRequest(assert *assert.Assertions, user string, password string,
 	email string, resources *ResourceAPI,
 ) *http.Request {
@@ -94,6 +102,7 @@ func makeLoginRequest(assert *assert.Assertions, user string, password string,
 	return req
 }
 
+// Test function for a bad / incorrect user.
 func TestBadUser(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -120,6 +129,7 @@ func TestBadUser(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 }
 
+// Test function for a bad / incorrect login.
 func TestBadLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -140,6 +150,7 @@ func TestBadLogin(t *testing.T) {
 	assert.Equal(http.StatusUnauthorized, rr.Code)
 }
 
+// Test function for login.
 func TestLogin(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -167,6 +178,7 @@ func TestLogin(t *testing.T) {
 	assert.NotNil(jwt)
 }
 
+// Test function for testForward.
 func TestLoginForward(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -174,6 +186,7 @@ func TestLoginForward(t *testing.T) {
 	testForward(assert, loginAdapter())
 }
 
+// Test function for login w/ context.
 func TestLoginContext(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

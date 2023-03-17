@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test function for operations of switch and for validation thereof.
 func TestSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)
@@ -45,6 +46,7 @@ func TestSwitch(t *testing.T) {
 	assert.NotNil(s1.Validate(ctx))
 }
 
+// Test function for creating a new switch.
 func TestNewSwitch(t *testing.T) {
 	t.Parallel()
 	assert := assert.New(t)

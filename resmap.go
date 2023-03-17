@@ -4,11 +4,15 @@ import (
 	"encoding/json"
 )
 
+// A ResourceList struct represents a list of resources with the appropriate constructor.
 type ResourceList struct {
 	ctr       TypeConstructor
 	Resources []Resource
 }
 
+// Function that creates a new resource list given a type constructor.
+//
+// It returns a pointer to ResourceList.
 func NewResourceList(ctr TypeConstructor) *ResourceList {
 	return &ResourceList{
 		ctr:       ctr,
@@ -16,12 +20,21 @@ func NewResourceList(ctr TypeConstructor) *ResourceList {
 	}
 }
 
+// Operation function on a pointer to ResourceList - add.
+//
+// It adds a new resource to a resource list,
+// given a Resource and returns error or nil in the absence thereof.
 func (r *ResourceList) Add(res Resource) error {
 	r.Resources = append(r.Resources, res)
 
 	return nil
 }
 
+// Operation function on a pointer to ResourceList - delete.
+//
+// It deletes a resource to a resource list,
+// given a Resource and returns nil or ErrNotFound in the absence of the resource.
+// ErrNotFund is an error that occurs if a resource was not found, declared in store.go.
 func (r *ResourceList) Delete(res Resource) error {
 	listLen := len(r.Resources)
 
@@ -37,6 +50,10 @@ func (r *ResourceList) Delete(res Resource) error {
 	return ErrNotFound
 }
 
+// Function that performs the copy operation of a resource list.
+//
+// It takes in pointers to the resource list, one for the source, the other for the destination
+// and returns nothing.
 func CopyResourceList(dest *ResourceList, src *ResourceList) {
 	if dest == nil || src == nil {
 		return
@@ -78,11 +95,15 @@ func (r *ResourceList) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// A ResourceMap struct represents a map of resources with a ResourceFactory and a map of type *ResourceList.
 type ResourceMap struct {
 	factory   ResourceFactory
 	Resources map[string]*ResourceList
 }
 
+// Function that creates a new ResourceMap.
+//
+// It takes in a ResourceFactory and returns a pointer to ResourceMap.
 func NewResourceMap(f ResourceFactory) *ResourceMap {
 	return &ResourceMap{
 		factory:   f,
@@ -90,6 +111,10 @@ func NewResourceMap(f ResourceFactory) *ResourceMap {
 	}
 }
 
+// Function that performs the copy operation of a resource map.
+//
+// It takes in pointers to the resource map one for the source, the other for the destination
+// and returns nothing.
 func CopyResourceMap(dest *ResourceMap, src *ResourceMap) {
 	if dest == nil || src == nil {
 		return
@@ -109,6 +134,10 @@ func (r *ResourceMap) Factory() ResourceFactory {
 	return r.factory
 }
 
+// Operation function on a pointer to ResourceMap  - add.
+//
+// This function adds a new resource list to the resource map.
+// It calls the add function on the resource list.
 func (r *ResourceMap) Add(res Resource) error {
 	key := res.GetMeta().Type.Name
 	rl := r.Resources[key]
@@ -125,6 +154,7 @@ func (r *ResourceMap) Add(res Resource) error {
 	return rl.Add(res)
 }
 
+// Operation function on a pointer to ResourceMap - delete.
 func (r *ResourceMap) Delete(res Resource) error {
 	key := res.GetMeta().Type.Name
 	if r.Resources[key] == nil {
