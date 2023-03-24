@@ -353,7 +353,7 @@ func TestPrintResources(t *testing.T) { //nolint:funlen
 
 	assert.NotNil(resMap)
 
-	rack := dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+	rack := dc.NewRack("test_row", "test_row_id", "test_rack", "test_location", "test_owner", "test_group")
 	assert.Nil(resMap.Add(rack))
 
 	printResources(resMap)
@@ -610,7 +610,8 @@ func TestPrintRacks(t *testing.T) {
 
 	fact := model.Factory()
 	resMap := zebra.NewResourceMap(fact)
-	rack := dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+
+	rack := dc.NewRack("test_row", "test_row_id", "test_rack", "test_location", "test_owner", "test_group")
 	assert.Nil(resMap.Add(rack))
 
 	listed := resMap.Resources["dc.rack"].Resources
