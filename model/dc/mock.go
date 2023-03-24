@@ -41,14 +41,17 @@ func MockLab(num int) []zebra.Resource {
 
 func MockRack(num int) []zebra.Resource {
 	maxRow := 10
+	even := 2
 	rs := make([]zebra.Resource, 0, num)
 
 	for i := 1; i <= num; i++ {
 		s := NewRack(
-			fmt.Sprintf("mock-row-%d", i%maxRow),
-			fmt.Sprintf("mock-lab-%d", i),
-			"mocker",
-			"rack",
+			fmt.Sprintf("mock-row-%d", i%maxRow), // row.
+			fmt.Sprintf("RowID=%d", i%even),      // some mock row id.
+			fmt.Sprintf("mock-lab-%d", i),        // name.
+			"mock-rack-area",                     // some random mock location.
+			"mocker",                             // owner.
+			"rack",                               // group.
 		)
 
 		rs = append(rs, s)
