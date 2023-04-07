@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 
@@ -24,7 +25,10 @@ func setupLogger(cfgStore *config.Store) context.Context {
 }
 
 func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
-	log := logr.FromContextOrDiscard(ctx)
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	storeCfg := struct {
 		Root string `json:"rootDir"`
@@ -47,9 +51,9 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 		panic(e)
 	}
 
-	log.Info("zebra store initialized")
+	log.Println("zebra store initialized")
 
-	if e := initAdminUser(log, resAPI.Store, cfgStore); e != nil {
+	if e := initAdminUser(resAPI.Store, cfgStore); e != nil {
 		panic(e)
 	}
 
@@ -74,7 +78,7 @@ func setupAdapter(ctx context.Context, cfgStore *config.Store) web.Adapter {
 	}
 }
 
-func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) error {
+func initAdminUser(store zebra.Store, cfgStore *config.Store) error {
 	admin := new(user.User)
 
 	if err := cfgStore.Get("admin", admin); err != nil {
@@ -82,7 +86,7 @@ func initAdminUser(log logr.Logger, store zebra.Store, cfgStore *config.Store) e
 	}
 
 	if findUser(store, admin.Email) == nil {
-		log.Info("creating admin user")
+		log.Println("creating admin user")
 
 		return store.Create(admin)
 	}

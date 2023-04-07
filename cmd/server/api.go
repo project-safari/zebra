@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
-	"github.com/go-logr/logr"
 	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/model"
@@ -99,10 +99,15 @@ func validateResources(ctx context.Context, resMap *zebra.ResourceMap) error {
 	return nil
 }
 
-func handleQuery() httprouter.Handle {
+func handleQuery() httprouter.Handle { //nolint:cyclop,funlen
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
-		log := logr.FromContextOrDiscard(ctx)
+
+		err := OpenLogFile("./zebralog.log")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 
 		if !ok {
@@ -116,7 +121,7 @@ func handleQuery() httprouter.Handle {
 		// Read request, return error if applicable
 		if err := readJSON(ctx, req, qr); err != nil && !errors.Is(err, ErrEmptyBody) {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be queried, could not read request")
+			log.Println("resources could not be queried, could not read request")
 
 			return
 		}
@@ -124,7 +129,7 @@ func handleQuery() httprouter.Handle {
 		// Validate query request and label/property queries
 		if err := qr.Validate(ctx); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be queried, found invalid quer(y/ies)")
+			log.Println("resources could not be queried, found invalid quer(y/ies)")
 
 			return
 		}
@@ -152,7 +157,7 @@ func handleQuery() httprouter.Handle {
 			resources, _ = store.FilterLabel(q, resources)
 		}
 
-		log.Info("successfully queried resources")
+		log.Println("successfully queried resources")
 
 		// Write response body
 		writeJSON(ctx, res, resources)
@@ -162,7 +167,12 @@ func handleQuery() httprouter.Handle {
 func handlePost() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
-		log := logr.FromContextOrDiscard(ctx)
+
+		err := OpenLogFile("./zebralog.log")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 
 		if !ok {
@@ -176,14 +186,14 @@ func handlePost() httprouter.Handle {
 		// Read request, return error if applicable
 		if err := readJSON(ctx, req, resMap); err != nil {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be created, could not read request")
+			log.Println("resources could not be created, could not read request")
 
 			return
 		}
 
 		if validateResources(ctx, resMap) != nil {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be created, found invalid resource(s)")
+			log.Println("resources could not be created, found invalid resource(s)")
 
 			return
 		}
@@ -191,12 +201,12 @@ func handlePost() httprouter.Handle {
 		// Add all resources to store
 		if applyFunc(resMap, api.Store.Create) != nil {
 			res.WriteHeader(http.StatusInternalServerError)
-			log.Info("internal server error while creating resources")
+			log.Println("internal server error while creating resources")
 
 			return
 		}
 
-		log.Info("successfully created resources")
+		log.Println("successfully created resources")
 
 		res.WriteHeader(http.StatusOK)
 	}
@@ -205,7 +215,12 @@ func handlePost() httprouter.Handle {
 func handleDelete() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
-		log := logr.FromContextOrDiscard(ctx)
+
+		err := OpenLogFile("./zebralog.log")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 
 		if !ok {
@@ -217,7 +232,7 @@ func handleDelete() httprouter.Handle {
 		id := params.ByName("id")
 		if id == "" {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Info("resources could not be deleted, found invalid resource(s)")
+			log.Println("resources could not be deleted, found invalid resource(s)")
 
 			return
 		}
@@ -228,12 +243,12 @@ func handleDelete() httprouter.Handle {
 		// Delete all resources from store
 		if applyFunc(resMap, api.Store.Delete) != nil {
 			res.WriteHeader(http.StatusInternalServerError)
-			log.Info("internal server error while deleting resources")
+			log.Println("internal server error while deleting resources")
 
 			return
 		}
 
-		log.Info("successfully deleted resources")
+		log.Println("successfully deleted resources")
 
 		res.WriteHeader(http.StatusOK)
 	}

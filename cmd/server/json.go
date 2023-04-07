@@ -5,22 +5,24 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
-
-	"github.com/go-logr/logr"
 )
 
 var ErrEmptyBody = errors.New("request body is empty")
 
 func readJSON(ctx context.Context, req *http.Request, data interface{}) error {
-	log := logr.FromContextOrDiscard(ctx)
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return err
 	}
 
-	log.Info("request", "body", string(body))
+	log.Println("request", "body", string(body))
 
 	if len(body) > 0 {
 		err = json.Unmarshal(body, data)
@@ -32,7 +34,10 @@ func readJSON(ctx context.Context, req *http.Request, data interface{}) error {
 }
 
 func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
-	log := logr.FromContextOrDiscard(ctx)
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	bytes, err := json.Marshal(data)
 	if err != nil {
@@ -45,6 +50,6 @@ func writeJSON(ctx context.Context, res http.ResponseWriter, data interface{}) {
 	res.WriteHeader(http.StatusOK)
 
 	if _, err := res.Write(bytes); err != nil {
-		log.Error(err, "error writing response")
+		log.Println(err, "error writing response")
 	}
 }
