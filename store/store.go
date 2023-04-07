@@ -111,6 +111,7 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	if err := res.Validate(context.Background()); err != nil {
 		return err
 	}
+
 	defer rs.qu.LeaseSatisfied()
 	defer rs.qu.Process()
 	rs.lock.Lock()
@@ -375,6 +376,22 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 	}
 
 	return retMap, nil
+}
+
+// Set Lease state of all resources in Resource Request.
+func (rs *ResourceStore) FreeResources(reslist []string) {
+	for _, id := range reslist {
+		res, ok := rs.ids.resources[id]
+		if !ok {
+			continue
+		}
+
+		res.UpdateStatus().UpdateLeaseState(0)
+
+		if err := rs.Create(res); err != nil {
+			continue
+		}
+	}
 }
 
 // Ignore case in returning value of given field.

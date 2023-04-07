@@ -40,6 +40,7 @@ type Store interface {
 	QueryType(types []string) *ResourceMap
 	QueryLabel(query Query) (*ResourceMap, error)
 	QueryProperty(query Query) (*ResourceMap, error)
+	FreeResources(reslist []string)
 }
 
 func (q *Query) Validate() error {

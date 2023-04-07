@@ -1,6 +1,8 @@
 package store
 
 import (
+	"time"
+
 	"github.com/edwingeng/deque"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/model/lease"
@@ -104,11 +106,28 @@ func (q *Queue) LeaseSatisfied() {
 				if l, ok := leslist.(*lease.Lease); ok {
 					if l.IsSatisfied() && l.Status.State == zebra.Inactive {
 						if l.Activate() == nil {
+							go q.isLeaseActive(l)
+
 							continue
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+func (q *Queue) isLeaseActive(lease *lease.Lease) {
+	for !lease.IsExpired() {
+		time.Sleep(1 * time.Minute)
+	}
+
+	lease.Deactivate()
+
+	for _, reslist := range lease.RequestList() {
+		list := reslist.Resources
+		reslist.Resources = nil
+
+		q.Store.FreeResources(list)
 	}
 }
