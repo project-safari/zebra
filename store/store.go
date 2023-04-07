@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/project-safari/zebra"
+	"github.com/project-safari/zebra/model/lease"
 )
 
 var ErrNilResource = errors.New("nil resource not allowed")
@@ -20,6 +21,7 @@ type ResourceStore struct {
 	ids         *IDStore
 	ls          *LabelStore
 	ts          *TypeStore
+	qu          *Queue
 }
 
 func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore {
@@ -31,6 +33,7 @@ func NewResourceStore(root string, factory zebra.ResourceFactory) *ResourceStore
 		ids:         nil,
 		ls:          nil,
 		ts:          nil,
+		qu:          nil,
 	}
 }
 
@@ -51,6 +54,7 @@ func (rs *ResourceStore) Initialize() error {
 	rs.ids = NewIDStore(resources)
 	rs.ls = NewLabelStore(resources)
 	rs.ts = NewTypeStore(resources)
+	rs.qu = NewQueue(rs)
 
 	return nil
 }
@@ -63,6 +67,7 @@ func (rs *ResourceStore) Wipe() error {
 	rs.ids = nil
 	rs.ls = nil
 	rs.ts = nil
+	rs.qu = nil
 
 	return nil
 }
@@ -107,6 +112,8 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 		return err
 	}
 
+	defer rs.qu.LeaseSatisfied()
+	defer rs.qu.Process()
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
 
@@ -128,6 +135,10 @@ func (rs *ResourceStore) Create(res zebra.Resource) error {
 	err = rs.ts.Create(res)
 	if err != nil {
 		return err
+	}
+
+	if l, ok := res.(*lease.Lease); ok {
+		rs.qu.Enqueue(l)
 	}
 
 	return nil
@@ -365,6 +376,22 @@ func FilterProperty(query zebra.Query, resMap *zebra.ResourceMap) (*zebra.Resour
 	}
 
 	return retMap, nil
+}
+
+// Set Lease state of all resources in Resource Request.
+func (rs *ResourceStore) FreeResources(reslist []string) {
+	for _, id := range reslist {
+		res, ok := rs.ids.resources[id]
+		if !ok {
+			continue
+		}
+
+		res.UpdateStatus().UpdateLeaseState(0)
+
+		if err := rs.Create(res); err != nil {
+			continue
+		}
+	}
 }
 
 // Ignore case in returning value of given field.
