@@ -322,7 +322,7 @@ func DoesMigration() {
 	// Execute the query
 	results, err := db.Query(statement)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 
 	for results.Next() {
@@ -377,7 +377,7 @@ func DoesMigration() {
 		RackArr = append(RackArr, rt)
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 	}
 
@@ -415,12 +415,8 @@ func getAuth() []byte {
 
 	if len(os.Args) > 1 {
 		serverLoginURL = os.Args[1]
-
-		fmt.Println("1") // For debugging purposes
 	} else {
 		serverLoginURL = theServerAddr + "/login"
-
-		fmt.Println("2")
 	}
 
 	migrationUser := []byte(`{
@@ -496,12 +492,8 @@ func allData(rackArr []Racktables) {
 
 	if len(os.Args) > 1 {
 		serverURL = os.Args[1]
-
-		fmt.Println("1") // For debugging purposes
 	} else {
 		serverURL = theServerAddr + "/api/v1/resources"
-
-		fmt.Println("2")
 	}
 
 	token := getToken()
@@ -569,7 +561,7 @@ func getIPDetaiLs(objectID string, db *sql.DB) string {
 	// Execute the query
 	results, err := db.Query(statement, objectID)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 
 	defer results.Close()
@@ -581,7 +573,7 @@ func getIPDetaiLs(objectID string, db *sql.DB) string {
 		rt.IP = IPnum
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 	}
 
@@ -599,7 +591,7 @@ func getPortDetails(objectID string, db *sql.DB) int {
 	// Execute the query
 	results, err := db.Query(statement, objectID)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 
 	// defer results.Close()
@@ -608,7 +600,7 @@ func getPortDetails(objectID string, db *sql.DB) int {
 		err = results.Scan(&rt.Port)
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 
 		numPort++
@@ -632,7 +624,7 @@ func getResMeta(objectID string, db *sql.DB) (string, string, string, string, st
 	// Execute the query
 	results, err := db.Query(statement, objectID)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 
 	defer results.Close()
@@ -647,7 +639,7 @@ func getResMeta(objectID string, db *sql.DB) (string, string, string, string, st
 		rt.Comments = comment.String
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 
 		log.Print(rt.RackID)
@@ -664,7 +656,7 @@ func getRackDetails(objID string, db *sql.DB) string {
 	// Execute the query
 	results, err := db.Query(statement, objID)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 
 	defer results.Close()
@@ -673,7 +665,7 @@ func getRackDetails(objID string, db *sql.DB) string {
 		err = results.Scan(&rt.RackID)
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 	}
 
@@ -689,7 +681,7 @@ func getRowDetails(id string, db *sql.DB) (string, string, string) {
 	// Execute the query
 	results, err := db.Query(statement, id)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 	defer results.Close()
 
@@ -697,7 +689,7 @@ func getRowDetails(id string, db *sql.DB) (string, string, string) {
 		err = results.Scan(&rt.RowID, &rt.RowName, &rt.Location)
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 	}
 
@@ -713,7 +705,7 @@ func getUserDetails(resIP string, db *sql.DB) string {
 	// Execute the query
 	results, err := db.Query(statement, resIP)
 	if err != nil {
-		panic(err.Error())
+		print("Got this error:", err)
 	}
 
 	defer results.Close()
@@ -722,7 +714,7 @@ func getUserDetails(resIP string, db *sql.DB) string {
 		err = results.Scan(&rt.Owner)
 
 		if err != nil {
-			panic(err.Error())
+			print("Got this error:", err)
 		}
 	}
 

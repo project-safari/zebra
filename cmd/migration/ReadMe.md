@@ -7,7 +7,7 @@ MigrationFromRacktables.go is a script to provide data migration from the rackta
 To run this script, follow these instructions: 
 
     cd cmd/migration
-    go run main.go
+    go run .
 
 The database that is used for this script is a MariaDB database. The user should be advised that the MariaDB mysql user utilized here has the following credentials: 
                     

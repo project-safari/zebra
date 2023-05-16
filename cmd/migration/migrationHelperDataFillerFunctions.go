@@ -346,7 +346,7 @@ func serverFiller(rt Racktables) *ServerData {
 	myStatus := &TheStatus{State: "active"}
 
 	myMeta := &MetaData{
-		ID: "0198300027", TheType: *myType,
+		ID: rt.ID, TheType: *myType,
 		CreationTime:       time.Now().Format("2006-01-02T15:04:05-07:00"),
 		ModifificationTime: time.Now().Format("2006-01-02T15:04:05-07:00"),
 		Owner:              "admin", TheLabels: *myLabels,
