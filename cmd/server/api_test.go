@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/model/dc"
@@ -279,10 +280,8 @@ func TestDeleteResource(t *testing.T) {
 	})
 
 	lab1 := dc.NewLab("Lab1", "test_owner", "test_group")
-	lab2 := dc.NewLab("Lab2", "test_owner", "test_group")
 
 	assert.Nil(myAPI.Store.Create(lab1))
-	assert.Nil(myAPI.Store.Create(lab2))
 
 	// Invalid resources requested to be deleted
 	body := `{"type":[]}`
@@ -304,14 +303,17 @@ func TestDeleteResource(t *testing.T) {
 	assert.Equal(http.StatusBadRequest, rr.Code)
 
 	// DELETE resources
-	id1 := lab1.Meta.ID
-	id2 := lab2.Meta.ID
-	idReq := &struct {
-		IDs []string `json:"ids"`
-	}{IDs: []string{id1, id2}}
-	bytes, err := json.Marshal(idReq)
-	assert.Nil(err)
-	req = createRequest(assert, "DELETE", "/resources", string(bytes), myAPI)
+	param := httprouter.Param{
+		Key:   "id",
+		Value: lab1.Meta.ID,
+	}
+
+	params := httprouter.Params{param}
+	handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, params)
+	})
+
+	req = createRequest(assert, "DELETE", "/resources", "", myAPI)
 	rr = httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusOK, rr.Code)
