@@ -15,7 +15,7 @@ func routeHandler() http.Handler {
 	router.GET("/api/v1/labels", handleLabels())
 	router.GET("/api/v1/resources", handleQuery())
 	router.POST("/api/v1/resources", handlePost())
-	router.DELETE("/api/v1/resources", handleDelete())
+	router.DELETE("/api/v1/resources/:id", handleDelete())
 
 	return router
 }
