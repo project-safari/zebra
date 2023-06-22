@@ -43,6 +43,7 @@ var (
 	ErrLeaseStatus = errors.New(`lease is incorrect, must be in ["leased", "free", "setup"]`)
 	ErrState       = errors.New(`state is incorrect, must be in ["active", "inactive"]`)
 	ErrCreatedTime = errors.New(`createdTime is incorrect, must be before current time`)
+	ErrNotLeasable = errors.New(`resource is not leasable`)
 )
 
 func (f *Fault) String() string {
@@ -54,6 +55,14 @@ func (f *Fault) String() string {
 	}
 
 	return fstr
+}
+
+func (l LeaseStatus) Leasable() error {
+	if l.String() == "setup" {
+		return ErrNotLeasable
+	}
+
+	return nil
 }
 
 func (f *Fault) MarshalText() ([]byte, error) {
