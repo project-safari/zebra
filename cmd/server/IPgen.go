@@ -1,7 +1,8 @@
 package main
 
 import (
-	"crypto/rand"
+	"encoding/binary"
+	"math/rand"
 	"net"
 )
 
@@ -19,7 +20,18 @@ func contains(all []net.IP, one net.IP) bool {
 	return false
 }
 
-func generateIP(cidr string) (net.IP, []net.IP, error) {
+func generateIP() (net.IP, []net.IP, error) {
+	buf := make([]byte, 4)
+
+	for i := 0; i < 10; i++ {
+
+		ip := rand.Uint32()
+
+		binary.LittleEndian.PutUint32(buf, ip)
+	}
+
+	cidr := string(buf[:])
+
 GENERATE:
 
 	ip, ipnet, err := net.ParseCIDR(cidr)
