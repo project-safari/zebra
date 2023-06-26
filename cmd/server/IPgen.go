@@ -7,8 +7,19 @@ import (
 
 var ipInUse []net.IP
 
-func generateIP(cidr string) (net.IP, []net.IP, error) {
+func contains(all []net.IP, one net.IP) bool {
+	for _, each := range all {
+		eachStr := string(each)
+		str := string(one)
+		if eachStr == str {
+			return true
+		}
+	}
 
+	return false
+}
+
+func generateIP(cidr string) (net.IP, []net.IP, error) {
 GENERATE:
 
 	ip, ipnet, err := net.ParseCIDR(cidr)
@@ -33,11 +44,13 @@ GENERATE:
 	}
 	ip = net.IPv4(r[0], r[1], r[2], r[3])
 
-	ipInUse = append(ipInUse, ip)
+	if contains(ipInUse, ip) {
+		goto GENERATE
+	} else {
+		ipInUse = append(ipInUse, ip)
+	}
 
-	if ip.Equal(ipnet.IP) /*|| ip.Equal(broadcast) */ {
-		// we got unlucky. The host portion of our ipv4 address was
-		// either all 0s (the network address) or all 1s (the broadcast address)
+	if ip.Equal(ipnet.IP) {
 		goto GENERATE
 	}
 
