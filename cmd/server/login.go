@@ -72,6 +72,12 @@ func loginAdapter() web.Adapter {
 	}
 }
 
+/*
+HOW TO USE THE NOTIFICATION FUNCTIONALITY FOR LOG IN:
+this, noteType := noifications.NotifyLogin()
+noifications.SendAccountNotification("New Login into Your Account", this, user.Email, noteType)
+*/
+
 func makeCookie(jwt string) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Name = "jwt"
