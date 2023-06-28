@@ -91,7 +91,6 @@ HOW TO USE THIS:
 */
 
 // nolint
-
 func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.User) {
 	bytes, err := json.Marshal(newuser)
 	if err != nil {
