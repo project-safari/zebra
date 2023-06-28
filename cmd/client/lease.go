@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/project-safari/zebra"
-	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/model/lease"
 	"github.com/spf13/cobra"
 )
 
 var ErrCreateLease = errors.New("error creating resource")
 
-const DefaultResourceCount = 3
+const (
+	DefaultResourceCount = 3
+	DefaultDuration      = 240
+)
 
 func NewLease() *cobra.Command {
 	leaseCmd := &cobra.Command{
@@ -27,12 +28,14 @@ func NewLease() *cobra.Command {
 
 	leaseCmd.Flags().StringP("group", "g", "global", "resource group")
 	leaseCmd.Flags().IntP("count", "k", DefaultResourceCount, "number of resources")
+	leaseCmd.Flags().IntP("duration", "d", DefaultDuration, "length of lease(in minutes)")
+	leaseCmd.Flags().StringP("name", "n", "", "name of lease")
 
 	return leaseCmd
 }
 
 func leaseRequest(cmd *cobra.Command, args []string) error {
-	cfg, req, resReq, err := makeLeaseReq(cmd, args)
+	cfg, req, err := makeLeaseReq(cmd, args)
 	if err != nil {
 		return err
 	}
@@ -42,46 +45,52 @@ func leaseRequest(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	dur, err := cmd.Flags().GetInt("duration")
+	if err != nil {
+		return err
+	}
+
+	leasereq := &struct {
+		Email    string               `json:"email"`
+		Duration time.Duration        `json:"duration"`
+		Request  []*lease.ResourceReq `json:"request"`
+	}{
+		Email:    cfg.Email,
+		Duration: time.Duration(dur) * time.Minute,
+		Request:  []*lease.ResourceReq{req},
+	}
+
 	// Create a new lease
-	resCode, err := client.Post("api/v1/resources", req, nil)
+	resCode, err := client.Post("/api/v1/lease", leasereq, nil)
 	if resCode != http.StatusOK {
 		return ErrCreateLease
 	}
 
-	fmt.Println("Request - Type:", resReq.Type, "Group:", resReq.Group, "Count:", resReq.Count)
+	fmt.Println("Request - Type:", req.Type, "Group:", req.Group, "Count:", req.Count)
 	fmt.Println("Lease request successfully created")
 
 	return err
 }
 
-func makeLeaseReq(cmd *cobra.Command, args []string) (*Config, *zebra.ResourceMap, *lease.ResourceReq, error) {
+func makeLeaseReq(cmd *cobra.Command, args []string) (*Config, *lease.ResourceReq, error) {
 	cfgFile := cmd.Flag("config").Value.String()
 
 	cfg, err := Load(cfgFile)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	resCount, err := cmd.Flags().GetInt("count")
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	req := &lease.ResourceReq{
 		Type:  args[0],
 		Group: cmd.Flag("group").Value.String(),
 		Count: resCount,
+		Name:  cmd.Flag("name").Value.String(),
 	}
 
-	lease := lease.NewLease(
-		cfg.Email,
-		time.Duration(cfg.Defaults.Duration)*time.Hour,
-		[]*lease.ResourceReq{req})
-
-	resMap := zebra.NewResourceMap(model.Factory())
-	if err := resMap.Add(lease); err != nil {
-		return nil, nil, nil, err
-	}
-
-	return cfg, resMap, req, nil
+	return cfg, req, nil
 }

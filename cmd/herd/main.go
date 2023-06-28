@@ -11,6 +11,7 @@ import (
 	"github.com/project-safari/zebra/model"
 	"github.com/project-safari/zebra/model/compute"
 	"github.com/project-safari/zebra/model/dc"
+	"github.com/project-safari/zebra/model/lease"
 	"github.com/project-safari/zebra/model/network"
 	"github.com/project-safari/zebra/model/user"
 	"github.com/project-safari/zebra/store"
@@ -60,6 +61,7 @@ func herdCmd() *cobra.Command {
 	rootCmd.Flags().Int16("lab", DefaultResourceSize, "number of labs")
 
 	rootCmd.Flags().Int16("user", DefaultUserSize, "number of users")
+	rootCmd.Flags().Int16("lease", DefaultUserSize, "number of seases")
 
 	return rootCmd
 }
@@ -81,9 +83,9 @@ func main() {
 	}
 }
 
-func storeResources(resources []zebra.Resource, fs *store.FileStore) error {
+func storeResources(resources []zebra.Resource, store *store.ResourceStore) error {
 	for _, res := range resources {
-		if e := fs.Create(res); e != nil {
+		if e := store.Create(res); e != nil {
 			return e
 		}
 	}
@@ -109,7 +111,7 @@ func genResources(cmd *cobra.Command,
 // run for each resource.
 func run(cmd *cobra.Command, _ []string) error {
 	rootDir := cmd.Flag("store").Value.String()
-	fs := initStore(rootDir)
+	store := initStore(rootDir)
 	resources := make([]zebra.Resource, 0, Max)
 
 	// Generate all the resources
@@ -124,8 +126,9 @@ func run(cmd *cobra.Command, _ []string) error {
 	resources = genResources(cmd, "rack", dc.MockRack, resources)
 	resources = genResources(cmd, "lab", dc.MockLab, resources)
 	resources = genResources(cmd, "user", user.MockUser, resources)
+	resources = genResources(cmd, "lease", lease.MockLease, resources)
 
-	return storeResources(resources, fs)
+	return storeResources(resources, store)
 }
 
 func intVal(cmd *cobra.Command, flag string) int {
@@ -135,12 +138,12 @@ func intVal(cmd *cobra.Command, flag string) int {
 	return i
 }
 
-func initStore(rootDir string) *store.FileStore {
-	fs := store.NewFileStore(rootDir, model.Factory())
-	if e := fs.Initialize(); e != nil {
+func initStore(rootDir string) *store.ResourceStore {
+	store := store.NewResourceStore(rootDir, model.Factory())
+	if e := store.Initialize(); e != nil {
 		fmt.Println("Error initializing store")
 		panic(e)
 	}
 
-	return fs
+	return store
 }

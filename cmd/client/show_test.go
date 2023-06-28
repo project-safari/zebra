@@ -1,6 +1,7 @@
 package main //nolint:testpackage
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -114,6 +115,14 @@ func TestShowLease(t *testing.T) {
 	res := showLeases(rootCmd, args)
 
 	assert.NotNil(res)
+
+	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "show", "lease")
+
+	assert.NotNil(execRootCmd())
+
+	os.Args = append([]string{"zebra"}, "-c", testCfgFile, "show", "lease", "--request=false")
+
+	assert.NotNil(execRootCmd())
 }
 
 // tests for server resource types (server, esx, vcenter, vm).
