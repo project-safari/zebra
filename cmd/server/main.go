@@ -3,18 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 	"gojini.dev/config"
 	"gojini.dev/web"
 )
 
-const version = "unknown"
+const (
+	flag    = 644
+	version = "unknown"
+)
 
 func main() {
 	if e := execRootCmd(); e != nil {
@@ -65,7 +68,11 @@ func run(cmd *cobra.Command, args []string) error {
 
 func startServer(cfgStore *config.Store) error {
 	appCtx := setupLogger(cfgStore)
-	log := logr.FromContextOrDiscard(appCtx)
+
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	serverCfg := new(web.Config)
 	if e := cfgStore.Get("server", serverCfg); e != nil {
@@ -74,7 +81,7 @@ func startServer(cfgStore *config.Store) error {
 
 	setup := setupAdapter(appCtx, cfgStore)
 
-	log.Info("setup completed")
+	log.Println("setup completed")
 
 	login := loginAdapter()
 	register := registerAdapter()
@@ -92,7 +99,7 @@ func startServer(cfgStore *config.Store) error {
 
 	webServer := web.NewServer(serverCfg, handler)
 
-	log.Info("starting zebra server")
+	log.Println("starting zebra server")
 
 	return webServer.Start(appCtx)
 }
@@ -101,4 +108,16 @@ func callNext(nextHandler http.Handler, res http.ResponseWriter, req *http.Reque
 	if nextHandler != nil {
 		nextHandler.ServeHTTP(res, req)
 	}
+}
+
+func OpenLogFile(path string) error {
+	logFile, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, flag)
+	if err != nil {
+		return err
+	}
+
+	log.SetOutput(logFile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
+
+	return nil
 }

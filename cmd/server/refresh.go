@@ -1,9 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
-	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra/auth"
 	"gojini.dev/web"
 )
@@ -19,11 +19,14 @@ func refreshAdapter() web.Adapter {
 			}
 
 			ctx := req.Context()
-			log := logr.FromContextOrDiscard(ctx)
+			err := OpenLogFile("./zebralog.log")
+			if err != nil {
+				log.Fatal(err)
+			}
 			jwtClaims, ok := ctx.Value(ClaimsCtxKey).(*auth.Claims)
 
 			if !ok {
-				log.Error(nil, "claims not in context")
+				log.Println(nil, "claims not in context")
 				res.WriteHeader(http.StatusUnauthorized)
 
 				return
@@ -31,7 +34,7 @@ func refreshAdapter() web.Adapter {
 
 			authKey, ok := ctx.Value(AuthCtxKey).(string)
 			if !ok {
-				log.Error(nil, "authKey not in context")
+				log.Println(nil, "authKey not in context")
 				res.WriteHeader(http.StatusUnauthorized)
 
 				return
@@ -41,7 +44,7 @@ func refreshAdapter() web.Adapter {
 			claims := auth.NewClaims("zebra", jwtClaims.Subject, jwtClaims.Role, jwtClaims.Email)
 			respondWithClaims(ctx, res, claims, authKey)
 
-			log.Info("refresh succeeded", "user", jwtClaims.Subject)
+			log.Println("refresh succeeded", "user", jwtClaims.Subject)
 		})
 	}
 }

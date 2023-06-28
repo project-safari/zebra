@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/model/user"
@@ -23,7 +23,10 @@ func loginAdapter() web.Adapter {
 			}
 
 			ctx := req.Context()
-			log := logr.FromContextOrDiscard(ctx)
+			err := OpenLogFile("./zebralog.log")
+			if err != nil {
+				log.Fatal(err)
+			}
 			api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 			if !ok {
 				res.WriteHeader(http.StatusInternalServerError)
@@ -51,14 +54,14 @@ func loginAdapter() web.Adapter {
 
 			user := findUser(api.Store, userData.Email)
 			if user == nil {
-				log.Error(nil, "user not found", "user", userData.Email)
+				log.Println(nil, "user not found", "user", userData.Email)
 				res.WriteHeader(http.StatusUnauthorized)
 
 				return
 			}
 
 			if err := user.AuthenticatePassword(userData.Password); err != nil {
-				log.Error(err, "user auth failed", "user", user.Email)
+				log.Println(err, "user auth failed", "user", user.Email)
 				res.WriteHeader(http.StatusUnauthorized)
 
 				return
@@ -67,7 +70,7 @@ func loginAdapter() web.Adapter {
 			claims := auth.NewClaims("zebra", user.Meta.Name, user.Role, user.Email)
 			respondWithClaims(ctx, res, claims, authKey)
 
-			log.Info("login succeeded", "user", user.Email)
+			log.Println("login succeeded", "user", user.Email)
 		})
 	}
 }

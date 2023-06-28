@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"encoding/base64"
+	"log"
 	"net/http"
 
-	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra/auth"
 	"gojini.dev/web"
 )
@@ -35,11 +35,16 @@ func creds(r *http.Request) (string, string) {
 
 func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 	ctx := req.Context()
-	log := logr.FromContextOrDiscard(ctx)
+
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 
 	if !ok {
-		log.Error(nil, "resources not in context")
+		log.Println(nil, "resources not in context")
 
 		return nil
 	}
@@ -53,7 +58,7 @@ func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 	// Make sure the user still exists
 	user := findUser(api.Store, userEmail)
 	if user == nil {
-		log.Error(nil, "user not found", "user", userEmail)
+		log.Println(nil, "user not found", "user", userEmail)
 		res.WriteHeader(http.StatusUnauthorized)
 
 		return nil
@@ -61,7 +66,7 @@ func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 
 	// Verify that token is valid
 	if e := user.Authenticate(userToken); e != nil {
-		log.Error(e, "user token invalid")
+		log.Println(e, "user token invalid")
 		res.WriteHeader(http.StatusUnauthorized)
 
 		return nil
@@ -79,18 +84,23 @@ func rsaKey(res http.ResponseWriter, req *http.Request) *http.Request {
 // to use. It returns an error if the jwt is not present or invalid.
 func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 	ctx := req.Context()
-	log := logr.FromContextOrDiscard(ctx)
+
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 
 	if !ok {
-		log.Error(nil, "resources not in context")
+		log.Println(nil, "resources not in context")
 
 		return nil
 	}
 
 	authKey, ok := ctx.Value(AuthCtxKey).(string)
 	if !ok {
-		log.Error(nil, "authKey not in context")
+		log.Println(nil, "authKey not in context")
 		res.WriteHeader(http.StatusInternalServerError)
 
 		return nil
@@ -98,7 +108,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 
 	jwtCookie, err := req.Cookie("jwt")
 	if err != nil {
-		log.Error(err, "jwt cookie missing")
+		log.Println(err, "jwt cookie missing")
 
 		return nil
 	}
@@ -106,7 +116,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 	// Parse the claims
 	jwtClaims, err := auth.FromJWT(jwtCookie.Value, authKey)
 	if err != nil {
-		log.Error(err, "bad jwt token")
+		log.Println(err, "bad jwt token")
 		res.WriteHeader(http.StatusUnauthorized)
 
 		return nil
@@ -114,7 +124,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 
 	// Make sure the jwt is still valid
 	if err := jwtClaims.Valid(); err != nil {
-		log.Error(err, "invalid jwt token")
+		log.Println(err, "invalid jwt token")
 		res.WriteHeader(http.StatusUnauthorized)
 
 		return nil
@@ -123,7 +133,7 @@ func jwtClaims(res http.ResponseWriter, req *http.Request) *http.Request {
 	// Make sure the user still exists
 	user := findUser(api.Store, jwtClaims.Email)
 	if user == nil {
-		log.Error(err, "user not found", "user", jwtClaims.Subject)
+		log.Println(err, "user not found", "user", jwtClaims.Subject)
 		res.WriteHeader(http.StatusUnauthorized)
 
 		return nil

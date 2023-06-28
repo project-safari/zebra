@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
-	"github.com/go-logr/logr"
 	"github.com/project-safari/zebra"
 	"github.com/project-safari/zebra/auth"
 	"github.com/project-safari/zebra/model/user"
@@ -29,7 +29,12 @@ func registerAdapter() web.Adapter {
 
 func registerHandler(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	log := logr.FromContextOrDiscard(ctx)
+
+	err := OpenLogFile("./zebralog.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
 
 	if !ok {
@@ -52,10 +57,10 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Info("request", "body", string(body))
+	log.Println("request", "body", string(body))
 
 	if err := json.Unmarshal(body, regReq); err != nil {
-		log.Error(err, "bad body")
+		log.Println(err, "bad body")
 		res.WriteHeader(http.StatusBadRequest)
 
 		return
@@ -64,7 +69,7 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 	store := api.Store
 
 	if findUser(store, regReq.Email) != nil {
-		log.Error(err, "user already exist", "user", regReq.Name)
+		log.Println(err, "user already exist", "user", regReq.Name)
 		res.WriteHeader(http.StatusForbidden)
 
 		return
@@ -74,20 +79,20 @@ func registerHandler(res http.ResponseWriter, req *http.Request) {
 		regReq.Password, regReq.Key, DefaultRole())
 
 	if err := store.Create(newuser); err != nil {
-		log.Error(err, "user cant be stored", "user", regReq.Name)
+		log.Println(err, "user cant be stored", "user", regReq.Name)
 		res.WriteHeader(http.StatusInternalServerError)
 
 		return
 	}
 
-	responseRegister(log, res, newuser)
-	log.Info("Registry succeeded", "user", regReq.Name)
+	responseRegister(res, newuser)
+	log.Println("Registry succeeded", "user", regReq.Name)
 }
 
-func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.User) {
+func responseRegister(res http.ResponseWriter, newuser *user.User) {
 	bytes, err := json.Marshal(newuser)
 	if err != nil {
-		log.Error(err, "crazy we can't marshal our own data!")
+		log.Println(err, "crazy we can't marshal our own data!")
 		res.WriteHeader(http.StatusInternalServerError)
 
 		return
@@ -97,7 +102,7 @@ func responseRegister(log logr.Logger, res http.ResponseWriter, newuser *user.Us
 	res.WriteHeader(http.StatusCreated)
 
 	if _, err := res.Write(bytes); err != nil {
-		log.Error(err, "error writing response")
+		log.Println(err, "error writing response")
 	}
 }
 
