@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// helper function.
 func makeStore(assert *assert.Assertions, root string) zebra.Store {
 	f := model.Factory()
 	s := store.NewResourceStore(root, f)

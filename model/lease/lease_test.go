@@ -66,6 +66,9 @@ func TestBadResources(t *testing.T) {
 	res := getRes()
 
 	assert.Nil(l.Request[0].Assign(res))
+
+	assert.NotNil(res)
+
 	assert.Nil(l.Activate())
 }
 
