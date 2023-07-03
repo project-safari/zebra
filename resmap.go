@@ -22,6 +22,8 @@ func (r *ResourceList) Add(res Resource) error {
 	return nil
 }
 
+// to add any necessary funcs. for edit.
+
 func (r *ResourceList) Delete(res Resource) error {
 	listLen := len(r.Resources)
 

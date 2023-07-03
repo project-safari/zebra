@@ -78,6 +78,8 @@ func (ids *IDStore) update(oldRes zebra.Resource, res zebra.Resource) error {
 	return ids.Create(res)
 }
 
+// to add any necessary funcs. for edit.
+
 // Delete a resource.
 func (ids *IDStore) Delete(res zebra.Resource) error {
 	delete(ids.resources, res.GetMeta().ID)

@@ -191,6 +191,8 @@ func (f *FileStore) Create(res zebra.Resource) error {
 	return os.Rename(file.Name(), f.resourcesFilePath(res))
 }
 
+// to add any necessary funcs. for edit.
+
 // Update existing object.
 func (f *FileStore) update(res zebra.Resource) error {
 	if err := f.Delete(res); err != nil {

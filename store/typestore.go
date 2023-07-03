@@ -60,6 +60,8 @@ func (ts *TypeStore) Create(res zebra.Resource) error {
 	return ts.resources.Add(res)
 }
 
+// to add any necessary funcs. for edit.
+
 // Delete a resource.
 func (ts *TypeStore) Delete(res zebra.Resource) error {
 	return ts.resources.Delete(res)

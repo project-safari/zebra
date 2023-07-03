@@ -202,6 +202,43 @@ func handlePost() httprouter.Handle {
 	}
 }
 
+func handleEdit() httprouter.Handle {
+	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		ctx := req.Context()
+		log := logr.FromContextOrDiscard(ctx)
+		api, ok := ctx.Value(ResourcesCtxKey).(*ResourceAPI)
+
+		if !ok {
+			res.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
+
+		id := params.ByName("id")
+		if id == "" {
+			res.WriteHeader(http.StatusBadRequest)
+			log.Info("resources could not edited, found invalid resource(s)")
+
+			return
+		}
+
+		ids := []string{id}
+		resMap := api.Store.QueryUUID(ids)
+
+		// Edit all resources from store
+		if applyFunc(resMap, api.Store.Create) != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			log.Info("internal server error while editing resources")
+
+			return
+		}
+
+		log.Info("successfully editied resources")
+
+		res.WriteHeader(http.StatusOK)
+	}
+}
+
 func handleDelete() httprouter.Handle {
 	return func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx := req.Context()
