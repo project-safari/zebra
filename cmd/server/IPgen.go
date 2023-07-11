@@ -26,8 +26,8 @@ func genNumericValue() int {
 	possibilities := "0123456789"
 
 	// the length of decimal, numeric value IP can be anywhere between 6 and 12.
-	min := 6
-	max := 12
+	min := 5
+	max := 7
 
 	// generate the size randomly for each IP address.
 	size := rand.Intn(max-min) + min
@@ -52,80 +52,97 @@ GENERATE:
 }
 
 func convertToHex(integerIP int) string {
-	// hexIP := strconv.FormatInt(255, integerIP)
 	hexIP := fmt.Sprintf("0x%x", integerIP)
 	hexIP = strings.TrimLeft(hexIP, "0x")
 	return hexIP
 }
 
-func getFinalIP(hexIP string) []string {
-	// finalHex := ""
-
-	l := len(hexIP)
+func genByteNum(l int) int {
 	manyBytes := (l / 2)
 
 	if (l % 2) != 0 {
 		manyBytes = manyBytes + 1
 	}
 
-	arrForIP := make([]string, manyBytes)
+	return manyBytes
+}
 
-	for i := 0; i <= len(hexIP); i++ {
-		if i+2 <= len(hexIP) {
-			piece := hexIP[i : i+2]
-			arrForIP = append(arrForIP, piece)
+func getFinal(hexIP string) []string {
+	l := len(hexIP)
+
+	fmt.Println("The hex length is: ", l)
+
+	manyBytes := genByteNum(l)
+
+	fmt.Println("the byte length is: ", manyBytes)
+
+	fmt.Println("the hex is: ", hexIP)
+
+	var slider = 2
+	start := 0
+	var piece string
+
+	// arrForIP := make([]string, 0, manyBytes)
+
+	var arrForIP []string
+
+	for i := 0; i < manyBytes; i++ {
+		if slider <= l {
+			piece = hexIP[start:slider]
 		}
+
+		arrForIP = append(arrForIP, piece)
+
+		fmt.Println(arrForIP)
+
+		start = start + 2
+		slider = slider + 2
+
 	}
+
+	fmt.Println("First Intermediate array: ", arrForIP, " of length: ", len(arrForIP))
+
+	fmt.Println("Size before last elem ", manyBytes)
+	if l%2 != 0 {
+		this := string(hexIP[l-1])
+		fmt.Println("The last elem is: ", this)
+		arrForIP = append(arrForIP, this)
+	}
+
+	fmt.Println("2nd Intermediate array: ", arrForIP, " of length: ", len(arrForIP))
 
 	for i, j := 0, len(arrForIP)-1; i < j; i, j = i+1, j-1 {
 		arrForIP[i], arrForIP[j] = arrForIP[j], arrForIP[i]
 	}
 
-	// finalHex = strings.Join(arrForIP, "")
-
 	return arrForIP
 }
 
-func hexToIP(hexVal []string) string {
-	var theIP []string
-	start := 0
-	end := 2
-	var piece string
+func theIP(hexVal []string) string {
 	var finalIP string
 
-	for i := 0; i < (len(hexVal))/2; i++ {
-		if end <= len(hexVal)-2 && start <= len(hexVal)-4 {
-			theIP = hexVal[start:end]
-			piece = strings.Join(theIP, "")
-			decimal, err := strconv.ParseInt(piece, 16, 64)
-			//in case of any error.
-			if err != nil {
-				panic(err)
-			}
-			finalIP = finalIP + fmt.Sprint(decimal) + "."
-
-			fmt.Println(theIP)
-		} else {
-			theIP = hexVal[len(hexVal)-2 : len(hexVal)-0]
-			piece = strings.Join(theIP, "")
-			decimal, err := strconv.ParseInt(piece, 16, 64)
-			//in case of any error.
-			if err != nil {
-				panic(err)
-			}
-			finalIP = finalIP + fmt.Sprint(decimal)
-
-			fmt.Println(theIP)
+	for i := 0; i < (len(hexVal)); i++ {
+		decimal, err := strconv.ParseInt(hexVal[i], 16, 64)
+		if err != nil {
+			fmt.Println(err)
 		}
-
-		start = start + 2
-		end = end + 2
-
+		if i <= len(hexVal)-2 {
+			finalIP = finalIP + fmt.Sprint(decimal) + "."
+		} else {
+			finalIP = finalIP + fmt.Sprint(decimal)
+		}
 	}
 
-	return ""
+	return finalIP
 }
 
 func main() {
-	fmt.Println(getFinalIP(convertToHex(genNumericValue())))
+	num := genNumericValue()
+	fmt.Println("Numeric value ", num)
+	hex := convertToHex(num)
+	fmt.Println("Numeric converted to hex value ", hex, " of length: ", len(hex))
+	convertible := getFinal(hex)
+	fmt.Println("Final <<arr>> value ", convertible, " of length ", len(convertible))
+	generatedIP := theIP(convertible)
+	fmt.Println("Generated IP value ", generatedIP)
 }
