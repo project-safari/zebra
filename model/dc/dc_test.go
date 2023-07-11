@@ -50,6 +50,7 @@ func TestLab(t *testing.T) {
 	assert.Nil(l.Validate(ctx))
 }
 
+// Added some extra fields.
 // TestRack tests the *Rack Validate function with a pass and a fail case.
 func TestRack(t *testing.T) {
 	t.Parallel()
@@ -64,6 +65,11 @@ func TestRack(t *testing.T) {
 	r.Meta.Type.Name = name
 	assert.Equal(zebra.ErrWrongType, r.Validate(ctx))
 
-	r = dc.NewRack("test_row", "test_rack", "test_owner", "test_group")
+	r = dc.NewRack("test_row",
+		"4141(=test_row_id)",
+		"AAB(=test_rack)",
+		"SJC19/LAB121(=test_location)",
+		"admin(=test_owner)",
+		"mock-resources(=test_group)")
 	assert.Nil(r.Validate(ctx))
 }
