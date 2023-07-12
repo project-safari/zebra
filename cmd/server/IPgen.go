@@ -25,9 +25,9 @@ func genNumericValue() int {
 	// numeric possibilities for the decimal value of the IP.
 	possibilities := "0123456789"
 
-	// the length of decimal, numeric value IP can be anywhere between 6 and 12.
-	min := 5
-	max := 7
+	// the length of decimal, numeric value IP can be anywhere between 6 and 10.
+	min := 4
+	max := 10
 
 	// generate the size randomly for each IP address.
 	size := rand.Intn(max-min) + min
@@ -78,7 +78,7 @@ func getFinal(hexIP string) []string {
 
 	fmt.Println("the hex is: ", hexIP)
 
-	var slider = 2
+	slider := 2
 	start := 0
 	var piece string
 
@@ -86,30 +86,39 @@ func getFinal(hexIP string) []string {
 
 	var arrForIP []string
 
-	for i := 0; i < manyBytes; i++ {
-		if slider <= l {
-			piece = hexIP[start:slider]
+	if l%2 != 0 {
+		for i := 0; i < manyBytes-1; i++ {
+			if slider <= l {
+				piece = hexIP[start:slider]
+			}
+
+			arrForIP = append(arrForIP, piece)
+
+			fmt.Println(arrForIP)
+
+			start = start + 2
+			slider = slider + 2
 		}
 
-		arrForIP = append(arrForIP, piece)
-
-		fmt.Println(arrForIP)
-
-		start = start + 2
-		slider = slider + 2
-
-	}
-
-	fmt.Println("First Intermediate array: ", arrForIP, " of length: ", len(arrForIP))
-
-	fmt.Println("Size before last elem ", manyBytes)
-	if l%2 != 0 {
 		this := string(hexIP[l-1])
 		fmt.Println("The last elem is: ", this)
 		arrForIP = append(arrForIP, this)
+	} else {
+		for i := 0; i < manyBytes; i++ {
+			if slider <= l {
+				piece = hexIP[start:slider]
+			}
+
+			arrForIP = append(arrForIP, piece)
+
+			fmt.Println(arrForIP)
+
+			start = start + 2
+			slider = slider + 2
+		}
 	}
 
-	fmt.Println("2nd Intermediate array: ", arrForIP, " of length: ", len(arrForIP))
+	fmt.Println("Intermediate array: ", arrForIP, " of length: ", len(arrForIP))
 
 	for i, j := 0, len(arrForIP)-1; i < j; i, j = i+1, j-1 {
 		arrForIP[i], arrForIP[j] = arrForIP[j], arrForIP[i]
@@ -122,7 +131,7 @@ func theIP(hexVal []string) string {
 	var finalIP string
 
 	for i := 0; i < (len(hexVal)); i++ {
-		decimal, err := strconv.ParseInt(hexVal[i], 16, 64)
+		decimal, err := strconv.ParseInt(hexVal[i], 16, 32)
 		if err != nil {
 			fmt.Println(err)
 		}
