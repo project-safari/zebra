@@ -24,8 +24,9 @@ func contains(all []int, one int) bool {
 func genNumericValue() int {
 	// numeric possibilities for the decimal value of the IP.
 	possibilities := "0123456789"
+	maxVal := 4294967296
 
-	// the length of decimal, numeric value IP can be anywhere between 6 and 10.
+	// the length of decimal, numeric value IP can be anywhere between 4 and 10.
 	min := 4
 	max := 10
 
@@ -42,7 +43,7 @@ GENERATE:
 	// get the IP together as a decimal.
 	decimalIP, _ := strconv.Atoi((string(b)))
 
-	if contains(ipInUse, decimalIP) {
+	if contains(ipInUse, decimalIP) || decimalIP > maxVal {
 		goto GENERATE
 	} else {
 		ipInUse = append(ipInUse, decimalIP)
