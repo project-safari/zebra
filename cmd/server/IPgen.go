@@ -53,6 +53,8 @@ GENERATE:
 
 func convertToHex(integerIP int) string {
 	hexIP := fmt.Sprintf("0x%x", integerIP)
+
+	// hex value w/o the hex-specific prefix.
 	hexIP = strings.TrimLeft(hexIP, "0x")
 	return hexIP
 }
@@ -60,6 +62,7 @@ func convertToHex(integerIP int) string {
 func genByteNum(l int) int {
 	manyBytes := (l / 2)
 
+	// calculate the needed number of bytes, given the size of the initial integer.
 	if (l % 2) != 0 {
 		manyBytes = manyBytes + 1
 	}
@@ -70,22 +73,16 @@ func genByteNum(l int) int {
 func getFinal(hexIP string) []string {
 	l := len(hexIP)
 
-	fmt.Println("The hex length is: ", l)
-
 	manyBytes := genByteNum(l)
-
-	fmt.Println("the byte length is: ", manyBytes)
-
-	fmt.Println("the hex is: ", hexIP)
 
 	slider := 2
 	start := 0
 	var piece string
 
-	// arrForIP := make([]string, 0, manyBytes)
-
+	// array to hold the IP pairs.
 	var arrForIP []string
 
+	// situation 1: uneven bits.
 	if l%2 != 0 {
 		for i := 0; i < manyBytes-1; i++ {
 			if slider <= l {
@@ -101,9 +98,8 @@ func getFinal(hexIP string) []string {
 		}
 
 		this := string(hexIP[l-1])
-		fmt.Println("The last elem is: ", this)
 		arrForIP = append(arrForIP, this)
-	} else {
+	} else { // situation 2: even number of bits.
 		for i := 0; i < manyBytes; i++ {
 			if slider <= l {
 				piece = hexIP[start:slider]
@@ -118,8 +114,6 @@ func getFinal(hexIP string) []string {
 		}
 	}
 
-	fmt.Println("Intermediate array: ", arrForIP, " of length: ", len(arrForIP))
-
 	for i, j := 0, len(arrForIP)-1; i < j; i, j = i+1, j-1 {
 		arrForIP[i], arrForIP[j] = arrForIP[j], arrForIP[i]
 	}
@@ -130,6 +124,7 @@ func getFinal(hexIP string) []string {
 func theIP(hexVal []string) string {
 	var finalIP string
 
+	// get the IP value for each pair in the hex string.
 	for i := 0; i < (len(hexVal)); i++ {
 		decimal, err := strconv.ParseInt(hexVal[i], 16, 32)
 		if err != nil {
@@ -145,13 +140,7 @@ func theIP(hexVal []string) string {
 	return finalIP
 }
 
+// just for testing purposes.
 func main() {
-	num := genNumericValue()
-	fmt.Println("Numeric value ", num)
-	hex := convertToHex(num)
-	fmt.Println("Numeric converted to hex value ", hex, " of length: ", len(hex))
-	convertible := getFinal(hex)
-	fmt.Println("Final <<arr>> value ", convertible, " of length ", len(convertible))
-	generatedIP := theIP(convertible)
-	fmt.Println("Generated IP value ", generatedIP)
+	fmt.Println(theIP(getFinal(convertToHex(genNumericValue()))))
 }
