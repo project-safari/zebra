@@ -1,8 +1,9 @@
-package main
+package zebra
 
 import (
 	"fmt"
 	"math/rand"
+	"net"
 	"strconv"
 	"strings"
 )
@@ -141,7 +142,8 @@ func theIP(hexVal []string) string {
 	return finalIP
 }
 
-// just for testing purposes.
-func main() {
-	fmt.Println(theIP(getFinal(convertToHex(genNumericValue()))))
+func assignIP() net.IP {
+	resIP := theIP(getFinal(convertToHex(genNumericValue())))
+
+	return net.IP(resIP)
 }
