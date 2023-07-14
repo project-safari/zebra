@@ -34,17 +34,14 @@ func genNumericValue() int {
 	max := 10
 
 	// generate the size randomly for each IP address.
-	// nolint gosec // used for random numbers that are further expanded on - not final.
-	size := rand.Intn(max-min) + min
+	size := rand.Intn(max-min) + min // nolint:all.
 
 GENERATE:
 	// create random IP values from the possible numbers in the possibilities string.
 	b := make([]byte, size)
 
-	// nolint: gosec.
 	for i := range b {
-		// nolint: gosec // used for random numbers that are further expanded on - not final.
-		b[i] = possibilities[rand.Intn(len(possibilities))]
+		b[i] = possibilities[rand.Intn(len(possibilities))] // nolint:all.
 	}
 
 	// get the IP together as a decimal.
