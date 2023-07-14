@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// nolint: gochecknoglobals: needed for later use throughout the code.
+// nolint: gochecknoglobals // needed for later use throughout the code.
 var ipInUse []int
 
 func contains(all []int, one int) bool {
@@ -34,7 +34,7 @@ func genNumericValue() int {
 	max := 10
 
 	// generate the size randomly for each IP address.
-	// nolint: gosec: used for random numbers that are further expanded on - not final.
+	// nolint gosec // used for random numbers that are further expanded on - not final.
 	size := rand.Intn(max-min) + min
 
 GENERATE:
@@ -43,7 +43,7 @@ GENERATE:
 
 	// nolint: gosec.
 	for i := range b {
-		// nolint: gosec: used for random numbers that are further expanded on - not final.
+		// nolint: gosec // used for random numbers that are further expanded on - not final.
 		b[i] = possibilities[rand.Intn(len(possibilities))]
 	}
 
