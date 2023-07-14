@@ -1,3 +1,4 @@
+// nolint: gosec.
 package zebra
 
 import (
@@ -14,6 +15,7 @@ func contains(all []int, one int) bool {
 	for _, each := range all {
 		eachStr := fmt.Sprint(each)
 		str := fmt.Sprint(one)
+
 		if eachStr == str {
 			return true
 		}
@@ -37,6 +39,7 @@ func genNumericValue() int {
 GENERATE:
 	// create random IP values from the possible numbers in the possibilities string.
 	b := make([]byte, size)
+
 	for i := range b {
 		b[i] = possibilities[rand.Intn(len(possibilities))]
 	}
@@ -58,6 +61,7 @@ func convertToHex(integerIP int) string {
 
 	// hex value w/o the hex-specific prefix.
 	hexIP = strings.TrimLeft(hexIP, "0x")
+
 	return hexIP
 }
 
@@ -66,7 +70,7 @@ func genByteNum(l int) int {
 
 	// calculate the needed number of bytes, given the size of the initial integer.
 	if (l % 2) != 0 {
-		manyBytes = manyBytes + 1
+		manyBytes += 1
 	}
 
 	return manyBytes
@@ -79,6 +83,7 @@ func getFinal(hexIP string) []string {
 
 	slider := 2
 	start := 0
+
 	var piece string
 
 	// array to hold the IP pairs.
@@ -95,8 +100,8 @@ func getFinal(hexIP string) []string {
 
 			fmt.Println(arrForIP)
 
-			start = start + 2
-			slider = slider + 2
+			start += 2
+			slider += 2
 		}
 
 		this := string(hexIP[l-1])
@@ -111,8 +116,8 @@ func getFinal(hexIP string) []string {
 
 			fmt.Println(arrForIP)
 
-			start = start + 2
-			slider = slider + 2
+			start += 2
+			slider += 2
 		}
 	}
 
@@ -126,23 +131,27 @@ func getFinal(hexIP string) []string {
 func theIP(hexVal []string) string {
 	var finalIP string
 
+	base := 16
+	size := 32
+
 	// get the IP value for each pair in the hex string.
 	for i := 0; i < (len(hexVal)); i++ {
-		decimal, err := strconv.ParseInt(hexVal[i], 16, 32)
+		decimal, err := strconv.ParseInt(hexVal[i], base, size)
+
 		if err != nil {
 			fmt.Println(err)
 		}
 		if i <= len(hexVal)-2 {
-			finalIP = finalIP + fmt.Sprint(decimal) + "."
+			finalIP += fmt.Sprint(decimal) + "."
 		} else {
-			finalIP = finalIP + fmt.Sprint(decimal)
+			finalIP += fmt.Sprint(decimal)
 		}
 	}
 
 	return finalIP
 }
 
-func assignIP() net.IP {
+func AssignIP() net.IP {
 	resIP := theIP(getFinal(convertToHex(genNumericValue())))
 
 	return net.IP(resIP)
