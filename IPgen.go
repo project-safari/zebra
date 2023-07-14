@@ -1,4 +1,3 @@
-// nolint: gosec.
 package zebra
 
 import (
@@ -9,6 +8,7 @@ import (
 	"strings"
 )
 
+// nolint: gochecknoglobals.
 var ipInUse []int
 
 func contains(all []int, one int) bool {
@@ -34,12 +34,14 @@ func genNumericValue() int {
 	max := 10
 
 	// generate the size randomly for each IP address.
+	// nolint: gosec.
 	size := rand.Intn(max-min) + min
 
 GENERATE:
 	// create random IP values from the possible numbers in the possibilities string.
 	b := make([]byte, size)
 
+	// nolint: gosec.
 	for i := range b {
 		b[i] = possibilities[rand.Intn(len(possibilities))]
 	}
@@ -66,11 +68,12 @@ func convertToHex(integerIP int) string {
 }
 
 func genByteNum(l int) int {
-	manyBytes := (l / 2)
+	parity := 2
+	manyBytes := (l / parity)
 
 	// calculate the needed number of bytes, given the size of the initial integer.
-	if (l % 2) != 0 {
-		manyBytes += 1
+	if (l % parity) != 0 {
+		manyBytes++
 	}
 
 	return manyBytes
@@ -141,6 +144,7 @@ func theIP(hexVal []string) string {
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		if i <= len(hexVal)-2 {
 			finalIP += fmt.Sprint(decimal) + "."
 		} else {
